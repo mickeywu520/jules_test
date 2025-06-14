@@ -45,15 +45,20 @@ export class AddEditProductComponent implements OnInit {
 
   //GET ALL CATEGORIES
   fetchCategories():void{
-    this.apiService.getAllCategory().subscribe({
-      next:(res:any) =>{
-        if (res.status === 200) {
-          this.categories = res.categories
-        }
+    this.apiService.categories$.subscribe((cats: any[]) => {
+      this.categories = cats;
+    });
+    // Ensure categories are fetched if not already, or to get latest
+    this.apiService.fetchAndBroadcastCategories().subscribe({
+      next: (res: any) => {
+        // console.log('Categories fetched for AddEditProductComponent');
+        // The BehaviorSubject in ApiService is now updated.
+        // this.categories will be updated by the categories$ subscription.
       },
-      error:(error) =>{
-        this.showMessage(error?.error?.message || error?.message || "Unable to get all categories" + error)
-      }})
+      error: (error: any) => {
+        this.showMessage(error?.error?.message || error?.message || "Unable to fetch categories for product form" + error);
+      }
+    });
   }
 
 

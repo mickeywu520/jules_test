@@ -28,21 +28,18 @@ export class CategoryComponent implements OnInit {
   constructor(private apiService: ApiService){}
 
   ngOnInit(): void {
-    this.getCategories();
-  }
-
-  //GET ALL CATEGORIES
-  getCategories():void{
-    this.apiService.getAllCategory().subscribe({
-      next:(res:any) =>{
-        if (res.status === 200) {
-          this.categories = res.categories;
-        }
+    this.apiService.categories$.subscribe((cats: Category[]) => {
+      this.categories = cats;
+    });
+    // Fetch initial categories and populate/update the BehaviorSubject
+    this.apiService.fetchAndBroadcastCategories().subscribe({
+      next: (res: any) => {
+        // console.log('Initial categories fetched by CategoryComponent');
       },
-      error:(error) =>{
-        this.showMessage(error?.error?.message || error?.message || "Unable to get all categories" + error)
+      error: (error: any) => {
+        this.showMessage(error?.error?.message || error?.message || "Unable to fetch initial categories" + error);
       }
-    })
+    });
   }
 
 
@@ -57,7 +54,13 @@ export class CategoryComponent implements OnInit {
         if (res.status === 200) {
           this.showMessage("Category added successfully")
           this.categoryName = '';
-          this.getCategories();
+          this.apiService.fetchAndBroadcastCategories().subscribe({
+            next: () => { /* console.log('Categories refreshed after action'); */ },
+            error: (err: any) => {
+              console.error('Failed to refresh categories after action:', err);
+              this.showMessage('Failed to refresh categories list.');
+            }
+          });
         }
       },
       error:(error) =>{
@@ -81,7 +84,13 @@ export class CategoryComponent implements OnInit {
           this.showMessage("Category updated successfully")
           this.categoryName = '';
           this.isEditing = false;
-          this.getCategories();
+          this.apiService.fetchAndBroadcastCategories().subscribe({
+            next: () => { /* console.log('Categories refreshed after action'); */ },
+            error: (err: any) => {
+              console.error('Failed to refresh categories after action:', err);
+              this.showMessage('Failed to refresh categories list.');
+            }
+          });
         }
       },
       error:(error) =>{
@@ -104,7 +113,13 @@ export class CategoryComponent implements OnInit {
         next:(res:any) =>{
           if (res.status === 200) {
             this.showMessage("Category deleted successfully")
-            this.getCategories(); //reload the category
+            this.apiService.fetchAndBroadcastCategories().subscribe({
+              next: () => { /* console.log('Categories refreshed after action'); */ },
+              error: (err: any) => {
+                console.error('Failed to refresh categories after action:', err);
+                this.showMessage('Failed to refresh categories list.');
+              }
+            }); //reload the category
           }
         },
         error:(error) =>{

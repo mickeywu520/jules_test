@@ -1,6 +1,6 @@
 import { EventEmitter, Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, BehaviorSubject } from 'rxjs';
 import CryptoJS from "crypto-js";
 
 
@@ -11,6 +11,10 @@ import CryptoJS from "crypto-js";
 
 
 export class ApiService {
+
+  // BehaviorSubject for reactive categories
+  private categoriesSource = new BehaviorSubject<any[]>([]);
+  public categories$ = this.categoriesSource.asObservable();
 
   authStatuschanged = new EventEmitter<void>();
   private static BASE_URL = 'http://localhost:5050/api';
@@ -40,6 +44,29 @@ export class ApiService {
   private clearAuth() {
       localStorage.removeItem("token");
       localStorage.removeItem("role");
+  }
+
+
+  public fetchAndBroadcastCategories(): Observable<any[]> {
+    const httpOptions = { headers: this.getHeader() };
+    // Assuming the backend /api/categories/all returns an array of categories directly
+    const request = this.http.get<any[]>(`${ApiService.BASE_URL}/categories/all`, httpOptions);
+
+    request.subscribe({
+      next: (categoriesArray: any[]) => {
+        if (Array.isArray(categoriesArray)) {
+          this.categoriesSource.next(categoriesArray);
+        } else {
+          console.warn("fetchAndBroadcastCategories: Response was not an array.", categoriesArray);
+          this.categoriesSource.next([]); // Broadcast empty if structure is off
+        }
+      },
+      error: (err: any) => {
+        console.error("Error fetching categories for BehaviorSubject:", err);
+        this.categoriesSource.next([]); // Broadcast empty on error to clear stale data
+      }
+    });
+    return request; // Return the original observable for the caller
   }
 
 

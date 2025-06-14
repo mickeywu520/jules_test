@@ -16,25 +16,17 @@ export class SupplierComponent implements OnInit {
   message: string = '';
 
   ngOnInit(): void {
-    this.getSuppliers();
-  }
-
-  getSuppliers(): void {
-    this.apiService.getAllSuppliers().subscribe({
+    this.apiService.suppliers$.subscribe((supps: any[]) => {
+      this.suppliers = supps;
+    });
+    // Fetch initial suppliers and populate/update the BehaviorSubject
+    this.apiService.fetchAndBroadcastSuppliers().subscribe({
       next: (res: any) => {
-        if (res.status === 200) {
-          this.suppliers = res.suppliers;
-        } else {
-          this.showMessage(res.message);
-        }
+        // console.log('Initial suppliers fetched by SupplierComponent');
       },
-      error: (error) => {
-        this.showMessage(
-          error?.error?.message ||
-            error?.message ||
-            'Unable to get suppliers' + error
-        );
-      },
+      error: (error: any) => {
+        this.showMessage(error?.error?.message || error?.message || "Unable to fetch initial suppliers" + error);
+      }
     });
   }
 
@@ -55,7 +47,13 @@ export class SupplierComponent implements OnInit {
         next:(res:any) =>{
           if (res.status === 200) {
             this.showMessage("Supplier deleted successfully")
-            this.getSuppliers(); //reload the category
+            this.apiService.fetchAndBroadcastSuppliers().subscribe({
+              next: () => { /* console.log('Suppliers refreshed after delete'); */ },
+              error: (err: any) => {
+                console.error('Failed to refresh suppliers after delete:', err);
+                this.showMessage('Failed to refresh supplier list.');
+              }
+            }); //reload the category
           }
         },
         error:(error) =>{

@@ -23,39 +23,23 @@ export class PurchaseComponent implements OnInit {
   
 
   ngOnInit(): void {
-    this.fetchProductsAndSuppliers();
-  }
-
-  fetchProductsAndSuppliers():void{
-    this.apiService.getAllProducts().subscribe({
-      next: (res: any) => {
-        if (res.status === 200) {
-          this.products = res.products;
-        }
-      },
-      error: (error) => {
-        this.showMessage(
-          error?.error?.message ||
-            error?.message ||
-            'Unable to get Products' + error
-        );
-      },
+    // Subscribe to products from ApiService
+    this.apiService.products$.subscribe((prods: any[]) => {
+      this.products = prods;
+    });
+    this.apiService.fetchAndBroadcastProducts().subscribe({
+      next: () => { /* console.log('Initial products fetched for PurchaseComponent'); */ },
+      error: (err) => this.showMessage(err?.error?.message || err?.message || 'Unable to fetch initial products')
     });
 
-    this.apiService.getAllSuppliers().subscribe({
-      next: (res: any) => {
-        if (res.status === 200) {
-          this.suppliers = res.suppliers;
-        }
-      },
-      error: (error) => {
-        this.showMessage(
-          error?.error?.message ||
-            error?.message ||
-            'Unable to get suppliers' + error
-        );
-      },
-    })
+    // Subscribe to suppliers from ApiService
+    this.apiService.suppliers$.subscribe((supps: any[]) => {
+      this.suppliers = supps;
+    });
+    this.apiService.fetchAndBroadcastSuppliers().subscribe({
+      next: () => { /* console.log('Initial suppliers fetched for PurchaseComponent'); */ },
+      error: (err) => this.showMessage(err?.error?.message || err?.message || 'Unable to fetch initial suppliers')
+    });
   }
 
   //Handle form submission
@@ -75,6 +59,11 @@ export class PurchaseComponent implements OnInit {
       next: (res: any) => {
         if (res.status === 200) {
           this.showMessage(res.message)
+          // Optionally refresh product list in ApiService to reflect any changes (e.g. stock changes are backend-only but other details)
+          this.apiService.fetchAndBroadcastProducts().subscribe({
+            next: () => { /* console.log('Product list refreshed after purchase'); */ },
+            error: (err: any) => { console.error('Failed to refresh product list after purchase:', err); }
+          });
           this.resetForm();
         }
       },

@@ -24,25 +24,14 @@ export class SellComponent implements OnInit {
 
 
   ngOnInit(): void {
-    this.fetchProducts();
-  }
-
-  fetchProducts():void{
-    this.apiService.getAllProducts().subscribe({
-      next: (res: any) => {
-        if (res.status === 200) {
-          this.products = res.products;
-        }
-      },
-      error: (error) => {
-        this.showMessage(
-          error?.error?.message ||
-            error?.message ||
-            'Unable to get Products' + error
-        );
-      },
+    // Subscribe to products from ApiService
+    this.apiService.products$.subscribe((prods: any[]) => {
+      this.products = prods;
     });
-
+    this.apiService.fetchAndBroadcastProducts().subscribe({
+      next: () => { /* console.log('Initial products fetched for SellComponent'); */ },
+      error: (err) => this.showMessage(err?.error?.message || err?.message || 'Unable to fetch initial products')
+    });
   }
 
   //Handle form submission
@@ -61,6 +50,11 @@ export class SellComponent implements OnInit {
       next: (res: any) => {
         if (res.status === 200) {
           this.showMessage(res.message)
+          // Refresh product list in ApiService to reflect stock changes
+          this.apiService.fetchAndBroadcastProducts().subscribe({
+            next: () => { /* console.log('Product list refreshed after sell'); */ },
+            error: (err: any) => { console.error('Failed to refresh product list after sell:', err); }
+          });
           this.resetForm();
         }
       },

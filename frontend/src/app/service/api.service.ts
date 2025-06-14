@@ -20,6 +20,10 @@ export class ApiService {
   private productsSource = new BehaviorSubject<any[]>([]);
   public products$ = this.productsSource.asObservable();
 
+  // BehaviorSubject for reactive suppliers
+  private suppliersSource = new BehaviorSubject<any[]>([]);
+  public suppliers$ = this.suppliersSource.asObservable();
+
   authStatuschanged = new EventEmitter<void>();
   private static BASE_URL = 'http://localhost:5050/api';
   private static ENCRYPTION_KEY = "phegon-dev-inventory";
@@ -90,6 +94,28 @@ export class ApiService {
       error: (err: any) => {
         console.error("Error fetching products for BehaviorSubject:", err);
         this.productsSource.next([]);
+      }
+    });
+    return request;
+  }
+
+
+  public fetchAndBroadcastSuppliers(): Observable<any[]> {
+    const httpOptions = { headers: this.getHeader() };
+    const request = this.http.get<any[]>(`${ApiService.BASE_URL}/suppliers/all`, httpOptions);
+
+    request.subscribe({
+      next: (suppliersArray: any[]) => {
+        if (Array.isArray(suppliersArray)) {
+          this.suppliersSource.next(suppliersArray);
+        } else {
+          console.warn("fetchAndBroadcastSuppliers: Response was not an array.", suppliersArray);
+          this.suppliersSource.next([]);
+        }
+      },
+      error: (err: any) => {
+        console.error("Error fetching suppliers for BehaviorSubject:", err);
+        this.suppliersSource.next([]);
       }
     });
     return request;

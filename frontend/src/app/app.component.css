@@ -1,0 +1,118 @@
+.dashboard-layout {
+    display: flex;
+    height: 100vh;
+    }
+     
+    .sidebar {
+     
+    width: 13%;
+    height: 100vh;
+    background: linear-gradient(135deg, #1c1e21, #3a3f44);
+    color: #f1f1f1;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 30px 0px;
+    box-shadow: 5px 0 15px rgba(0, 0, 0, 0.2);
+    position: fixed;
+    transition: all 0.3s ease;
+    }
+     
+    .ims {
+    font-size: 34px;
+    margin-left: 20%;
+    color: #17a2b8;
+    font-weight: bold;
+    padding: 0;
+    margin-bottom: 0;
+    font-weight: 900;
+    }
+     
+    .nav-links {
+    list-style-type: none;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    }
+     
+    .nav-links li {
+    margin: 15px 0;
+    transition: transform 0.2s ease-in-out;
+    }
+     
+    .nav-links li a {
+    display: block;
+    color: #f1f1f1;
+    text-decoration: none;
+    padding: 10px 15px;
+    border-radius: 8px;
+    background: transparent;
+    transition: background 0.3s ease, color 0.3s ease;
+    font-size: 1rem;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    }
+     
+    .nav-links li a:hover {
+    background-color: #444;
+    }
+    
+    
+    
+    .nav-links a:hover {
+    color: #008080;
+    }
+     
+    .nav-links a.active {
+    background: rgba(106, 17, 203, 0.3);
+    color: #008080;
+    }
+     
+    .nav-links li:hover a {
+    background: rgba(37, 117, 252, 0.2);
+    }
+     
+    .nav-links a::before {
+    content: '→ ';
+    opacity: 0;
+    transition: opacity 0.2s ease, margin-left 0.3s ease;
+    }
+     
+    .nav-links li:hover a::before {
+    opacity: 1;
+    margin-left: -10px;
+    }
+    
+    
+    
+    .main-content {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+    }
+     
+    @media (max-width: 768px) {
+    .sidebar {
+    width: 15%;
+    }
+     
+    .logo {
+    font-size: 1.5rem;
+    }
+     
+    .nav-links a {
+    font-size: 0.9rem;
+    }
+    }
+    
+    
+    
+    
+    /* Adjust margin to match the fixed sidebar width */
+    .main-content {
+    margin-left: 12%;
+    /* Sidebar width when fixed */
+    flex-grow: 1;
+    padding: 20px;
+    transition: margin-left 0.3s ease;
+    }
+    

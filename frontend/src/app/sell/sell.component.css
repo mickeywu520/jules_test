@@ -1,0 +1,43 @@
+.purchase-form-page {
+    max-width: 600px;
+    margin: 30px auto;
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 5px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    }
+     
+    .purchase-form-page h1 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #17a2b8;
+    }
+     
+    .purchase-form-page .form-group {
+    margin-bottom: 15px;
+    }
+     
+    .purchase-form-page .form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #2F4F4F;
+    margin: 10px;
+    font-weight: 550;
+    }
+     
+    .purchase-form-page .form-group input,
+    .purchase-form-page .form-group select,
+    .purchase-form-page .form-group textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-sizing: border-box;
+    }
+     
+    .purchase-form-page .form-group textarea {
+    resize: vertical;
+    height: 100px;
+    }
+    

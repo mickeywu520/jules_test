@@ -1,0 +1,62 @@
+.supplier-page {
+    padding: 20px;
+    }
+     
+    .supplier-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 30px;
+    color: #17a2b8;
+    margin-left: 10px;
+    }
+     
+    .supplier-header button {
+    padding: 12px 12px;
+    background-color: #17a2b8;
+    font-size: 16px;
+    color: white;
+    border: none;
+    cursor: pointer;
+    }
+     
+    .add-sup {
+    margin: 0 auto;
+    }
+     
+    .supplier-list {
+    list-style: none;
+    padding: 0;
+    margin-top: 50px;
+    }
+    .supplier-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 18px;
+    margin: 5px;
+    font-size: 20px;
+    background-color: #f9f9f9;
+    border-bottom: 1px solid #eee;
+    border-radius: 10px;
+    color: #2F4F4F;
+    font-weight: 550;
+    }
+     
+    .supplier-item:hover {
+    background-color: #f9ffff;
+    }
+     
+    .supplier-actions button {
+     
+    margin-left: 10px;
+    background-color: #17a2b8;
+    font-size: 16px;
+    padding: 10px 20px;
+    color: white;
+    border: none;
+    cursor: pointer;
+    }
+     
+    .supplier-actions button:last-child {
+    background-color: #dc3545;
+    }
+    

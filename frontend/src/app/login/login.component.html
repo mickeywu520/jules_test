@@ -1,0 +1,27 @@
+<div class="auth-container">
+    <h2>Login</h2>
+    <p *ngIf="message" class="message">{{ message }}</p>
+  
+    <form (ngSubmit)="handleSubmit()">
+
+      <input
+        type="email"
+        placeholder="Email ..."
+        [(ngModel)]="formData.email"
+        name="email"
+        required
+      />
+      <input
+        type="password"
+        placeholder="Psssword ..."
+        [(ngModel)]="formData.password"
+        name="password"
+        required
+      />
+
+  
+      <button type="submit">Login</button>
+    </form>
+    <p>Don't have an account?<a routerLink="/register" routerLinkActive="router-link-active" >Register</a></p>
+  </div>
+  

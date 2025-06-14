@@ -12,6 +12,7 @@ import { Router } from '@angular/router';
   styleUrl: './product.component.css',
 })
 export class ProductComponent implements OnInit {
+  private fullProductList: any[] = [];
   constructor(private apiService: ApiService, private router: Router) {}
   products: any[] = [];
   message: string = '';
@@ -20,32 +21,38 @@ export class ProductComponent implements OnInit {
   itemsPerPage: number = 10;
 
   ngOnInit(): void {
-    this.fetchProducts();
+    this.setupProductSubscriptionAndLoad();
   }
 
-  //FETCH PRODUCTS
-  fetchProducts(): void {
-    this.apiService.getAllProducts().subscribe({
-      next: (res: any) => {
-        const products = res.products || [];
-        console.log(products[0].imageUrl)
-
-        this.totalPages = Math.ceil(products.length / this.itemsPerPage);
-
-        this.products = products.slice(
-          (this.currentPage - 1) * this.itemsPerPage,
-          this.currentPage * this.itemsPerPage
-        );
-        
+  // Renamed from fetchProducts to reflect new reactive approach
+  setupProductSubscriptionAndLoad(): void {
+    this.apiService.products$.subscribe((allProducts: any[]) => {
+      this.fullProductList = allProducts; // Store the full list
+      this.applyPagination(); // Apply pagination to the new full list
+    });
+    // Trigger initial load / refresh of products from backend
+    this.apiService.fetchAndBroadcastProducts().subscribe({
+      next: () => {
+        // console.log('Initial products fetched for ProductComponent');
+        // Data is now in BehaviorSubject, products$ subscription will handle it.
       },
-      error: (error) => {
+      error: (error: any) => {
         this.showMessage(
           error?.error?.message ||
-            error?.message ||
-            'Unable to edit category' + error
+          error?.message ||
+          'Unable to fetch initial products' + error
         );
-      },
+      }
     });
+  }
+
+  applyPagination(): void {
+    if (!this.fullProductList) return;
+    this.totalPages = Math.ceil(this.fullProductList.length / this.itemsPerPage);
+    this.products = this.fullProductList.slice(
+      (this.currentPage - 1) * this.itemsPerPage,
+      this.currentPage * this.itemsPerPage
+    );
   }
 
   //DELETE A PRODUCT
@@ -55,7 +62,13 @@ export class ProductComponent implements OnInit {
         next: (res: any) => {
           if (res.status === 200) {
             this.showMessage('Product deleted successfully');
-            this.fetchProducts(); //reload the products
+            this.apiService.fetchAndBroadcastProducts().subscribe({
+              next: () => { /* console.log('Products refreshed after delete'); */ },
+              error: (err: any) => {
+                console.error('Failed to refresh products after delete:', err);
+                this.showMessage('Failed to refresh product list.');
+              }
+            }); //reload the products
           }
         },
         error: (error) => {
@@ -72,7 +85,7 @@ export class ProductComponent implements OnInit {
   //HANDLE PAGE CHANGRTE. NAVIGATR TO NEXT< PREVIOUS OR SPECIFIC PAGE CHANGE
   onPageChange(page: number): void {
     this.currentPage = page;
-    this.fetchProducts();
+    this.applyPagination();
   }
 
   //NAVIGATE TO ADD PRODUCT PAGE

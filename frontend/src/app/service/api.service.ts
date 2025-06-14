@@ -16,6 +16,10 @@ export class ApiService {
   private categoriesSource = new BehaviorSubject<any[]>([]);
   public categories$ = this.categoriesSource.asObservable();
 
+  // BehaviorSubject for reactive products
+  private productsSource = new BehaviorSubject<any[]>([]);
+  public products$ = this.productsSource.asObservable();
+
   authStatuschanged = new EventEmitter<void>();
   private static BASE_URL = 'http://localhost:5050/api';
   private static ENCRYPTION_KEY = "phegon-dev-inventory";
@@ -67,6 +71,28 @@ export class ApiService {
       }
     });
     return request; // Return the original observable for the caller
+  }
+
+
+  public fetchAndBroadcastProducts(): Observable<any[]> {
+    const httpOptions = { headers: this.getHeader() };
+    const request = this.http.get<any[]>(`${ApiService.BASE_URL}/products/all`, httpOptions);
+
+    request.subscribe({
+      next: (productsArray: any[]) => {
+        if (Array.isArray(productsArray)) {
+          this.productsSource.next(productsArray);
+        } else {
+          console.warn("fetchAndBroadcastProducts: Response was not an array.", productsArray);
+          this.productsSource.next([]);
+        }
+      },
+      error: (err: any) => {
+        console.error("Error fetching products for BehaviorSubject:", err);
+        this.productsSource.next([]);
+      }
+    });
+    return request;
   }
 
 

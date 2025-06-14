@@ -117,6 +117,11 @@ export class AddEditProductComponent implements OnInit {
         next:(res:any) =>{
           if (res.status === 200) {
             this.showMessage("product updated successfully")
+            // Refresh the product list in ApiService before navigating
+            this.apiService.fetchAndBroadcastProducts().subscribe({
+              next: () => { /* console.log('Product list refreshed after add/update'); */ },
+              error: (err: any) => { console.error('Failed to refresh product list after add/update:', err); }
+            });
             this.router.navigate(['/product'])
           }
         },
@@ -128,6 +133,11 @@ export class AddEditProductComponent implements OnInit {
         next:(res:any) =>{
           if (res.status === 200) {
             this.showMessage("Product Saved successfully")
+            // Refresh the product list in ApiService before navigating
+            this.apiService.fetchAndBroadcastProducts().subscribe({
+              next: () => { /* console.log('Product list refreshed after add/update'); */ },
+              error: (err: any) => { console.error('Failed to refresh product list after add/update:', err); }
+            });
             this.router.navigate(['/product'])
           }
         },

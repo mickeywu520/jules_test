@@ -43,6 +43,12 @@ export class ApiService {
   }
 
 
+  // Method to get data from the new FastAPI backend
+  getFastApiData(): Observable<any> {
+    return this.http.get('http://localhost:8000/api/data');
+  }
+
+
 
   private getHeader(): HttpHeaders {
     const token = this.getFromStorageAndDecrypt("token");

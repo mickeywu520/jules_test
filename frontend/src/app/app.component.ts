@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { Router, RouterLink, RouterOutlet } from '@angular/router';
 import { ApiService } from './service/api.service';
 
@@ -12,7 +12,7 @@ import { ApiService } from './service/api.service';
 })
 
 
-export class AppComponent {
+export class AppComponent implements OnInit {
   title = 'ims';
   constructor(
     private apiService: ApiService,
@@ -34,6 +34,13 @@ logOut():void{
   this.router.navigate(["/login"])
   this.cdr.detectChanges();
 }
+
+  ngOnInit(): void {
+    this.apiService.getFastApiData().subscribe({
+      next: (data) => console.log('Data from FastAPI backend:', data),
+      error: (err) => console.error('Error fetching from FastAPI:', err)
+    });
+  }
 
 
 

@@ -36,8 +36,13 @@ export class RegisterComponent {
     }
 
     try {
+      const payload_for_api = {
+        ...this.formData,
+        phoneNumber: String(this.formData.phoneNumber)
+      };
+
       const response: any = await firstValueFrom(
-        this.apiService.registerUser(this.formData)
+        this.apiService.registerUser(payload_for_api)
       );
       if (response.status === 200) {
         this.showMessage(response.message)

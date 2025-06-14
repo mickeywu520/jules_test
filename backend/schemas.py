@@ -33,7 +33,7 @@ class Category(CategoryBase): # For Read operations
     id: int
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 # Base and Read schemas for Product
 class ProductBase(BaseModel):
@@ -56,7 +56,7 @@ class Product(ProductBase): # For Read operations
     category: Optional[Category] = None # Nested schema for category details
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 # Schemas for updating a product (all fields optional)
 class ProductUpdate(BaseModel):
@@ -83,7 +83,7 @@ class Supplier(SupplierBase): # For Read operations
     id: int
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 # Base and Read schemas for User
 class UserBase(BaseModel):
@@ -107,7 +107,7 @@ class User(UserBase): # For Read operations (e.g., /users/current)
     # Do not include password in responses
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 # Schemas for TransactionProductAssociation (if needed directly in API, often handled via Transaction)
@@ -124,7 +124,7 @@ class TransactionProductAssociation(TransactionProductAssociationBase): # For Re
     # For now, keeping it simple as the frontend likely gets product details via the Transaction schema.
     pass
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 # Base and Read schemas for Transaction
@@ -156,7 +156,7 @@ class Transaction(TransactionBase): # For Read operations
     products: List[TransactionProductAssociation] # List of products involved in the transaction
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 # Schema for updating transaction status (as per frontend api.service.ts)
 class TransactionStatusUpdate(BaseModel):

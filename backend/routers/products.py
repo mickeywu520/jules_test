@@ -72,12 +72,12 @@ def delete_product_image(image_url: Optional[str]):
 async def add_product(
     name: str = Form(...),
     price: float = Form(...),
-    category_id: int = Form(...),
+    category_id: int = Form(..., alias="categoryId"),
     sku: Optional[str] = Form(None),
     stockQuantity: Optional[int] = Form(0),
     description: Optional[str] = Form(None),
     expiryDate: Optional[str] = Form(None), # Handle date string conversion if needed
-    image: Optional[UploadFile] = File(None), # Changed to 'image' to match common frontend field name
+    image: Optional[UploadFile] = File(None, alias="imageFile"), # Changed to 'image' to match common frontend field name
     db: Session = Depends(database.get_db)
 ):
     # Validate category exists
@@ -120,12 +120,12 @@ async def update_product(
     id: int = Form(...), # Product ID to update
     name: Optional[str] = Form(None),
     price: Optional[float] = Form(None),
-    category_id: Optional[int] = Form(None),
+    category_id: Optional[int] = Form(None, alias="categoryId"),
     sku: Optional[str] = Form(None),
     stockQuantity: Optional[int] = Form(None),
     description: Optional[str] = Form(None),
     expiryDate: Optional[str] = Form(None),
-    image: Optional[UploadFile] = File(None),
+    image: Optional[UploadFile] = File(None, alias="imageFile"),
     db: Session = Depends(database.get_db)
 ):
     db_product = db.query(models.Product).filter(models.Product.id == id).first()

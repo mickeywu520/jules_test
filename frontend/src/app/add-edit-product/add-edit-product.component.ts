@@ -67,18 +67,14 @@ export class AddEditProductComponent implements OnInit {
   fetchProductById(productId: string):void{
     this.apiService.getProductById(productId).subscribe({
       next:(res:any) =>{
-        if (res.status === 200) {
-          const product = res.product;
-          this.name = product.name;
-          this.sku = product.sku;
-          this.price = product.price;
-          this.stockQuantity = product.stockQuantity;
-          this.categoryId = product.caetgoryId;
-          this.description = product.description;
-          this.imageUrl = product.imageUrl;
-        }else{
-          this.showMessage(res.message);
-        }
+        const product = res; // Direct assignment as backend returns product object directly
+        this.name = product.name;
+        this.sku = product.sku;
+        this.price = product.price;
+        this.stockQuantity = product.stockQuantity;
+        this.categoryId = product.categoryId; // Corrected typo from caetgoryId
+        this.description = product.description;
+        this.imageUrl = product.imageUrl;
       },
       error:(error) =>{
         this.showMessage(error?.error?.message || error?.message || "Unable to get all categories" + error)
@@ -112,18 +108,17 @@ export class AddEditProductComponent implements OnInit {
     }
 
     if (this.isEditing) {
-      formData.append("productId", this.productId!);
-      this.apiService.updateProduct(formData).subscribe({
+      // Remove productId from formData as it's now passed in the URL
+      // formData.append("productId", this.productId!); // This line is removed
+      this.apiService.updateProduct(this.productId!, formData).subscribe({ // Pass productId as first argument
         next:(res:any) =>{
-          if (res.status === 200) {
-            this.showMessage("product updated successfully")
-            // Refresh the product list in ApiService before navigating
-            this.apiService.fetchAndBroadcastProducts().subscribe({
-              next: () => { /* console.log('Product list refreshed after add/update'); */ },
-              error: (err: any) => { console.error('Failed to refresh product list after add/update:', err); }
-            });
-            this.router.navigate(['/product'])
-          }
+          this.showMessage("product updated successfully")
+          // Refresh the product list in ApiService before navigating
+          this.apiService.fetchAndBroadcastProducts().subscribe({
+            next: () => { /* console.log('Product list refreshed after add/update'); */ },
+            error: (err: any) => { console.error('Failed to refresh product list after add/update:', err); }
+          });
+          this.router.navigate(['/product'])
         },
         error:(error) =>{
           this.showMessage(error?.error?.message || error?.message || "Unable to update a product" + error)
@@ -131,15 +126,13 @@ export class AddEditProductComponent implements OnInit {
     }else{
       this.apiService.addProduct(formData).subscribe({
         next:(res:any) =>{
-          if (res.status === 200) {
-            this.showMessage("Product Saved successfully")
-            // Refresh the product list in ApiService before navigating
-            this.apiService.fetchAndBroadcastProducts().subscribe({
-              next: () => { /* console.log('Product list refreshed after add/update'); */ },
-              error: (err: any) => { console.error('Failed to refresh product list after add/update:', err); }
-            });
-            this.router.navigate(['/product'])
-          }
+          this.showMessage("Product Saved successfully")
+          // Refresh the product list in ApiService before navigating
+          this.apiService.fetchAndBroadcastProducts().subscribe({
+            next: () => { /* console.log('Product list refreshed after add/update'); */ },
+            error: (err: any) => { console.error('Failed to refresh product list after add/update:', err); }
+          });
+          this.router.navigate(['/product'])
         },
         error:(error) =>{
           this.showMessage(error?.error?.message || error?.message || "Unable to save a product" + error)

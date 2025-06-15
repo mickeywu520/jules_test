@@ -45,16 +45,14 @@ export class SupplierComponent implements OnInit {
     if (window.confirm("Are you sure you want to delete this supplier?")) {
       this.apiService.deleteSupplier(supplierId).subscribe({
         next:(res:any) =>{
-          if (res.status === 200) {
-            this.showMessage("Supplier deleted successfully")
-            this.apiService.fetchAndBroadcastSuppliers().subscribe({
-              next: () => { /* console.log('Suppliers refreshed after delete'); */ },
-              error: (err: any) => {
-                console.error('Failed to refresh suppliers after delete:', err);
-                this.showMessage('Failed to refresh supplier list.');
-              }
-            }); //reload the category
-          }
+          this.showMessage("Supplier deleted successfully")
+          this.apiService.fetchAndBroadcastSuppliers().subscribe({
+            next: () => { /* console.log('Suppliers refreshed after delete'); */ },
+            error: (err: any) => {
+              console.error('Failed to refresh suppliers after delete:', err);
+              this.showMessage('Failed to refresh supplier list.');
+            }
+          }); //reload the category
         },
         error:(error) =>{
           this.showMessage(error?.error?.message || error?.message || "Unable to Delete Supplier" + error)

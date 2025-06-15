@@ -33,12 +33,10 @@ export class AddEditSupplierComponent implements OnInit {
   fetchSupplier(): void {
     this.apiService.getSupplierById(this.supplierId!).subscribe({
       next: (res: any) => {
-        if (res.status === 200) {
-          this.formData = {
-            name: res.supplier.name,
-            address: res.supplier.address,
-          };
-        }
+        this.formData = {
+          name: res.name, // Direct assignment as backend returns supplier object directly
+          address: res.address, // Direct assignment
+        };
       },
       error: (error) => {
         this.showMessage(
@@ -67,10 +65,8 @@ export class AddEditSupplierComponent implements OnInit {
     if (this.isEditing) {
       this.apiService.updateSupplier(this.supplierId!, supplierData).subscribe({
         next:(res:any) =>{
-          if (res.status === 200) {
-            this.showMessage("Supplier updated successfully");
-            this.router.navigate(['/supplier'])
-          }
+          this.showMessage("Supplier updated successfully");
+          this.router.navigate(['/supplier'])
         },
         error:(error) =>{
           this.showMessage(error?.error?.message || error?.message || "Unable to edit supplier" + error)
@@ -79,10 +75,8 @@ export class AddEditSupplierComponent implements OnInit {
     } else {
       this.apiService.addSupplier(supplierData).subscribe({
         next:(res:any) =>{
-          if (res.status === 200) {
-            this.showMessage("Supplier Added successfully");
-            this.router.navigate(['/supplier'])
-          }
+          this.showMessage("Supplier Added successfully");
+          this.router.navigate(['/supplier'])
         },
         error:(error) =>{
           this.showMessage(error?.error?.message || error?.message || "Unable to Add supplier" + error)

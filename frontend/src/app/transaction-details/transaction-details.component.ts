@@ -36,10 +36,8 @@ export class TransactionDetailsComponent implements OnInit {
     if (this.transactionId) {
       this.apiService.getTransactionById(this.transactionId).subscribe({
         next:(transactionData: any) =>{
-          if (transactionData.status === 200) {
-            this.transaction = transactionData.transaction;
-            this.status = this.transaction.status;
-          }
+          this.transaction = transactionData;
+          this.status = this.transaction.transactionStatus; // Use transactionStatus from the directly returned object
         },
         error:(error)=>{
           this.showMessage(

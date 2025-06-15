@@ -5,7 +5,7 @@ from typing import List, Optional
 from datetime import datetime
 
 from fastapi import APIRouter, Depends, HTTPException, status, File, UploadFile, Form
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from .. import database, models, schemas, security
 
@@ -115,9 +115,9 @@ async def add_product(
     db.refresh(new_product)
     return new_product
 
-@router.put("/update", response_model=schemas.Product)
+@router.put("/update/{id}", response_model=schemas.Product) # Added {id} to the path
 async def update_product(
-    id: int = Form(...), # Product ID to update
+    id: int, # Product ID from path
     name: Optional[str] = Form(None),
     price: Optional[float] = Form(None),
     category_id: Optional[int] = Form(None, alias="categoryId"),
@@ -160,6 +160,19 @@ async def update_product(
         if db_product.imageUrl:
             delete_product_image(db_product.imageUrl)
         update_data['imageUrl'] = save_product_image(image)
+    elif image is None and db_product.imageUrl: # If image is explicitly set to None (e.g., no file sent) and there was an old image
+        # This case handles if the user removes an image without uploading a new one
+        # Frontend would need to send a specific signal for "remove image"
+        # For now, if image is None, and imageUrl is not provided in form, keep existing.
+        # If frontend sends imageUrl: "" to clear, that's handled by update_data['imageUrl'] = ""
+        pass # No change to imageUrl if no new image and not explicitly cleared
+
+    # Handle case where imageUrl is explicitly sent as empty string to clear it
+    # This would require frontend to send imageUrl as a Form field
+    # if "imageUrl" in update_data and update_data["imageUrl"] == "":
+    #     delete_product_image(db_product.imageUrl)
+    #     update_data["imageUrl"] = None
+
 
     for key, value in update_data.items():
         setattr(db_product, key, value)

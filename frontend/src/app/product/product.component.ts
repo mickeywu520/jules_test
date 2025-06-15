@@ -60,16 +60,14 @@ export class ProductComponent implements OnInit {
     if (window.confirm('Are you sure you want to delete this product?')) {
       this.apiService.deleteProduct(productId).subscribe({
         next: (res: any) => {
-          if (res.status === 200) {
-            this.showMessage('Product deleted successfully');
-            this.apiService.fetchAndBroadcastProducts().subscribe({
-              next: () => { /* console.log('Products refreshed after delete'); */ },
-              error: (err: any) => {
-                console.error('Failed to refresh products after delete:', err);
-                this.showMessage('Failed to refresh product list.');
-              }
-            }); //reload the products
-          }
+          this.showMessage('Product deleted successfully');
+          this.apiService.fetchAndBroadcastProducts().subscribe({
+            next: () => { /* console.log('Products refreshed after delete'); */ },
+            error: (err: any) => {
+              console.error('Failed to refresh products after delete:', err);
+              this.showMessage('Failed to refresh product list.');
+            }
+          }); //reload the products
         },
         error: (error) => {
           this.showMessage(

@@ -51,17 +51,15 @@ export class CategoryComponent implements OnInit {
     }
     this.apiService.createCategory({name:this.categoryName}).subscribe({
       next:(res:any) =>{
-        if (res.status === 200) {
-          this.showMessage("Category added successfully")
-          this.categoryName = '';
-          this.apiService.fetchAndBroadcastCategories().subscribe({
-            next: () => { /* console.log('Categories refreshed after action'); */ },
-            error: (err: any) => {
-              console.error('Failed to refresh categories after action:', err);
-              this.showMessage('Failed to refresh categories list.');
-            }
-          });
-        }
+        this.showMessage("Category added successfully")
+        this.categoryName = '';
+        this.apiService.fetchAndBroadcastCategories().subscribe({
+          next: () => { /* console.log('Categories refreshed after action'); */ },
+          error: (err: any) => {
+            console.error('Failed to refresh categories after action:', err);
+            this.showMessage('Failed to refresh categories list.');
+          }
+        });
       },
       error:(error) =>{
         this.showMessage(error?.error?.message || error?.message || "Unable to save category" + error)
@@ -80,18 +78,16 @@ export class CategoryComponent implements OnInit {
     }
     this.apiService.updateCategory(this.editingCategoryId, {name:this.categoryName}).subscribe({
       next:(res:any) =>{
-        if (res.status === 200) {
-          this.showMessage("Category updated successfully")
-          this.categoryName = '';
-          this.isEditing = false;
-          this.apiService.fetchAndBroadcastCategories().subscribe({
-            next: () => { /* console.log('Categories refreshed after action'); */ },
-            error: (err: any) => {
-              console.error('Failed to refresh categories after action:', err);
-              this.showMessage('Failed to refresh categories list.');
-            }
-          });
-        }
+        this.showMessage("Category updated successfully")
+        this.categoryName = '';
+        this.isEditing = false;
+        this.apiService.fetchAndBroadcastCategories().subscribe({
+          next: () => { /* console.log('Categories refreshed after action'); */ },
+          error: (err: any) => {
+            console.error('Failed to refresh categories after action:', err);
+            this.showMessage('Failed to refresh categories list.');
+          }
+        });
       },
       error:(error) =>{
         this.showMessage(error?.error?.message || error?.message || "Unable to edit category" + error)
@@ -111,16 +107,14 @@ export class CategoryComponent implements OnInit {
     if (window.confirm("Are you sure you want to delete this categoy?")) {
       this.apiService.deleteCategory(caetgoryId).subscribe({
         next:(res:any) =>{
-          if (res.status === 200) {
-            this.showMessage("Category deleted successfully")
-            this.apiService.fetchAndBroadcastCategories().subscribe({
-              next: () => { /* console.log('Categories refreshed after action'); */ },
-              error: (err: any) => {
-                console.error('Failed to refresh categories after action:', err);
-                this.showMessage('Failed to refresh categories list.');
-              }
-            }); //reload the category
-          }
+          this.showMessage("Category deleted successfully")
+          this.apiService.fetchAndBroadcastCategories().subscribe({
+            next: () => { /* console.log('Categories refreshed after action'); */ },
+            error: (err: any) => {
+              console.error('Failed to refresh categories after action:', err);
+              this.showMessage('Failed to refresh categories list.');
+            }
+          }); //reload the category
         },
         error:(error) =>{
           this.showMessage(error?.error?.message || error?.message || "Unable to Delete category" + error)

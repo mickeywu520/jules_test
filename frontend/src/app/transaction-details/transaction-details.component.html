@@ -6,7 +6,7 @@
          <div class="section-card">
             <h2>Transaction Information</h2>
             <p>Type: {{transaction.transactionType}}</p>
-            <p>Status: {{transaction.status}}</p>
+            <p>Status: {{transaction.transactionStatus}}</p>
             <p>Description: {{transaction.description}}</p>
             <p>Total Products: {{transaction.totalProducts}}</p>
             <p>Total Price: {{transaction.totalPrice | currency}}</p>
@@ -20,14 +20,11 @@
          <!-- PRODUCT INFORMATION -->
          <div class="section-card">
             <h2>Product Information</h2>
-            <p>Name: {{transaction.product.name}}</p>
-            <p>SKU: {{transaction.product.sku}}</p>
-            <p>Price: {{transaction.product.price | currency}}</p>
-            <p>Stock Quantity: {{transaction.product.stockQuantity}}</p>
-            <p>Description: {{transaction.product.description}}</p>
-
-            <div *ngIf="transaction.product.imageUrl">
-                <img [src]="transaction.prouct.imageUrl" alt="preview">
+            <div *ngFor="let productAssoc of transaction.products">
+                <p>Product ID: {{productAssoc.product_id}}</p>
+                <p>Quantity: {{productAssoc.quantity}}</p>
+                <!-- If full product details are needed here, backend needs to embed them or frontend needs to fetch them -->
+                <hr> <!-- Separator for multiple products -->
             </div>
          </div>
 
@@ -55,9 +52,9 @@
                 <option value="PENDING">PENDING</option>
                 <option value="PROCESSING">PROCESSING</option>
                 <option value="COMPLETED">COMPLETED</option>
-                <option value="CANCELED">CANCELED</option>
+                <option value="CANCELLED">CANCELLED</option>
             </select>
-            <button (click)="handleUpdateStatus()">Update Staus</button>
+            <button (click)="handleUpdateStatus()">Update Status</button>
          </div>
 
     </div>

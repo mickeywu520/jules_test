@@ -60,8 +60,8 @@ export class DashboardComponent {
 
   // Method to fetch all transactions from the API
   loadTransactions(): void {
-    this.apiService.getAllTransactions('').subscribe((data) => {
-      this.transactions = data.transactions; // Store transactions data
+    this.apiService.getAllTransactions('').subscribe((data: any[]) => {
+      this.transactions = data; // Store transactions data
       this.processChartData(); // Process data to generate charts
     });
   }
@@ -107,10 +107,10 @@ export class DashboardComponent {
         Number.parseInt(this.selectedMonth), // Convert month string to number
         Number.parseInt(this.selectedYear) // Convert year string to number
       )
-      .subscribe((data) => {
-        this.transactions = data.transactions; // Store transactions for the selected month
+      .subscribe((data: any[]) => {
+        this.transactions = data; // Store transactions for the selected month
         this.processChartData(); // Process the overall data for charts
-        this.processMonthlyData(data.transactions); // Process the data for the daily chart
+        this.processMonthlyData(data); // Process the data for the daily chart
       });
   }
 

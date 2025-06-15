@@ -19,6 +19,7 @@ class TransactionType(str, enum.Enum):
 
 class TransactionStatus(str, enum.Enum):
     PENDING = "PENDING"
+    PROCESSING = "PROCESSING" # Added PROCESSING status
     COMPLETED = "COMPLETED"
     CANCELLED = "CANCELLED"
 

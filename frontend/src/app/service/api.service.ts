@@ -254,8 +254,8 @@ export class ApiService {
     });
   }
 
-  updateProduct(formData: any): Observable<any> {
-    return this.http.put(`${ApiService.BASE_URL}/products/update`, formData, {
+  updateProduct(id: string, formData: any): Observable<any> {
+    return this.http.put(`${ApiService.BASE_URL}/products/update/${id}`, formData, {
       headers: this.getHeader(),
     });
   }
@@ -318,8 +318,10 @@ export class ApiService {
 
   
   updateTransactionStatus(id: string, status: string): Observable<any> {
-    return this.http.put(`${ApiService.BASE_URL}/transactions/update/${id}`, JSON.stringify(status), {
-      headers: this.getHeader().set("Content-Type", "application/json")
+    // The backend expects a JSON object like {"status": "NEW_STATUS"}
+    const body = { status: status };
+    return this.http.put(`${ApiService.BASE_URL}/transactions/update/${id}`, body, {
+      headers: this.getHeader()
     });
   }
 

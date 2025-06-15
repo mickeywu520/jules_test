@@ -16,7 +16,8 @@
       class="supplier-item"
       [attr.key]="supplier.id"
     >
-      <span>{{ supplier.name }}</span>
+      <span>Name: {{ supplier.name }}</span>
+      <span>Address: {{ supplier.address }}</span>
 
       <div class="supplier-actions">
             <button (click)="navigateToEditSupplierPage(supplier.id)" >Edit</button>

@@ -3,7 +3,8 @@ import { PaginationComponent } from '../pagination/pagination.component';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { ApiService } from '../service/api.service';
-import { Router } from '@angular/router';
+import { Router, NavigationEnd } from '@angular/router';
+import { filter } from 'rxjs/operators';
 
 @Component({
   selector: 'app-transaction',
@@ -25,6 +26,13 @@ export class TransactionComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadTransactions();
+    
+    // Subscribe to router events to reload transactions when navigating back to this component
+    this.router.events.pipe(
+      filter(event => event instanceof NavigationEnd && event.urlAfterRedirects === '/transaction')
+    ).subscribe(() => {
+      this.loadTransactions();
+    });
   }
 
 
@@ -33,7 +41,7 @@ export class TransactionComponent implements OnInit {
   loadTransactions(): void {
     this.apiService.getAllTransactions(this.valueToSearch).subscribe({
       next: (res: any) => {
-        const transactions = res.transactions || [];
+        const transactions = res || [];
 
         this.totalPages = Math.ceil(transactions.length / this.itemsPerPage);
 

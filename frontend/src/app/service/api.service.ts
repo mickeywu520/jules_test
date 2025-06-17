@@ -25,7 +25,8 @@ export class ApiService {
   public suppliers$ = this.suppliersSource.asObservable();
 
   authStatuschanged = new EventEmitter<void>();
-  private static BASE_URL = 'http://localhost:5050/api';
+  //private static BASE_URL = 'http://localhost:5050/api';
+  private static BASE_URL = 'https://mickeywu520-inventory-fastapi.hf.space/api';
   private static ENCRYPTION_KEY = "phegon-dev-inventory";
 
 

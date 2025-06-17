@@ -2,11 +2,19 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.sql import text # For db.execute(text("SELECT 1"))
+import os
+import psycopg
 
-# Replace with your actual PostgreSQL connection string
-# Format: postgresql://user:password@host:port/database_name
-DATABASE_URL = "postgresql://postgres:123456@localhost:5432/inventory_db_fastapi"
-# It's good practice to use environment variables for credentials in a real app.
+# 從環境變數獲取資料庫連線資訊
+# Hugging Face Space 會在運行時自動注入這些變數
+DB_HOST = os.getenv("DB_HOST")
+DB_PORT = os.getenv("DB_PORT") # 現在是 '6543'
+DB_NAME = os.getenv("DB_NAME")
+DB_USER = os.getenv("DB_USER")
+DB_PASSWORD = os.getenv("DB_PASSWORD")
+
+# SQLAlchemy 初始化
+DATABASE_URL = f"postgresql+psycopg://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
 
 engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)

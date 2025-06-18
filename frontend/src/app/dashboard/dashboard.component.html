@@ -29,13 +29,14 @@
         [gradient]="false"
         [xAxis]="true"
         [yAxis]="true"
-        [legend]="showLegend"
+        [legend]="false"
         [showXAxisLabel]="true"
         [showYAxisLabel]="true"
         xAxisLabel="{{ 'TRANSACTION_TYPE' | translate }}"
         yAxisLabel="{{ 'COUNT' | translate }}"
         [animations]="animations">
       </ngx-charts-bar-vertical>
+      <p>{{ 'LEGEND' | translate }}</p>
     </div>
   
     <!-- Transaction Amount by Type Pie Chart -->
@@ -45,11 +46,12 @@
         [view]="view"
         [scheme]="'cool'"
         [results]="transactionAmountData"
-        [legend]="showLegend"
+        [legend]="false"
         [labels]="showLabels"
         [doughnut]="false"
         [animations]="animations">
       </ngx-charts-pie-chart>
+      <p>{{ 'LEGEND' | translate }}</p>
     </div>
   
 
@@ -65,12 +67,13 @@
         [gradient]="false"
         [xAxis]="true"
         [yAxis]="true"
-        [legend]="showLegend"
+        [legend]="false"
         [showXAxisLabel]="true"
         [showYAxisLabel]="true"
         xAxisLabel="{{ 'DAY_OF_MONTH' | translate }}"
         yAxisLabel="{{ 'TOTAL_PRICE' | translate }}"
         [animations]="animations">
       </ngx-charts-bar-vertical>
+      <p>{{ 'LEGEND' | translate }}</p>
     </div>
   </div>

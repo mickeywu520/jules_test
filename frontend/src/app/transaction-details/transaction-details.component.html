@@ -1,28 +1,28 @@
 <div class="transaction-details-page">
     <p *ngIf="message" class="message">{{message}}</p>
-    
+
     <div *ngIf="transaction">
         <!-- Transaction Information -->
          <div class="section-card">
-            <h2>Transaction Information</h2>
-            <p>Type: {{transaction.transactionType}}</p>
-            <p>Status: {{transaction.transactionStatus}}</p>
-            <p>Description: {{transaction.description}}</p>
-            <p>Total Products: {{transaction.totalProducts}}</p>
-            <p>Total Price: {{transaction.totalPrice | currency}}</p>
-            <p>Created At: {{transaction.createdAt | date:'short'}}</p>
+            <h2>{{ 'TRANSACTION_INFORMATION' | translate }}</h2>
+            <p>{{ 'TYPE' | translate }}: {{transaction.transactionType}}</p>
+            <p>{{ 'STATUS' | translate }}: {{transaction.transactionStatus}}</p>
+            <p>{{ 'DESCRIPTION' | translate }}: {{transaction.description}}</p>
+            <p>{{ 'TOTAL_PRODUCTS' | translate }}: {{transaction.totalProducts}}</p>
+            <p>{{ 'TOTAL_PRICE' | translate }}: {{transaction.totalPrice | currency}}</p>
+            <p>{{ 'CREATED_AT' | translate }}: {{transaction.createdAt | date:'short'}}</p>
 
             <div *ngIf="transaction.updatedAt">
-                <p>Updated At: {{transaction.updatedAt | date:'short'}}</p>
+                <p>{{ 'UPDATED_AT' | translate }}: {{transaction.updatedAt | date:'short'}}</p>
             </div>
          </div>
 
          <!-- PRODUCT INFORMATION -->
          <div class="section-card">
-            <h2>Product Information</h2>
+            <h2>{{ 'PRODUCT_INFORMATION' | translate }}</h2>
             <div *ngFor="let productAssoc of transaction.products">
-                <p>Product ID: {{productAssoc.product_id}}</p>
-                <p>Quantity: {{productAssoc.quantity}}</p>
+                <p>{{ 'PRODUCT_ID' | translate }}: {{productAssoc.product_id}}</p>
+                <p>{{ 'QUANTITY' | translate }}: {{productAssoc.quantity}}</p>
                 <!-- If full product details are needed here, backend needs to embed them or frontend needs to fetch them -->
                 <hr> <!-- Separator for multiple products -->
             </div>
@@ -30,31 +30,31 @@
 
          <!-- USER ASSOCIATED WITH THE TRANSACTIONS -->
          <div class="section-card">
-            <h2>User Information</h2>
-            <p>Name: {{transaction.user.name}}</p>
-            <p>Email: {{transaction.user.email}}</p>
-            <p>Phone Number: {{transaction.user.phoneNumber}}</p>
-            <p>Role: {{transaction.user.role}}</p>
+            <h2>{{ 'USER_INFORMATION' | translate }}</h2>
+            <p>{{ 'NAME' | translate }}: {{transaction.user.name}}</p>
+            <p>{{ 'EMAIL' | translate }}: {{transaction.user.email}}</p>
+            <p>{{ 'PHONE_NUMBER' | translate }}: {{transaction.user.phoneNumber}}</p>
+            <p>{{ 'ROLE' | translate }}: {{transaction.user.role}}</p>
 
          </div>
 
-         <!-- USER ASSOCIATED WITH THE TRANSACTIONS -->
+         <!-- SUPPLIER ASSOCIATED WITH THE TRANSACTIONS -->
          <div *ngIf="transaction.supplier" class="section-card">
-            <h2>Supplier Information</h2>
-            <p>Name: {{transaction.supplier.name}}</p>
-            <p>Address: {{transaction.supplier.address}}</p>
+            <h2>{{ 'SUPPLIER_INFORMATION' | translate }}</h2>
+            <p>{{ 'NAME' | translate }}: {{transaction.supplier.name}}</p>
+            <p>{{ 'ADDRESS' | translate }}: {{transaction.supplier.address}}</p>
          </div>
 
          <!-- UPDATE TRANSACTION -->
          <div class="section-card transaction-staus-update">
-            <label for="">Status: </label>
+            <label for="">{{ 'STATUS' | translate }}: </label>
             <select [(ngModel)]="status" id="">
-                <option value="PENDING">PENDING</option>
-                <option value="PROCESSING">PROCESSING</option>
-                <option value="COMPLETED">COMPLETED</option>
-                <option value="CANCELLED">CANCELLED</option>
+                <option value="PENDING">{{ 'PENDING' | translate }}</option>
+                <option value="PROCESSING">{{ 'PROCESSING' | translate }}</option>
+                <option value="COMPLETED">{{ 'COMPLETED' | translate }}</option>
+                <option value="CANCELLED">{{ 'CANCELLED' | translate }}</option>
             </select>
-            <button (click)="handleUpdateStatus()">Update Status</button>
+            <button (click)="handleUpdateStatus()">{{ 'UPDATE_STATUS' | translate }}</button>
          </div>
 
     </div>

@@ -3,9 +3,9 @@
 
   <!-- SUPPLIER HEADER -->
   <div class="supplier-header">
-    <h1>Supplier</h1>
+    <h1>{{ 'SUPPLIER_LIST' | translate }}</h1>
     <div class="add-sup">
-      <button (click)="navigateToAddSupplierPage()">Add Supplier</button>
+      <button (click)="navigateToAddSupplierPage()">{{ 'ADD_SUPPLIER' | translate }}</button>
     </div>
   </div>
 
@@ -16,12 +16,12 @@
       class="supplier-item"
       [attr.key]="supplier.id"
     >
-      <span>Name: {{ supplier.name }}</span>
-      <span>Address: {{ supplier.address }}</span>
+      <span>{{ 'NAME' | translate }}: {{ supplier.name }}</span>
+      <span>{{ 'ADDRESS' | translate }}: {{ supplier.address }}</span>
 
       <div class="supplier-actions">
-            <button (click)="navigateToEditSupplierPage(supplier.id)" >Edit</button>
-            <button (click)="handleDeleteSupplier(supplier.id)">Delete</button>
+            <button (click)="navigateToEditSupplierPage(supplier.id)" >{{ 'EDIT' | translate }}</button>
+            <button (click)="handleDeleteSupplier(supplier.id)">{{ 'DELETE' | translate }}</button>
       </div>
     </li>
   </ul>

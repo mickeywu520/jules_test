@@ -3,17 +3,18 @@ import { Component, OnInit } from '@angular/core';
 import { PaginationComponent } from '../pagination/pagination.component';
 import { ApiService } from '../service/api.service';
 import { Router } from '@angular/router';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-product',
   standalone: true,
-  imports: [CommonModule, PaginationComponent],
+  imports: [CommonModule, PaginationComponent, TranslateModule],
   templateUrl: './product.component.html',
   styleUrl: './product.component.css',
 })
 export class ProductComponent implements OnInit {
   private fullProductList: any[] = [];
-  constructor(private apiService: ApiService, private router: Router) {}
+  constructor(private apiService: ApiService, private router: Router, private translate: TranslateService) {}
   products: any[] = [];
   message: string = '';
   currentPage: number = 1;
@@ -40,7 +41,7 @@ export class ProductComponent implements OnInit {
         this.showMessage(
           error?.error?.message ||
           error?.message ||
-          'Unable to fetch initial products' + error
+          this.translate.instant('UNABLE_TO_FETCH_INITIAL_PRODUCTS') + error
         );
       }
     });
@@ -57,15 +58,15 @@ export class ProductComponent implements OnInit {
 
   //DELETE A PRODUCT
   handleProductDelete(productId: string): void {
-    if (window.confirm('Are you sure you want to delete this product?')) {
+    if (window.confirm(this.translate.instant('CONFIRM_DELETE_PRODUCT'))) {
       this.apiService.deleteProduct(productId).subscribe({
         next: (res: any) => {
-          this.showMessage('Product deleted successfully');
+          this.showMessage(this.translate.instant('PRODUCT_DELETED_SUCCESSFULLY'));
           this.apiService.fetchAndBroadcastProducts().subscribe({
             next: () => { /* console.log('Products refreshed after delete'); */ },
             error: (err: any) => {
               console.error('Failed to refresh products after delete:', err);
-              this.showMessage('Failed to refresh product list.');
+              this.showMessage(this.translate.instant('FAILED_TO_REFRESH_PRODUCT_LIST'));
             }
           }); //reload the products
         },
@@ -73,7 +74,7 @@ export class ProductComponent implements OnInit {
           this.showMessage(
             error?.error?.message ||
               error?.message ||
-              'Unable to Delete product' + error
+              this.translate.instant('UNABLE_TO_DELETE_PRODUCT') + error
           );
         },
       });

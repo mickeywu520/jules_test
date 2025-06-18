@@ -1,34 +1,34 @@
 <div class="purchase-form-page">
   <p *ngIf="message" class="message">{{ message }}</p>
-  <h1>Receive Inventory</h1>
+  <h1>{{ 'RECEIVE_INVENTORY' | translate }}</h1>
 
   <!-- PRODUCT PURCHASE? INVENTORY RECEIVING PAGE -->
   <form (ngSubmit)="handleSubmit()">
 
     <div class="form-group">
-      <label for="">Select Product</label>
+      <label for="">{{ 'SELECT_PRODUCT' | translate }}</label>
       <select
         name="productId"
         class="form-control"
         [(ngModel)]="productId"
         id=""
       >
-        <option value="">Select a product</option>
+        <option value="">{{ 'SELECT_PRODUCT_PLACEHOLDER' | translate }}</option>
         <option *ngFor="let product of products" [value]="product.id">
           {{ product.name }}
         </option>
       </select>
     </div>
-    
+
     <div class="form-group">
-      <label for="">Select Supplier</label>
+      <label for="">{{ 'SELECT_SUPPLIER' | translate }}</label>
       <select
         name="supplierId"
         class="form-control"
         [(ngModel)]="supplierId"
         id=""
       >
-        <option value="">Select a Supplier</option>
+        <option value="">{{ 'SELECT_SUPPLIER_PLACEHOLDER' | translate }}</option>
         <option *ngFor="let supplier of suppliers" [value]="supplier.id">
           {{ supplier.name }}
         </option>
@@ -36,17 +36,17 @@
     </div>
 
     <div class="form-group">
-        <label for="">Description</label>
+        <label for="">{{ 'DESCRIPTION' | translate }}</label>
         <input type="text" [(ngModel)]="description" name="description" class="form-control"/>
       </div>
 
 
     <div class="form-group">
-        <label for="">Quantity</label>
+        <label for="">{{ 'QUANTITY' | translate }}</label>
         <input type="number" [(ngModel)]="quantity" name="quantity" class="form-control"/>
       </div>
 
 
-      <button type="submit" class="btn btn-primary">Purchase Product</button>
+      <button type="submit" class="btn btn-primary">{{ 'PURCHASE_PRODUCT' | translate }}</button>
   </form>
 </div>

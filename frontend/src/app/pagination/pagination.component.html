@@ -5,7 +5,7 @@
     [disabled]="currentPage === 1"
     (click)="onPageChange(currentPage - 1)"
   >
-    &laquo; Prev
+    &laquo; {{ 'PREVIOUS' | translate }}
   </button>
 
     <!-- Page numbers BUTTONs -->
@@ -24,6 +24,6 @@
     [disabled]="currentPage === totalPages"
     (click)="onPageChange(currentPage + 1)"
   >
-    Next &raquo;
+    {{ 'NEXT' | translate }} &raquo;
   </button>
 </div>

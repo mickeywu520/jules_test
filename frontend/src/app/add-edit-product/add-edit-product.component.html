@@ -1,51 +1,51 @@
 <div class="product-form-page">
     <p *ngIf="message" class="message">{{message}}</p>
-    <h1>{{isEditing? 'Edit Product' : 'Add Product'}}</h1>
+    <h1>{{isEditing? ('EDIT_PRODUCT' | translate) : ('ADD_PRODUCT' | translate)}}</h1>
     <form (submit)="handleSubmit($event)">
         <div class="form-group">
-            <label for="">Product Name</label>
+            <label for="">{{ 'PRODUCT_NAME' | translate }}</label>
             <input type="text" [(ngModel)]="name" name="name" required>
         </div>
 
         <div class="form-group">
-            <label for="">Sku</label>
+            <label for="">{{ 'SKU' | translate }}</label>
             <input type="text" [(ngModel)]="sku" name="sku" required>
         </div>
 
         <div class="form-group">
-            <label for="">Stock Quantity</label>
+            <label for="">{{ 'STOCK_QUANTITY' | translate }}</label>
             <input type="number" [(ngModel)]="stockQuantity" name="stockQuantity" required>
         </div>
 
         <div class="form-group">
-            <label for="">Price</label>
+            <label for="">{{ 'PRICE' | translate }}</label>
             <input type="number" [(ngModel)]="price" name="price" required>
         </div>
 
 
         <div class="form-group">
-            <label for="">Description</label>
+            <label for="">{{ 'DESCRIPTION' | translate }}</label>
             <textarea [(ngModel)]="description" name="description" required></textarea>
         </div>
 
 
         <div class="form-group">
-            <label for="">Category</label>
+            <label for="">{{ 'CATEGORY' | translate }}</label>
             <select [(ngModel)]="categoryId" name="categoryId" id="" required>
-                <option value="">Select a category</option>
+                <option value="">{{ 'SELECT_CATEGORY' | translate }}</option>
                 <option *ngFor="let category of categories" [value]="category.id">{{category.name}}</option>
             </select>
         </div>
 
         <div class="form-group">
-            <label for="">Product Image</label>
+            <label for="">{{ 'PRODUCT_IMAGE' | translate }}</label>
             <input type="file" (change)="handleImageChange($event)">
             <div *ngIf="imageUrl">
                 <img [src]="imageUrl" alt="preview" class="image-preview">
             </div>
         </div>
 
-        <button type="submit">{{isEditing? 'Edit Product' : 'Add Product'}}</button>
+        <button type="submit">{{isEditing? ('EDIT_PRODUCT' | translate) : ('ADD_PRODUCT' | translate)}}</button>
     </form>
 
 </div>

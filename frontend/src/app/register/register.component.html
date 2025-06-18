@@ -1,38 +1,38 @@
 <div class="auth-container">
-  <h2>Register</h2>
+  <h2>{{ 'REGISTER' | translate }}</h2>
   <p *ngIf="message" class="message">{{ message }}</p>
 
   <form (ngSubmit)="handleSubmit()">
     <input
       type="text"
-      placeholder="Name ..."
+      placeholder="{{ 'NAME_PLACEHOLDER' | translate }}"
       [(ngModel)]="formData.name"
       name="name"
       required
     />
     <input
       type="email"
-      placeholder="Email ..."
+      placeholder="{{ 'EMAIL_PLACEHOLDER' | translate }}"
       [(ngModel)]="formData.email"
       name="email"
       required
     />
     <input
       type="password"
-      placeholder="Psssword ..."
+      placeholder="{{ 'PASSWORD_PLACEHOLDER' | translate }}"
       [(ngModel)]="formData.password"
       name="password"
       required
     />
     <input
       type="number"
-      placeholder="Phone Number ..."
+      placeholder="{{ 'PHONE_NUMBER_PLACEHOLDER' | translate }}"
       [(ngModel)]="formData.phoneNumber"
       name="phoneNumber"
       required
     />
 
-    <button type="submit">Register</button>
+    <button type="submit">{{ 'REGISTER' | translate }}</button>
   </form>
-  <p>Already have an account?<a routerLink="/login" routerLinkActive="router-link-active" >Login</a></p>
+  <p>{{ 'ALREADY_HAVE_ACCOUNT' | translate }}<a routerLink="/login" routerLinkActive="router-link-active" >{{ 'LOGIN_LINK' | translate }}</a></p>
 </div>

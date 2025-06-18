@@ -5,11 +5,12 @@ import { CommonModule } from '@angular/common';
 import { ApiService } from '../service/api.service';
 import { Router, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs/operators';
+import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-transaction',
   standalone: true,
-  imports: [PaginationComponent, FormsModule, CommonModule],
+  imports: [PaginationComponent, FormsModule, CommonModule, TranslateModule],
   templateUrl: './transaction.component.html',
   styleUrl: './transaction.component.css'
 })

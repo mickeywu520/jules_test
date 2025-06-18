@@ -4,16 +4,16 @@
   </div>
 
   <div class="category-header">
-    <h1>Category</h1>
+    <h1>{{ 'CATEGORY' | translate }}</h1>
     <!-- FORM TO ADD AND EDIT CATEGORY -->
     <div class="add-cat">
       <input
         type="text"
         [(ngModel)]="categoryName"
-        placeholder="Category name"
+        placeholder="{{ 'CATEGORY_NAME_PLACEHOLDER' | translate }}"
       />
-      <button *ngIf="!isEditing" (click)="addCategory()">Add Category</button>
-      <button *ngIf="isEditing" (click)="editCategory()">Edit Category</button>
+      <button *ngIf="!isEditing" (click)="addCategory()">{{ 'ADD_CATEGORY' | translate }}</button>
+      <button *ngIf="isEditing" (click)="editCategory()">{{ 'EDIT_CATEGORY' | translate }}</button>
     </div>
   </div>
 
@@ -22,8 +22,8 @@
     <li *ngFor="let category of categories" class="category-item">
       <span>{{ category.name }}</span>
       <div class="category-actions">
-        <button (click)="handleEditCategory(category)">Edit</button>
-        <button (click)="handleDeleteCategory(category.id)">Delete</button>
+        <button (click)="handleEditCategory(category)">{{ 'EDIT' | translate }}</button>
+        <button (click)="handleDeleteCategory(category.id)">{{ 'DELETE' | translate }}</button>
       </div>
     </li>
   </ul>

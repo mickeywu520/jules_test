@@ -1,27 +1,26 @@
 <div class="auth-container">
-    <h2>Login</h2>
+    <h2>{{ 'LOGIN' | translate }}</h2>
     <p *ngIf="message" class="message">{{ message }}</p>
   
     <form (ngSubmit)="handleSubmit()">
 
       <input
         type="email"
-        placeholder="Email ..."
+        placeholder="{{ 'EMAIL_PLACEHOLDER' | translate }}"
         [(ngModel)]="formData.email"
         name="email"
         required
       />
       <input
         type="password"
-        placeholder="Psssword ..."
+        placeholder="{{ 'PASSWORD_PLACEHOLDER' | translate }}"
         [(ngModel)]="formData.password"
         name="password"
         required
       />
 
   
-      <button type="submit">Login</button>
+      <button type="submit">{{ 'LOGIN' | translate }}</button>
     </form>
-    <p>Don't have an account?<a routerLink="/register" routerLinkActive="router-link-active" >Register</a></p>
+    <p>{{ 'DONT_HAVE_ACCOUNT' | translate }}<a routerLink="/register" routerLinkActive="router-link-active" >{{ 'REGISTER_LINK' | translate }}</a></p>
   </div>
-  

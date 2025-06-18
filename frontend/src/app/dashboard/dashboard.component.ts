@@ -4,12 +4,13 @@ import { Component } from '@angular/core';
 import { NgxChartsModule } from '@swimlane/ngx-charts';  // Module for charts
 import { ApiService } from '../service/api.service'; // Service to interact with API
 import { FormsModule } from '@angular/forms'; // Forms module for two-way binding
+import { TranslateModule, TranslateService } from '@ngx-translate/core'; // Import TranslateModule and TranslateService
 
 // Define the component metadata
 @Component({
   selector: 'app-dashboard', // The component selector
   standalone: true, // Marks this component as standalone (no need for NgModule)
-  imports: [CommonModule, NgxChartsModule, FormsModule], // Import other modules required for this component
+  imports: [CommonModule, NgxChartsModule, FormsModule, TranslateModule], // Import other modules required for this component
   templateUrl: './dashboard.component.html', // HTML template
   styleUrl: './dashboard.component.css', // CSS styles for the component
 })
@@ -23,18 +24,18 @@ export class DashboardComponent {
 
   // List of months, used for selecting a month
   months = [
-    { name: 'January', value: '01' },
-    { name: 'February', value: '02' },
-    { name: 'March', value: '03' },
-    { name: 'April', value: '04' },
-    { name: 'May', value: '05' },
-    { name: 'June', value: '06' },
-    { name: 'July', value: '07' },
-    { name: 'August', value: '08' },
-    { name: 'September', value: '09' },
-    { name: 'October', value: '10' },
-    { name: 'November', value: '11' },
-    { name: 'December', value: '12' },
+    { name: 'JANUARY', value: '01' },
+    { name: 'FEBRUARY', value: '02' },
+    { name: 'MARCH', value: '03' },
+    { name: 'APRIL', value: '04' },
+    { name: 'MAY', value: '05' },
+    { name: 'JUNE', value: '06' },
+    { name: 'JULY', value: '07' },
+    { name: 'AUGUST', value: '08' },
+    { name: 'SEPTEMBER', value: '09' },
+    { name: 'OCTOBER', value: '10' },
+    { name: 'NOVEMBER', value: '11' },
+    { name: 'DECEMBER', value: '12' },
   ];
 
   // Array to store the years (last 10 years from current year)
@@ -51,7 +52,13 @@ export class DashboardComponent {
   animations = true;  // Enable chart animations
 
   // Constructor to inject ApiService for API calls
-  constructor(private apiService: ApiService) {}
+  constructor(private apiService: ApiService, private translate: TranslateService) {
+    // Translate month names
+    this.months = this.months.map(month => ({
+      ...month,
+      name: this.translate.instant(month.name)
+    }));
+  }
 
   // ngOnInit lifecycle hook, called when the component initializes
   ngOnInit(): void {

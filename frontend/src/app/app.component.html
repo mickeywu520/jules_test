@@ -3,22 +3,23 @@
   <div class="sidebar">
     <h1 class="ims">IMS</h1>
     <ul class="nav-links">
-      <li *ngIf="isAuth()"><a routerLink="/dashboard">Dashbaord</a></li>
-      <li *ngIf="isAuth()"><a routerLink="/transaction">Transactions</a></li>
-      <li *ngIf="isAdmin()"><a routerLink="/category">Category</a></li>
-      <li *ngIf="isAdmin()"><a routerLink="/product">Product</a></li>
-      <li *ngIf="isAdmin()"><a routerLink="/supplier">Supplier</a></li>
-      <li *ngIf="isAuth()"><a routerLink="/purchase">Purchase</a></li>
-      <li *ngIf="isAuth()"><a routerLink="/sell">Sell</a></li>
-      <li *ngIf="isAuth()"><a routerLink="/profile">Profile</a></li>
-      <li *ngIf="!isAuth()"><a routerLink="/login">Login</a></li>
-      <li *ngIf="!isAuth()"><a routerLink="/register">Register</a></li>
-      <li *ngIf="isAuth()"><a (click)="logOut()" >Logout</a></li>
+      <li *ngIf="isAuth()"><a routerLink="/dashboard">{{ 'DASHBOARD' | translate }}</a></li>
+      <li *ngIf="isAuth()"><a routerLink="/transaction">{{ 'TRANSACTIONS' | translate }}</a></li>
+      <li *ngIf="isAdmin()"><a routerLink="/category">{{ 'CATEGORY' | translate }}</a></li>
+      <li *ngIf="isAdmin()"><a routerLink="/product">{{ 'PRODUCT' | translate }}</a></li>
+      <li *ngIf="isAdmin()"><a routerLink="/supplier">{{ 'SUPPLIER' | translate }}</a></li>
+      <li *ngIf="isAuth()"><a routerLink="/purchase">{{ 'PURCHASE' | translate }}</a></li>
+      <li *ngIf="isAuth()"><a routerLink="/sell">{{ 'SELL' | translate }}</a></li>
+      <li *ngIf="isAuth()"><a routerLink="/profile">{{ 'PROFILE' | translate }}</a></li>
+      <li *ngIf="!isAuth()"><a routerLink="/login">{{ 'LOGIN' | translate }}</a></li>
+      <li *ngIf="!isAuth()"><a routerLink="/register">{{ 'REGISTER' | translate }}</a></li>
+      <li *ngIf="isAuth()"><a (click)="logOut()" >{{ 'LOGOUT' | translate }}</a></li>
     </ul>
   </div>
 
   <!-- MAIN CONTENT Area-->
    <div class="main-content">
+      <h1>{{ 'WELCOME_MESSAGE' | translate }}</h1>
       <router-outlet></router-outlet>
    </div>
 </div>

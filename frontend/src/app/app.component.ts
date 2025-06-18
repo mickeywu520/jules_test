@@ -2,11 +2,12 @@ import { CommonModule } from '@angular/common';
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { Router, RouterLink, RouterOutlet } from '@angular/router';
 import { ApiService } from './service/api.service';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, RouterLink, CommonModule],
+  imports: [RouterOutlet, RouterLink, CommonModule, TranslateModule],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css',
 })
@@ -17,8 +18,12 @@ export class AppComponent implements OnInit {
   constructor(
     private apiService: ApiService,
     private router: Router,
-    private cdr: ChangeDetectorRef
-  ) {}
+    private cdr: ChangeDetectorRef,
+    private translate: TranslateService
+  ) {
+    this.translate.addLangs(['en', 'zh-TW']);
+    this.translate.setDefaultLang('zh-TW');
+  }
 
 
 isAuth():boolean{

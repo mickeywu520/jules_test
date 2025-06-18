@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../service/api.service';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 interface Category {
   id: string,
@@ -12,7 +13,7 @@ interface Category {
 @Component({
   selector: 'app-category',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, TranslateModule],
   templateUrl: './category.component.html',
   styleUrl: './category.component.css'
 })
@@ -25,7 +26,7 @@ export class CategoryComponent implements OnInit {
   isEditing:boolean = false;
   editingCategoryId:string | null = null;
 
-  constructor(private apiService: ApiService){}
+  constructor(private apiService: ApiService, private translate: TranslateService){}
 
   ngOnInit(): void {
     this.apiService.categories$.subscribe((cats: Category[]) => {
@@ -37,7 +38,7 @@ export class CategoryComponent implements OnInit {
         // console.log('Initial categories fetched by CategoryComponent');
       },
       error: (error: any) => {
-        this.showMessage(error?.error?.message || error?.message || "Unable to fetch initial categories" + error);
+        this.showMessage(error?.error?.message || error?.message || this.translate.instant("UNABLE_TO_FETCH_INITIAL_CATEGORIES") + error);
       }
     });
   }
@@ -46,23 +47,23 @@ export class CategoryComponent implements OnInit {
   //ADD A NEW CATEGORY
   addCategory():void{
     if (!this.categoryName) {
-      this.showMessage("Category name is required");
+      this.showMessage(this.translate.instant("CATEGORY_NAME_REQUIRED"));
       return;
     }
     this.apiService.createCategory({name:this.categoryName}).subscribe({
       next:(res:any) =>{
-        this.showMessage("Category added successfully")
+        this.showMessage(this.translate.instant("CATEGORY_ADDED_SUCCESSFULLY"))
         this.categoryName = '';
         this.apiService.fetchAndBroadcastCategories().subscribe({
           next: () => { /* console.log('Categories refreshed after action'); */ },
           error: (err: any) => {
             console.error('Failed to refresh categories after action:', err);
-            this.showMessage('Failed to refresh categories list.');
+            this.showMessage(this.translate.instant('FAILED_TO_REFRESH_CATEGORIES_LIST'));
           }
         });
       },
       error:(error) =>{
-        this.showMessage(error?.error?.message || error?.message || "Unable to save category" + error)
+        this.showMessage(error?.error?.message || error?.message || this.translate.instant("UNABLE_TO_SAVE_CATEGORY") + error)
       }
     })
   }
@@ -78,19 +79,19 @@ export class CategoryComponent implements OnInit {
     }
     this.apiService.updateCategory(this.editingCategoryId, {name:this.categoryName}).subscribe({
       next:(res:any) =>{
-        this.showMessage("Category updated successfully")
+        this.showMessage(this.translate.instant("CATEGORY_UPDATED_SUCCESSFULLY"))
         this.categoryName = '';
         this.isEditing = false;
         this.apiService.fetchAndBroadcastCategories().subscribe({
           next: () => { /* console.log('Categories refreshed after action'); */ },
           error: (err: any) => {
             console.error('Failed to refresh categories after action:', err);
-            this.showMessage('Failed to refresh categories list.');
+            this.showMessage(this.translate.instant('FAILED_TO_REFRESH_CATEGORIES_LIST'));
           }
         });
       },
       error:(error) =>{
-        this.showMessage(error?.error?.message || error?.message || "Unable to edit category" + error)
+        this.showMessage(error?.error?.message || error?.message || this.translate.instant("UNABLE_TO_EDIT_CATEGORY") + error)
       }
     })
   }
@@ -104,20 +105,20 @@ export class CategoryComponent implements OnInit {
 
   //Delete a caetgory
   handleDeleteCategory(caetgoryId: string):void{
-    if (window.confirm("Are you sure you want to delete this categoy?")) {
+    if (window.confirm(this.translate.instant("CONFIRM_DELETE_CATEGORY"))) {
       this.apiService.deleteCategory(caetgoryId).subscribe({
         next:(res:any) =>{
-          this.showMessage("Category deleted successfully")
+          this.showMessage(this.translate.instant("CATEGORY_DELETED_SUCCESSFULLY"))
           this.apiService.fetchAndBroadcastCategories().subscribe({
             next: () => { /* console.log('Categories refreshed after action'); */ },
             error: (err: any) => {
               console.error('Failed to refresh categories after action:', err);
-              this.showMessage('Failed to refresh categories list.');
+              this.showMessage(this.translate.instant('FAILED_TO_REFRESH_CATEGORIES_LIST'));
             }
           }); //reload the category
         },
         error:(error) =>{
-          this.showMessage(error?.error?.message || error?.message || "Unable to Delete category" + error)
+          this.showMessage(error?.error?.message || error?.message || this.translate.instant("UNABLE_TO_DELETE_CATEGORY") + error)
         }
       })
     }

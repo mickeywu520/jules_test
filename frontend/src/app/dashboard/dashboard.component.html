@@ -1,27 +1,27 @@
 
 <div class="dashboard-container">
-    <h1>Transaction Dashboard</h1>
+    <h1>{{ 'TRANSACTION_DASHBOARD' | translate }}</h1>
 
       
     <!-- Transaction Selection -->
     <div style="margin-bottom: 50px; margin-top: 30px;">
-        <label>Select Month:</label>
+        <label>{{ 'SELECT_MONTH' | translate }}</label>
         <select [(ngModel)]="selectedMonth">
           <option *ngFor="let month of months" [value]="month.value">{{ month.name }}</option>
         </select>
     
-        <label>Select Year:</label>
+        <label>{{ 'SELECT_YEAR' | translate }}</label>
         <select [(ngModel)]="selectedYear">
           <option *ngFor="let year of years" [value]="year">{{ year }}</option>
         </select>
     
-        <button (click)="loadMonthlyData()">Show Monthly Data</button>
+        <button (click)="loadMonthlyData()">{{ 'SHOW_MONTHLY_DATA' | translate }}</button>
       </div>
 
   
     <!-- Transaction Type Count Bar Chart -->
     <div style="margin-bottom: 30px;">
-      <h2>Transaction Counts by Type</h2>
+      <h2>{{ 'TRANSACTION_COUNTS_BY_TYPE' | translate }}</h2>
       <ngx-charts-bar-vertical
         [view]="view"
         [scheme]="'vivid'"
@@ -32,15 +32,15 @@
         [legend]="showLegend"
         [showXAxisLabel]="true"
         [showYAxisLabel]="true"
-        xAxisLabel="Transaction Type"
-        yAxisLabel="Count"
+        xAxisLabel="{{ 'TRANSACTION_TYPE' | translate }}"
+        yAxisLabel="{{ 'COUNT' | translate }}"
         [animations]="animations">
       </ngx-charts-bar-vertical>
     </div>
   
     <!-- Transaction Amount by Type Pie Chart -->
     <div style="margin-bottom: 30px;">
-      <h2>Total Transaction Amount by Type</h2>
+      <h2>{{ 'TOTAL_TRANSACTION_AMOUNT_BY_TYPE' | translate }}</h2>
       <ngx-charts-pie-chart
         [view]="view"
         [scheme]="'cool'"
@@ -55,7 +55,7 @@
 
 
     <!-- Monthly Transaction Bar Chart -->
-    <h2 style="margin-bottom: 50px;">Monthly Transaction Chart</h2>
+    <h2 style="margin-bottom: 50px;">{{ 'MONTHLY_TRANSACTION_CHART' | translate }}</h2>
 
     <div *ngIf="monthlyTransactionData.length">
       <ngx-charts-bar-vertical
@@ -68,11 +68,9 @@
         [legend]="showLegend"
         [showXAxisLabel]="true"
         [showYAxisLabel]="true"
-        xAxisLabel="Day of Month"
-        yAxisLabel="Total Price"
+        xAxisLabel="{{ 'DAY_OF_MONTH' | translate }}"
+        yAxisLabel="{{ 'TOTAL_PRICE' | translate }}"
         [animations]="animations">
       </ngx-charts-bar-vertical>
     </div>
   </div>
-  
-  

@@ -11,11 +11,51 @@ router = APIRouter(
     dependencies=[Depends(security.get_current_active_user)]
 )
 
-def generate_so_number() -> str:
+def generate_so_number(db: Session) -> str:
     """生成銷售單號，格式：SO-YYYYMMDD-XXX"""
     today = date.today()
     date_str = today.strftime("%Y%m%d")
-    return f"SO-{date_str}-001"  # 簡化版本，實際應該查詢資料庫生成序號
+
+    # 查詢當天已有的銷售單號
+    existing_sos = db.query(models.SalesOrder)\
+        .filter(models.SalesOrder.so_number.like(f"SO-{date_str}-%"))\
+        .order_by(models.SalesOrder.so_number.desc())\
+        .first()
+
+    if existing_sos:
+        # 提取最後的序號並加1
+        last_number = existing_sos.so_number.split('-')[-1]
+        next_number = int(last_number) + 1
+        sequence = f"{next_number:03d}"  # 格式化為3位數
+    else:
+        # 當天第一筆
+        sequence = "001"
+
+    return f"SO-{date_str}-{sequence}"
+
+def deduct_inventory(db: Session, sales_order_items: List[dict]) -> None:
+    """扣減庫存"""
+    for item_data in sales_order_items:
+        product = db.query(models.Product)\
+            .filter(models.Product.id == item_data['product_id'])\
+            .first()
+
+        if product:
+            # 扣減庫存
+            product.stock = max(0, product.stock - item_data['quantity'])
+            db.add(product)
+
+def restore_inventory(db: Session, sales_order_items: List[dict]) -> None:
+    """恢復庫存（用於取消銷售單時）"""
+    for item_data in sales_order_items:
+        product = db.query(models.Product)\
+            .filter(models.Product.id == item_data['product_id'])\
+            .first()
+
+        if product:
+            # 恢復庫存
+            product.stock += item_data['quantity']
+            db.add(product)
 
 def calculate_sales_order_totals(sales_order_data: dict, items: List[dict]) -> dict:
     """計算銷售單總金額"""
@@ -68,14 +108,23 @@ def create_sales_order(
     if not customer:
         raise HTTPException(status_code=404, detail="Customer not found")
     
-    # 驗證所有產品是否存在
+    # 驗證所有產品是否存在並檢查庫存
     product_ids = [item.product_id for item in sales_order.items]
     products = db.query(models.Product)\
         .filter(models.Product.id.in_(product_ids))\
         .all()
-    
+
     if len(products) != len(product_ids):
         raise HTTPException(status_code=404, detail="One or more products not found")
+
+    # 檢查庫存是否足夠
+    for item_data in sales_order.items:
+        product = next((p for p in products if p.id == item_data.product_id), None)
+        if product and item_data.quantity > product.stock:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Product '{product.productName}' insufficient stock. Available: {product.stock}, Required: {item_data.quantity}"
+            )
     
     # 準備明細資料並計算小計
     items_data = []
@@ -93,7 +142,7 @@ def create_sales_order(
     totals = calculate_sales_order_totals(sales_order.model_dump(), items_data)
     
     # 生成銷售單號
-    so_number = generate_so_number()
+    so_number = generate_so_number(db)
     
     # 創建銷售單主檔
     new_so = models.SalesOrder(
@@ -252,31 +301,73 @@ def delete_sales_order(so_id: int, db: Session = Depends(database.get_db)):
 # 更新銷售單狀態
 @router.patch("/{so_id}/status")
 def update_sales_order_status(
-    so_id: int, 
-    status_data: dict, 
+    so_id: int,
+    status_data: dict,
     db: Session = Depends(database.get_db)
 ):
-    db_so = db.query(models.SalesOrder).filter(models.SalesOrder.id == so_id).first()
+    db_so = db.query(models.SalesOrder)\
+        .options(joinedload(models.SalesOrder.items))\
+        .filter(models.SalesOrder.id == so_id)\
+        .first()
+
     if not db_so:
         raise HTTPException(status_code=404, detail="Sales order not found")
-    
+
     # 從字典中提取狀態值
     if 'status' in status_data:
         status_value = status_data['status']
     else:
         status_value = status_data
-    
+
     # 驗證狀態值是否有效
     try:
+        old_status = db_so.status
         valid_status = schemas.SalesOrderStatus(status_value)
+
+        # 檢查狀態變更邏輯
+        if old_status == models.SalesOrderStatus.CONFIRMED and valid_status == models.SalesOrderStatus.SHIPPED:
+            # 從已確認變更為已出貨：扣減庫存
+            items_data = []
+            for item in db_so.items:
+                # 再次檢查庫存是否足夠
+                product = db.query(models.Product)\
+                    .filter(models.Product.id == item.product_id)\
+                    .first()
+
+                if product and item.quantity > product.stock:
+                    raise HTTPException(
+                        status_code=400,
+                        detail=f"Product '{product.productName}' insufficient stock. Available: {product.stock}, Required: {item.quantity}"
+                    )
+
+                items_data.append({
+                    'product_id': item.product_id,
+                    'quantity': item.quantity
+                })
+
+            # 扣減庫存
+            deduct_inventory(db, items_data)
+
+        elif old_status == models.SalesOrderStatus.SHIPPED and valid_status == models.SalesOrderStatus.CANCELLED:
+            # 從已出貨變更為已取消：恢復庫存
+            items_data = []
+            for item in db_so.items:
+                items_data.append({
+                    'product_id': item.product_id,
+                    'quantity': item.quantity
+                })
+
+            # 恢復庫存
+            restore_inventory(db, items_data)
+
         db_so.status = valid_status
-        
+
     except ValueError:
         raise HTTPException(status_code=400, detail=f"Invalid status: {status_value}")
-    
+
     db.commit()
     db.refresh(db_so)
-    
+
     return {
         "id": db_so.id,
         "so_number": db_so.so_number,

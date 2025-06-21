@@ -55,6 +55,7 @@ class ProductCreate(ProductBase):
 # For Read operations
 class Product(ProductBase):
     id: int
+    stock: int = Field(default=0, description="庫存數量")  # 添加庫存欄位
     createdAt: datetime
     updatedAt: Optional[datetime] = None
     category: Optional[Category] = None  # 包含類別詳細資訊
@@ -71,6 +72,7 @@ class ProductUpdate(BaseModel):
     unitWeight: Optional[float] = None
     barcode: Optional[str] = None
     category_id: Optional[int] = None
+    stock: Optional[int] = Field(None, ge=0, description="庫存數量，必須大於等於0")  # 添加庫存更新
 
 
 # Base and Read schemas for Supplier

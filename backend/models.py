@@ -141,6 +141,7 @@ class Product(Base):
     warehouse = Column(String, nullable=True)  # 倉別
     unitWeight = Column(Float, nullable=True)  # 單位重量(KG)
     barcode = Column(String, nullable=True)  # 條碼編號
+    stock = Column(Integer, default=0, nullable=False)  # 庫存數量，預設為0
     createdAt = Column(DateTime(timezone=True), server_default=func.now())
     updatedAt = Column(DateTime(timezone=True), onupdate=func.now())
 

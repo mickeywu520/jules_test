@@ -11,11 +11,27 @@ router = APIRouter(
     dependencies=[Depends(security.get_current_active_user)]
 )
 
-def generate_gr_number() -> str:
+def generate_gr_number(db: Session) -> str:
     """生成入庫單號，格式：GR-YYYYMMDD-XXX"""
     today = date.today()
     date_str = today.strftime("%Y%m%d")
-    return f"GR-{date_str}-001"  # 簡化版本，實際應該查詢資料庫生成序號
+
+    # 查詢當天已有的入庫單號
+    existing_grs = db.query(models.GoodsReceipt)\
+        .filter(models.GoodsReceipt.gr_number.like(f"GR-{date_str}-%"))\
+        .order_by(models.GoodsReceipt.gr_number.desc())\
+        .first()
+
+    if existing_grs:
+        # 提取最後的序號並加1
+        last_number = existing_grs.gr_number.split('-')[-1]
+        next_number = int(last_number) + 1
+        sequence = f"{next_number:03d}"  # 格式化為3位數
+    else:
+        # 當天第一筆
+        sequence = "001"
+
+    return f"GR-{date_str}-{sequence}"
 
 # 新增入庫單
 @router.post("/", response_model=schemas.GoodsReceipt, status_code=status.HTTP_201_CREATED)
@@ -49,7 +65,7 @@ def create_goods_receipt(
         raise HTTPException(status_code=404, detail="One or more purchase order items not found")
     
     # 生成入庫單號
-    gr_number = generate_gr_number()
+    gr_number = generate_gr_number(db)
     
     # 創建入庫單主檔
     new_gr = models.GoodsReceipt(
@@ -247,15 +263,45 @@ def update_goods_receipt_status(
     # 驗證狀態值是否有效
     try:
         valid_status = schemas.GoodsReceiptStatus(status_value)
+
+        # ✅ 處理狀態變更的庫存邏輯 - 先保存舊狀態
+        old_status = db_gr.status
+
+        # 更新狀態
         db_gr.status = valid_status
-        
-        # 如果狀態變更為已完成，更新採購單狀態為已收貨
-        if valid_status == models.GoodsReceiptStatus.COMPLETED:
+
+        # 如果從非完成狀態變更為已完成，增加庫存
+        if old_status != models.GoodsReceiptStatus.COMPLETED and valid_status == models.GoodsReceiptStatus.COMPLETED:
+            # 增加產品庫存
+            for item in db_gr.items:
+                product = db.query(models.Product)\
+                    .filter(models.Product.id == item.product_id)\
+                    .first()
+
+                if product:
+                    # 增加庫存數量
+                    product.stock += item.received_quantity
+                    db.add(product)
+
+            # 更新採購單狀態為已收貨
             purchase_order = db.query(models.PurchaseOrder)\
                 .filter(models.PurchaseOrder.id == db_gr.purchase_order_id)\
                 .first()
             if purchase_order:
                 purchase_order.status = models.PurchaseOrderStatus.RECEIVED
+
+        # 如果從已完成狀態變更為其他狀態，扣減庫存
+        elif old_status == models.GoodsReceiptStatus.COMPLETED and valid_status != models.GoodsReceiptStatus.COMPLETED:
+            # 扣減產品庫存（恢復到入庫前狀態）
+            for item in db_gr.items:
+                product = db.query(models.Product)\
+                    .filter(models.Product.id == item.product_id)\
+                    .first()
+
+                if product:
+                    # 扣減庫存數量，但不能低於0
+                    product.stock = max(0, product.stock - item.received_quantity)
+                    db.add(product)
         
     except ValueError:
         raise HTTPException(status_code=400, detail=f"Invalid status: {status_value}")

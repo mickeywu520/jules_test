@@ -535,4 +535,47 @@ export class ApiService {
     });
   }
 
+  /**SALES ORDER ENDPOINTS */
+  // 新增銷售單
+  createSalesOrder(salesOrderData: any): Observable<any> {
+    return this.http.post(`${ApiService.BASE_URL}/sales-orders/`, salesOrderData, {
+      headers: this.getHeader(),
+    });
+  }
+
+  // 獲取所有銷售單
+  getAllSalesOrders(skip: number = 0, limit: number = 100): Observable<any> {
+    return this.http.get(`${ApiService.BASE_URL}/sales-orders/?skip=${skip}&limit=${limit}`, {
+      headers: this.getHeader(),
+    });
+  }
+
+  // 根據 ID 獲取銷售單
+  getSalesOrderById(id: string): Observable<any> {
+    return this.http.get(`${ApiService.BASE_URL}/sales-orders/${id}`, {
+      headers: this.getHeader(),
+    });
+  }
+
+  // 更新銷售單
+  updateSalesOrder(id: string, salesOrderData: any): Observable<any> {
+    return this.http.put(`${ApiService.BASE_URL}/sales-orders/${id}`, salesOrderData, {
+      headers: this.getHeader(),
+    });
+  }
+
+  // 刪除銷售單
+  deleteSalesOrder(id: string): Observable<any> {
+    return this.http.delete(`${ApiService.BASE_URL}/sales-orders/${id}`, {
+      headers: this.getHeader(),
+    });
+  }
+
+  // 更新銷售單狀態
+  updateSalesOrderStatus(id: string, status: string): Observable<any> {
+    return this.http.patch(`${ApiService.BASE_URL}/sales-orders/${id}/status`, { status: status }, {
+      headers: this.getHeader(),
+    });
+  }
+
 }

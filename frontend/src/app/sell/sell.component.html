@@ -1,39 +1,264 @@
-<div class="purchase-form-page">
-    <p *ngIf="message" class="message">{{ message }}</p>
-    <h1>{{ 'SELL_PRODUCT' | translate }}</h1>
+<div class="sales-order-page">
+  <!-- 頁面標題和操作按鈕 -->
+  <div class="page-header">
+    <h1>{{ showSalesOrderList ? ('SALES_ORDER_LIST' | translate) : (isEditing ? ('EDIT_SALES_ORDER' | translate) : ('NEW_SALES_ORDER' | translate)) }}</h1>
+    <div class="header-actions">
+      <button type="button" class="btn-secondary" (click)="toggleSalesOrderList()">
+        {{ showSalesOrderList ? ('NEW_SALES_ORDER' | translate) : ('VIEW_SALES_ORDER_LIST' | translate) }}
+      </button>
+      <button type="button" class="btn-secondary" (click)="resetForm()" *ngIf="!showSalesOrderList && isEditing">
+        {{ 'NEW_SALES_ORDER' | translate }}
+      </button>
+    </div>
+  </div>
 
-    <!-- PRODUCT PURCHASE? INVENTORY RECEIVING PAGE -->
+  <!-- 訊息提示 -->
+  <div *ngIf="message" class="toast-message" [ngClass]="{'success': message.includes('成功'), 'error': !message.includes('成功')}">
+    {{ message }}
+  </div>
+
+  <!-- 銷售單列表 -->
+  <div *ngIf="showSalesOrderList" class="sales-order-list">
+    <h2>{{ 'SALES_ORDER_LIST' | translate }}</h2>
+    
+    <!-- 搜尋欄 -->
+    <div class="search-container">
+      <div class="search-input-group">
+        <input type="text" 
+               [(ngModel)]="searchTerm" 
+               (input)="onSearchChange()"
+               [placeholder]="'SEARCH_SALES_ORDER_PLACEHOLDER' | translate"
+               class="search-input">
+        <button type="button" class="btn-clear" (click)="clearSearch()" *ngIf="searchTerm">
+          {{ 'CLEAR' | translate }}
+        </button>
+      </div>
+      <div class="search-info" *ngIf="searchTerm">
+        {{ 'SEARCH_RESULTS' | translate }}: {{ filteredSalesOrders.length }} / {{ salesOrders.length }}
+      </div>
+    </div>
+    
+    <div class="table-container">
+      <table class="sales-order-table">
+        <thead>
+          <tr>
+            <th>{{ 'SO_NUMBER' | translate }}</th>
+            <th>{{ 'SALES_DATE' | translate }}</th>
+            <th>{{ 'CUSTOMER' | translate }}</th>
+            <th>{{ 'SALESPERSON' | translate }}</th>
+            <th>{{ 'PAYMENT_TERM' | translate }}</th>
+            <th>{{ 'TOTAL_AMOUNT' | translate }}</th>
+            <th>{{ 'STATUS' | translate }}</th>
+            <th>{{ 'ACTIONS' | translate }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let so of filteredSalesOrders" class="sales-order-row">
+            <td>{{ so.so_number }}</td>
+            <td>{{ so.sales_date | date:'yyyy-MM-dd' }}</td>
+            <td>{{ so.customer?.customerName || '-' }}</td>
+            <td>{{ so.salesperson?.name || '-' }}</td>
+            <td>{{ ('PAYMENT_' + so.payment_term) | translate }}</td>
+            <td>{{ so.total_amount | currency:'TWD':'symbol':'1.0-2' }}</td>
+            <td>
+              <select [(ngModel)]="so.status" 
+                      (ngModelChange)="onStatusChange(so.id, $event)"
+                      [name]="'status_' + so.id"
+                      class="status-select">
+                <option *ngFor="let status of salesOrderStatuses" [value]="status.value">
+                  {{ status.label | translate }}
+                </option>
+              </select>
+            </td>
+            <td class="actions">
+              <button class="btn-edit" (click)="editSalesOrder(so.id)">
+                {{ 'EDIT' | translate }}
+              </button>
+              <button class="btn-delete" (click)="deleteSalesOrder(so.id)" 
+                      *ngIf="so.status === 'DRAFT'"
+                      [title]="'只有草稿狀態才能刪除'">
+                {{ 'DELETE' | translate }}
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 銷售單表單 -->
+  <div *ngIf="!showSalesOrderList" class="sales-order-form">
     <form (ngSubmit)="handleSubmit()">
+      <!-- 銷售單主檔區塊 -->
+      <div class="form-section">
+        <h2>{{ 'SALES_ORDER_HEADER' | translate }}</h2>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="sales_date">{{ 'SALES_DATE' | translate }}</label>
+            <input type="date" [(ngModel)]="formData.sales_date" name="sales_date" id="sales_date" required>
+          </div>
+          
+          <div class="form-group">
+            <label for="customer_id">{{ 'CUSTOMER' | translate }}</label>
+            <select [(ngModel)]="formData.customer_id" name="customer_id" id="customer_id" 
+                    (change)="onCustomerChange()" required>
+              <option value="">{{ 'SELECT_CUSTOMER' | translate }}</option>
+              <option *ngFor="let customer of customers" [value]="customer.id">
+                {{ customer.customerName }}
+              </option>
+            </select>
+          </div>
+        </div>
 
-      <div class="form-group">
-        <label for="">{{ 'SELECT_PRODUCT' | translate }}</label>
-        <select
-          name="productId"
-          class="form-control"
-          [(ngModel)]="productId"
-          id=""
-        >
-          <option value="">{{ 'SELECT_PRODUCT_PLACEHOLDER' | translate }}</option>
-          <option *ngFor="let product of products" [value]="product.id">
-            {{ product.name }}
-          </option>
-        </select>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="payment_term">{{ 'PAYMENT_TERM' | translate }}</label>
+            <select [(ngModel)]="formData.payment_term" name="payment_term" id="payment_term">
+              <option *ngFor="let term of paymentTerms" [value]="term.value">
+                {{ term.label | translate }}
+              </option>
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <label for="tax_type">{{ 'TAX_TYPE' | translate }}</label>
+            <select [(ngModel)]="formData.tax_type" name="tax_type" id="tax_type">
+              <option *ngFor="let type of taxTypes" [value]="type.value">
+                {{ type.label | translate }}
+              </option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="tax_rate">{{ 'TAX_RATE' | translate }}</label>
+            <input type="number" [(ngModel)]="formData.tax_rate" name="tax_rate" id="tax_rate" 
+                   min="0" max="1" step="0.01" [placeholder]="'TAX_RATE_PLACEHOLDER' | translate">
+          </div>
+          
+          <div class="form-group">
+            <label for="discount_rate">{{ 'DISCOUNT_RATE' | translate }}</label>
+            <input type="number" [(ngModel)]="formData.discount_rate" name="discount_rate" id="discount_rate" 
+                   min="0" max="1" step="0.01" [placeholder]="'DISCOUNT_RATE_PLACEHOLDER' | translate">
+          </div>
+        </div>
+
+        <div class="form-group full-width">
+          <label for="notes">{{ 'NOTES' | translate }}</label>
+          <textarea [(ngModel)]="formData.notes" name="notes" id="notes" rows="3" 
+                    [placeholder]="'SALES_ORDER_NOTES_PLACEHOLDER' | translate"></textarea>
+        </div>
       </div>
 
-
-      <div class="form-group">
-          <label for="">{{ 'DESCRIPTION' | translate }}</label>
-          <input type="text" [(ngModel)]="description" name="description" class="form-control"/>
+      <!-- 客戶資訊顯示 -->
+      <div *ngIf="selectedCustomer" class="form-section">
+        <h2>{{ 'CUSTOMER_INFO' | translate }}</h2>
+        <div class="customer-info">
+          <div class="info-item">
+            <label>{{ 'CUSTOMER_NAME' | translate }}:</label>
+            <span>{{ selectedCustomer.customerName }}</span>
+          </div>
+          <div class="info-item">
+            <label>{{ 'CUSTOMER_TYPE' | translate }}:</label>
+            <span>{{ selectedCustomer.customerType }}</span>
+          </div>
+          <div class="info-item">
+            <label>{{ 'CONTACT_PERSON' | translate }}:</label>
+            <span>{{ selectedCustomer.contactPerson }}</span>
+          </div>
+          <div class="info-item">
+            <label>{{ 'PHONE' | translate }}:</label>
+            <span>{{ selectedCustomer.phone }}</span>
+          </div>
         </div>
+      </div>
 
-
-      <div class="form-group">
-          <label for="">{{ 'QUANTITY' | translate }}</label>
-          <input type="number" [(ngModel)]="quantity" name="quantity" class="form-control"/>
+      <!-- 銷售明細區塊 -->
+      <div class="form-section">
+        <h2>{{ 'SALES_ORDER_ITEMS' | translate }}</h2>
+        <div class="items-header">
+          <button type="button" class="btn-add-item" (click)="addNewItem()">
+            {{ 'ADD_ITEM' | translate }}
+          </button>
         </div>
+        
+        <div class="items-table" *ngIf="items.length > 0">
+          <table class="items-table-content">
+            <thead>
+              <tr>
+                <th>{{ 'PRODUCT' | translate }}</th>
+                <th>{{ 'UNIT' | translate }}</th>
+                <th>{{ 'QUANTITY' | translate }}</th>
+                <th>{{ 'UNIT_PRICE' | translate }}</th>
+                <th>{{ 'LINE_TOTAL' | translate }}</th>
+                <th>{{ 'NOTES' | translate }}</th>
+                <th>{{ 'ACTIONS' | translate }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let item of items; let i = index" class="item-row">
+                <td>
+                  <select [(ngModel)]="item.product_id" [name]="'product_id_' + i"
+                          (change)="onProductChange(i)" required>
+                    <option value="">{{ 'SELECT_PRODUCT' | translate }}</option>
+                    <option *ngFor="let product of products" [value]="product.id">
+                      {{ product.productName }} ({{ 'STOCK' | translate }}: {{ product.stock }})
+                    </option>
+                  </select>
+                </td>
+                <td>
+                  <div class="unit-info">
+                    <span class="unit-display">{{ item.product?.unit || '-' }}</span>
+                    <small class="stock-info" *ngIf="item.product">
+                      {{ 'STOCK' | translate }}: {{ item.product.stock }}
+                    </small>
+                  </div>
+                </td>
+                <td>
+                  <input type="number" [(ngModel)]="item.quantity" [name]="'quantity_' + i"
+                         (input)="calculateLineTotal(i)" min="1" required
+                         [class.stock-warning]="item.product && item.quantity > item.product.stock"
+                         [title]="item.product && item.quantity > item.product.stock ? '庫存不足！目前庫存：' + item.product.stock : ''">
+                </td>
+                <td>
+                  <input type="number" [(ngModel)]="item.unit_price" [name]="'unit_price_' + i" 
+                         (input)="calculateLineTotal(i)" min="0" step="0.01" required>
+                </td>
+                <td>
+                  <span class="line-total">{{ item.line_total | currency:'TWD':'symbol':'1.0-2' }}</span>
+                </td>
+                <td>
+                  <input type="text" [(ngModel)]="item.notes" [name]="'notes_' + i" 
+                         [placeholder]="'ITEM_NOTES_PLACEHOLDER' | translate">
+                </td>
+                <td>
+                  <button type="button" class="btn-remove" (click)="removeItem(i)">
+                    {{ 'REMOVE' | translate }}
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        
+        <div *ngIf="items.length === 0" class="no-items">
+          <p>{{ 'NO_ITEMS_MESSAGE' | translate }}</p>
+          <button type="button" class="btn-add-item" (click)="addNewItem()">
+            {{ 'ADD_FIRST_ITEM' | translate }}
+          </button>
+        </div>
+      </div>
 
-
-        <button type="submit" class="btn btn-primary">{{ 'SELL_PRODUCT' | translate }}</button>
+      <!-- 表單操作按鈕 -->
+      <div class="form-actions">
+        <button type="button" class="btn-secondary" (click)="resetForm()">
+          {{ 'RESET' | translate }}
+        </button>
+        <button type="submit" class="btn-primary" [disabled]="items.length === 0">
+          {{ isEditing ? ('UPDATE_SALES_ORDER' | translate) : ('CREATE_SALES_ORDER' | translate) }}
+        </button>
+      </div>
     </form>
   </div>
-  
+</div>

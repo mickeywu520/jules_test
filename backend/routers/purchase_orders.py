@@ -11,11 +11,27 @@ router = APIRouter(
     dependencies=[Depends(security.get_current_active_user)]
 )
 
-def generate_po_number() -> str:
+def generate_po_number(db: Session) -> str:
     """生成採購單號，格式：PO-YYYYMMDD-XXX"""
     today = date.today()
     date_str = today.strftime("%Y%m%d")
-    return f"PO-{date_str}-001"  # 簡化版本，實際應該查詢資料庫生成序號
+
+    # 查詢當天已有的採購單號
+    existing_pos = db.query(models.PurchaseOrder)\
+        .filter(models.PurchaseOrder.po_number.like(f"PO-{date_str}-%"))\
+        .order_by(models.PurchaseOrder.po_number.desc())\
+        .first()
+
+    if existing_pos:
+        # 提取最後的序號並加1
+        last_number = existing_pos.po_number.split('-')[-1]
+        next_number = int(last_number) + 1
+        sequence = f"{next_number:03d}"  # 格式化為3位數
+    else:
+        # 當天第一筆
+        sequence = "001"
+
+    return f"PO-{date_str}-{sequence}"
 
 def calculate_totals(items: List[models.PurchaseOrderItem], tax_rate: float, tax_type: schemas.TaxType):
     """計算採購單總額"""
@@ -55,7 +71,7 @@ def create_purchase_order(
         raise HTTPException(status_code=404, detail="One or more products not found")
     
     # 生成採購單號
-    po_number = generate_po_number()
+    po_number = generate_po_number(db)
     
     # 創建採購單主檔
     new_po = models.PurchaseOrder(

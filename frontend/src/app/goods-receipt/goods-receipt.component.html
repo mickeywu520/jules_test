@@ -1,0 +1,213 @@
+<div class="goods-receipt-page">
+  <!-- 頁面標題和操作按鈕 -->
+  <div class="page-header">
+    <h1>{{ showGoodsReceiptList ? ('GOODS_RECEIPT_LIST' | translate) : (isEditing ? ('EDIT_GOODS_RECEIPT' | translate) : ('NEW_GOODS_RECEIPT' | translate)) }}</h1>
+    <div class="header-actions">
+      <button type="button" class="btn-secondary" (click)="toggleGoodsReceiptList()">
+        {{ showGoodsReceiptList ? ('NEW_GOODS_RECEIPT' | translate) : ('VIEW_GOODS_RECEIPT_LIST' | translate) }}
+      </button>
+      <button type="button" class="btn-secondary" (click)="resetForm()" *ngIf="!showGoodsReceiptList && isEditing">
+        {{ 'NEW_GOODS_RECEIPT' | translate }}
+      </button>
+    </div>
+  </div>
+
+  <!-- 訊息提示 -->
+  <div *ngIf="message" class="toast-message" [ngClass]="{'success': message.includes('成功'), 'error': !message.includes('成功')}">
+    {{ message }}
+  </div>
+
+  <!-- 入庫單列表 -->
+  <div *ngIf="showGoodsReceiptList" class="goods-receipt-list">
+    <h2>{{ 'GOODS_RECEIPT_LIST' | translate }}</h2>
+
+    <!-- 搜尋欄 -->
+    <div class="search-container">
+      <div class="search-input-group">
+        <input type="text"
+               [(ngModel)]="searchTerm"
+               (input)="onSearchChange()"
+               [placeholder]="'SEARCH_GOODS_RECEIPT_PLACEHOLDER' | translate"
+               class="search-input">
+        <button type="button" class="btn-clear" (click)="clearSearch()" *ngIf="searchTerm">
+          {{ 'CLEAR' | translate }}
+        </button>
+      </div>
+      <div class="search-info" *ngIf="searchTerm">
+        {{ 'SEARCH_RESULTS' | translate }}: {{ filteredGoodsReceipts.length }} / {{ goodsReceipts.length }}
+      </div>
+    </div>
+
+    <div class="table-container">
+      <table class="goods-receipt-table">
+        <thead>
+          <tr>
+            <th>{{ 'GR_NUMBER' | translate }}</th>
+            <th>{{ 'RECEIPT_DATE' | translate }}</th>
+            <th>{{ 'PO_NUMBER' | translate }}</th>
+            <th>{{ 'WAREHOUSE_STAFF' | translate }}</th>
+            <th>{{ 'WAREHOUSE_TYPE' | translate }}</th>
+            <th>{{ 'STATUS' | translate }}</th>
+            <th>{{ 'ACTIONS' | translate }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let gr of filteredGoodsReceipts" class="goods-receipt-row">
+            <td>{{ gr.gr_number }}</td>
+            <td>{{ gr.receipt_date | date:'yyyy-MM-dd' }}</td>
+            <td>{{ gr.purchase_order?.po_number || '-' }}</td>
+            <td>{{ gr.warehouse_staff?.name || '-' }}</td>
+            <td>{{ ('WAREHOUSE_' + gr.warehouse_type) | translate }}</td>
+            <td>
+              <select [(ngModel)]="gr.status" 
+                      (ngModelChange)="onStatusChange(gr.id, $event)"
+                      [name]="'status_' + gr.id"
+                      class="status-select">
+                <option *ngFor="let status of goodsReceiptStatuses" [value]="status.value">
+                  {{ status.label | translate }}
+                </option>
+              </select>
+            </td>
+            <td class="actions">
+              <button class="btn-edit" (click)="editGoodsReceipt(gr.id)">
+                {{ 'EDIT' | translate }}
+              </button>
+              <button class="btn-delete" (click)="deleteGoodsReceipt(gr.id)" 
+                      *ngIf="gr.status === 'DRAFT'"
+                      [title]="'只有草稿狀態才能刪除'">
+                {{ 'DELETE' | translate }}
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 入庫單表單 -->
+  <div *ngIf="!showGoodsReceiptList" class="goods-receipt-form">
+    <form (ngSubmit)="handleSubmit()">
+      <!-- 入庫單主檔區塊 -->
+      <div class="form-section">
+        <h2>{{ 'GOODS_RECEIPT_HEADER' | translate }}</h2>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="receipt_date">{{ 'RECEIPT_DATE' | translate }}</label>
+            <input type="date" [(ngModel)]="formData.receipt_date" name="receipt_date" id="receipt_date" required>
+          </div>
+          
+          <div class="form-group">
+            <label for="purchase_order_id">{{ 'PURCHASE_ORDER' | translate }}</label>
+            <select [(ngModel)]="formData.purchase_order_id" name="purchase_order_id" id="purchase_order_id"
+                    (change)="onPurchaseOrderChange()" required>
+              <option value="">{{ 'SELECT_PURCHASE_ORDER' | translate }}</option>
+              <option *ngFor="let po of purchaseOrders" [value]="po.id">
+                {{ po.po_number }} - {{ po.supplier?.name }} ({{ ('STATUS_' + po.status) | translate }})
+              </option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="warehouse_type">{{ 'WAREHOUSE_TYPE' | translate }}</label>
+            <select [(ngModel)]="formData.warehouse_type" name="warehouse_type" id="warehouse_type">
+              <option *ngFor="let type of warehouseTypes" [value]="type.value">
+                {{ type.label | translate }}
+              </option>
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <label for="warehouse_location">{{ 'WAREHOUSE_LOCATION' | translate }}</label>
+            <input type="text" [(ngModel)]="formData.warehouse_location" name="warehouse_location" id="warehouse_location" 
+                   [placeholder]="'WAREHOUSE_LOCATION_PLACEHOLDER' | translate">
+          </div>
+        </div>
+
+        <div class="form-group full-width">
+          <label for="notes">{{ 'NOTES' | translate }}</label>
+          <textarea [(ngModel)]="formData.notes" name="notes" id="notes" rows="3" 
+                    [placeholder]="'GOODS_RECEIPT_NOTES_PLACEHOLDER' | translate"></textarea>
+        </div>
+      </div>
+
+      <!-- 採購單資訊顯示 -->
+      <div *ngIf="selectedPurchaseOrder" class="form-section">
+        <h2>{{ 'PURCHASE_ORDER_INFO' | translate }}</h2>
+        <div class="po-info">
+          <div class="info-item">
+            <label>{{ 'PO_NUMBER' | translate }}:</label>
+            <span>{{ selectedPurchaseOrder.po_number }}</span>
+          </div>
+          <div class="info-item">
+            <label>{{ 'SUPPLIER' | translate }}:</label>
+            <span>{{ selectedPurchaseOrder.supplier?.name }}</span>
+          </div>
+          <div class="info-item">
+            <label>{{ 'PURCHASE_DATE' | translate }}:</label>
+            <span>{{ selectedPurchaseOrder.purchase_date | date:'yyyy-MM-dd' }}</span>
+          </div>
+          <div class="info-item">
+            <label>{{ 'TOTAL_AMOUNT' | translate }}:</label>
+            <span>{{ selectedPurchaseOrder.total_amount | currency:'TWD':'symbol':'1.0-2' }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 入庫明細區塊 -->
+      <div *ngIf="items.length > 0" class="form-section">
+        <h2>{{ 'GOODS_RECEIPT_ITEMS' | translate }}</h2>
+        <div class="items-table">
+          <table class="items-table-content">
+            <thead>
+              <tr>
+                <th>{{ 'PRODUCT' | translate }}</th>
+                <th>{{ 'UNIT' | translate }}</th>
+                <th>{{ 'ORDERED_QUANTITY' | translate }}</th>
+                <th>{{ 'RECEIVED_QUANTITY' | translate }}</th>
+                <th>{{ 'STORAGE_LOCATION' | translate }}</th>
+                <th>{{ 'NOTES' | translate }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let item of items; let i = index" class="item-row">
+                <td>
+                  <span class="product-name">{{ item.product?.productName || '-' }}</span>
+                </td>
+                <td>
+                  <span class="unit-display">{{ item.product?.unit || '-' }}</span>
+                </td>
+                <td>
+                  <span class="ordered-quantity">{{ item.ordered_quantity }}</span>
+                </td>
+                <td>
+                  <input type="number" [(ngModel)]="item.received_quantity" [name]="'received_quantity_' + i" 
+                         min="0" required>
+                </td>
+                <td>
+                  <input type="text" [(ngModel)]="item.storage_location" [name]="'storage_location_' + i" 
+                         [placeholder]="'STORAGE_LOCATION_PLACEHOLDER' | translate">
+                </td>
+                <td>
+                  <input type="text" [(ngModel)]="item.notes" [name]="'notes_' + i" 
+                         [placeholder]="'ITEM_NOTES_PLACEHOLDER' | translate">
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- 表單操作按鈕 -->
+      <div class="form-actions">
+        <button type="button" class="btn-secondary" (click)="resetForm()">
+          {{ 'RESET' | translate }}
+        </button>
+        <button type="submit" class="btn-primary" [disabled]="items.length === 0">
+          {{ isEditing ? ('UPDATE_GOODS_RECEIPT' | translate) : ('CREATE_GOODS_RECEIPT' | translate) }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

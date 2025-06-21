@@ -32,10 +32,10 @@ def create_goods_receipt(
     if not purchase_order:
         raise HTTPException(status_code=404, detail="Purchase order not found")
     
-    if purchase_order.status != models.PurchaseOrderStatus.CONFIRMED:
+    if purchase_order.status not in [models.PurchaseOrderStatus.CONFIRMED, models.PurchaseOrderStatus.RECEIVED]:
         raise HTTPException(
-            status_code=400, 
-            detail="Only confirmed purchase orders can be received"
+            status_code=400,
+            detail="Only confirmed or received purchase orders can be processed for goods receipt"
         )
     
     # 驗證所有採購明細是否存在
@@ -134,10 +134,10 @@ def get_receivable_items_by_purchase_order(po_id: int, db: Session = Depends(dat
     if not purchase_order:
         raise HTTPException(status_code=404, detail="Purchase order not found")
     
-    if purchase_order.status != models.PurchaseOrderStatus.CONFIRMED:
+    if purchase_order.status not in [models.PurchaseOrderStatus.CONFIRMED, models.PurchaseOrderStatus.RECEIVED]:
         raise HTTPException(
-            status_code=400, 
-            detail="Only confirmed purchase orders can be received"
+            status_code=400,
+            detail="Only confirmed or received purchase orders can be processed for goods receipt"
         )
     
     # 獲取採購明細
@@ -151,19 +151,51 @@ def get_receivable_items_by_purchase_order(po_id: int, db: Session = Depends(dat
 # 更新入庫單
 @router.put("/{gr_id}", response_model=schemas.GoodsReceipt)
 def update_goods_receipt(
-    gr_id: int, 
-    goods_receipt: schemas.GoodsReceiptUpdate, 
+    gr_id: int,
+    goods_receipt: schemas.GoodsReceiptUpdate,
     db: Session = Depends(database.get_db)
 ):
     db_gr = db.query(models.GoodsReceipt).filter(models.GoodsReceipt.id == gr_id).first()
     if not db_gr:
         raise HTTPException(status_code=404, detail="Goods receipt not found")
-    
-    # 更新欄位
-    update_data = goods_receipt.model_dump(exclude_unset=True)
+
+    # 更新主檔欄位
+    update_data = goods_receipt.model_dump(exclude_unset=True, exclude={'items'})
     for key, value in update_data.items():
         setattr(db_gr, key, value)
-    
+
+    # 更新入庫明細
+    if goods_receipt.items is not None:
+        # 刪除現有的入庫明細
+        db.query(models.GoodsReceiptItem)\
+          .filter(models.GoodsReceiptItem.goods_receipt_id == gr_id)\
+          .delete()
+
+        # 新增更新後的入庫明細
+        for item_data in goods_receipt.items:
+            # 驗證必要欄位
+            if not item_data.purchase_order_item_id or not item_data.product_id:
+                raise HTTPException(status_code=400, detail="purchase_order_item_id and product_id are required for items")
+
+            # 找到對應的採購明細來獲取 ordered_quantity
+            po_item = db.query(models.PurchaseOrderItem)\
+                .filter(models.PurchaseOrderItem.id == item_data.purchase_order_item_id)\
+                .first()
+
+            if not po_item:
+                raise HTTPException(status_code=404, detail=f"Purchase order item {item_data.purchase_order_item_id} not found")
+
+            gr_item = models.GoodsReceiptItem(
+                goods_receipt_id=gr_id,
+                purchase_order_item_id=item_data.purchase_order_item_id,
+                product_id=item_data.product_id,
+                ordered_quantity=po_item.quantity,  # 從採購明細獲取
+                received_quantity=item_data.received_quantity if item_data.received_quantity is not None else po_item.quantity,
+                storage_location=item_data.storage_location,
+                notes=item_data.notes
+            )
+            db.add(gr_item)
+
     db.commit()
     db.refresh(db_gr)
     return db_gr

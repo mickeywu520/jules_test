@@ -10,6 +10,7 @@
       <li *ngIf="isAdmin()"><a routerLink="/supplier">{{ 'SUPPLIER' | translate }}</a></li>
       <li *ngIf="isAdmin()"><a routerLink="/customer">{{ 'CUSTOMER' | translate }}</a></li>
       <li *ngIf="isAuth()"><a routerLink="/purchase">{{ 'PURCHASE' | translate }}</a></li>
+      <li *ngIf="isAuth()"><a routerLink="/goods-receipt">{{ 'GOODS_RECEIPT' | translate }}</a></li>
       <li *ngIf="isAuth()"><a routerLink="/sell">{{ 'SELL' | translate }}</a></li>
       <li *ngIf="isAuth()"><a routerLink="/profile">{{ 'PROFILE' | translate }}</a></li>
       <li *ngIf="!isAuth()"><a routerLink="/login">{{ 'LOGIN' | translate }}</a></li>

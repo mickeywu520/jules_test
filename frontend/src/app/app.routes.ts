@@ -15,6 +15,7 @@ import { ProfileComponent } from './profile/profile.component';
 import { DashboardComponent } from './dashboard/dashboard.component';
 import { CustomerComponent } from './customer/customer.component';
 import { AddEditCustomerComponent } from './add-edit-customer/add-edit-customer.component';
+import { GoodsReceiptComponent } from './goods-receipt/goods-receipt.component';
 
 export const routes: Routes = [
 
@@ -37,6 +38,7 @@ export const routes: Routes = [
 
 
   { path: 'purchase', component: PurchaseComponent, canActivate:[GuardService] },
+  { path: 'goods-receipt', component: GoodsReceiptComponent, canActivate:[GuardService] },
   { path: 'sell', component: SellComponent, canActivate:[GuardService] },
 
   { path: 'transaction', component: TransactionComponent, canActivate:[GuardService] },

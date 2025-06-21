@@ -478,4 +478,61 @@ export class ApiService {
     });
   }
 
+  /**GOODS RECEIPT ENDPOINTS */
+  // 新增入庫單
+  createGoodsReceipt(goodsReceiptData: any): Observable<any> {
+    return this.http.post(`${ApiService.BASE_URL}/goods-receipts/`, goodsReceiptData, {
+      headers: this.getHeader(),
+    });
+  }
+
+  // 獲取所有入庫單
+  getAllGoodsReceipts(skip: number = 0, limit: number = 100): Observable<any> {
+    return this.http.get(`${ApiService.BASE_URL}/goods-receipts/?skip=${skip}&limit=${limit}`, {
+      headers: this.getHeader(),
+    });
+  }
+
+  // 根據 ID 獲取入庫單
+  getGoodsReceiptById(id: string): Observable<any> {
+    return this.http.get(`${ApiService.BASE_URL}/goods-receipts/${id}`, {
+      headers: this.getHeader(),
+    });
+  }
+
+  // 根據採購單 ID 獲取可入庫明細
+  getReceivableItemsByPurchaseOrder(poId: string): Observable<any> {
+    return this.http.get(`${ApiService.BASE_URL}/goods-receipts/purchase-order/${poId}/items`, {
+      headers: this.getHeader(),
+    });
+  }
+
+  // 根據採購單查詢入庫記錄
+  getGoodsReceiptsByPurchaseOrder(poId: string): Observable<any> {
+    return this.http.get(`${ApiService.BASE_URL}/goods-receipts/by-purchase-order/${poId}`, {
+      headers: this.getHeader(),
+    });
+  }
+
+  // 更新入庫單
+  updateGoodsReceipt(id: string, goodsReceiptData: any): Observable<any> {
+    return this.http.put(`${ApiService.BASE_URL}/goods-receipts/${id}`, goodsReceiptData, {
+      headers: this.getHeader(),
+    });
+  }
+
+  // 刪除入庫單
+  deleteGoodsReceipt(id: string): Observable<any> {
+    return this.http.delete(`${ApiService.BASE_URL}/goods-receipts/${id}`, {
+      headers: this.getHeader(),
+    });
+  }
+
+  // 更新入庫單狀態
+  updateGoodsReceiptStatus(id: string, status: string): Observable<any> {
+    return this.http.patch(`${ApiService.BASE_URL}/goods-receipts/${id}/status`, { status: status }, {
+      headers: this.getHeader(),
+    });
+  }
+
 }

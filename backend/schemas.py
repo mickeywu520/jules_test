@@ -342,6 +342,8 @@ class GoodsReceiptItemCreate(GoodsReceiptItemBase):
     pass
 
 class GoodsReceiptItemUpdate(BaseModel):
+    purchase_order_item_id: Optional[int] = None  # 需要用來識別明細項目
+    product_id: Optional[int] = None              # 需要用來識別產品
     received_quantity: Optional[int] = Field(None, ge=0)
     storage_location: Optional[str] = None
     notes: Optional[str] = None
@@ -374,6 +376,7 @@ class GoodsReceiptUpdate(BaseModel):
     warehouse_location: Optional[str] = None
     status: Optional[GoodsReceiptStatus] = None
     notes: Optional[str] = None
+    items: Optional[List[GoodsReceiptItemUpdate]] = None  # 新增入庫明細更新
 
 class GoodsReceipt(GoodsReceiptBase):
     id: int

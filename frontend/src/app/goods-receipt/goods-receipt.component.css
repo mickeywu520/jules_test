@@ -132,59 +132,64 @@
 /* 搜尋欄樣式 */
 .search-container {
   margin-bottom: 20px;
-  padding: 15px;
-  background-color: #f8f9fa;
-  border-radius: 8px;
-  border: 1px solid #e0e0e0;
+  padding: 0;
+  background-color: transparent;
+  border: none;
 }
 
 .search-input-group {
   display: flex;
-  gap: 10px;
+  gap: 15px;
   align-items: center;
-  margin-bottom: 10px;
+  margin-bottom: 15px;
+  justify-content: center;
 }
 
 .search-input {
-  flex: 1;
-  padding: 10px 15px;
-  border: 2px solid #17a2b8;
-  border-radius: 25px;
-  font-size: 0.9rem;
+  width: 400px;
+  padding: 12px 20px;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  font-size: 1rem;
   outline: none;
   transition: all 0.3s ease;
+  background-color: #f8f9fa;
 }
 
 .search-input:focus {
-  border-color: #138496;
+  border-color: #17a2b8;
   box-shadow: 0 0 0 3px rgba(23, 162, 184, 0.1);
+  background-color: white;
 }
 
 .search-input::placeholder {
-  color: #6c757d;
-  font-style: italic;
+  color: #999;
+  font-style: normal;
 }
 
 .btn-clear {
-  background-color: #6c757d;
+  background-color: #17a2b8;
   color: white;
   border: none;
-  padding: 8px 16px;
-  border-radius: 20px;
+  padding: 12px 20px;
+  border-radius: 8px;
   cursor: pointer;
-  font-size: 0.8rem;
+  font-size: 1rem;
+  font-weight: 500;
   transition: background-color 0.3s ease;
+  min-width: 80px;
 }
 
 .btn-clear:hover {
-  background-color: #5a6268;
+  background-color: #138496;
 }
 
 .search-info {
-  font-size: 0.8rem;
+  font-size: 0.9rem;
   color: #6c757d;
   text-align: center;
-  font-style: italic;
+  font-style: normal;
+  margin-top: 10px;
 }
 
 .table-container {
@@ -352,7 +357,7 @@
 
 .items-table-content th,
 .items-table-content td {
-  padding: 10px;
+  padding: 12px;
   text-align: left;
   border: 1px solid #ddd;
 }
@@ -361,12 +366,12 @@
   background-color: #17a2b8;
   color: white;
   font-weight: bold;
-  font-size: 0.8rem;
+  font-size: 1rem;
   text-transform: uppercase;
 }
 
 .items-table-content td {
-  font-size: 0.8rem;
+  font-size: 1rem;
 }
 
 .item-row:hover {
@@ -375,10 +380,10 @@
 
 .items-table-content input {
   width: 100%;
-  padding: 5px;
+  padding: 8px;
   border: 1px solid #ddd;
   border-radius: 3px;
-  font-size: 0.8rem;
+  font-size: 1rem;
 }
 
 .product-name {
@@ -437,12 +442,22 @@
     align-items: center;
   }
   
-  .items-table-content {
-    font-size: 0.7rem;
+  .search-input {
+    width: 100%;
+    max-width: 300px;
   }
-  
+
+  .search-input-group {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .items-table-content {
+    font-size: 0.9rem;
+  }
+
   .items-table-content th,
   .items-table-content td {
-    padding: 5px;
+    padding: 8px;
   }
 }

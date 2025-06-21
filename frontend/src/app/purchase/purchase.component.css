@@ -294,7 +294,7 @@
 
 .items-table-content th,
 .items-table-content td {
-  padding: 10px;
+  padding: 12px;
   text-align: left;
   border: 1px solid #ddd;
 }
@@ -303,12 +303,12 @@
   background-color: #17a2b8;
   color: white;
   font-weight: bold;
-  font-size: 0.8rem;
+  font-size: 1rem;
   text-transform: uppercase;
 }
 
 .items-table-content td {
-  font-size: 0.8rem;
+  font-size: 1rem;
 }
 
 .item-row:hover {
@@ -318,10 +318,10 @@
 .items-table-content select,
 .items-table-content input {
   width: 100%;
-  padding: 5px;
+  padding: 8px;
   border: 1px solid #ddd;
   border-radius: 3px;
-  font-size: 0.8rem;
+  font-size: 1rem;
 }
 
 .unit-display {
@@ -432,12 +432,12 @@
   }
 
   .items-table-content {
-    font-size: 0.7rem;
+    font-size: 0.9rem;
   }
 
   .items-table-content th,
   .items-table-content td {
-    padding: 5px;
+    padding: 8px;
   }
 }
     

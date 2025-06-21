@@ -256,6 +256,21 @@ class WarehouseType(str, enum.Enum):
     QUARANTINE = "QUARANTINE" # 檢疫倉
     DAMAGED = "DAMAGED"       # 損壞品倉
 
+# 銷售單相關的枚舉類型
+class SalesOrderStatus(str, enum.Enum):
+    DRAFT = "DRAFT"           # 草稿
+    CONFIRMED = "CONFIRMED"   # 已確認
+    SHIPPED = "SHIPPED"       # 已出貨
+    DELIVERED = "DELIVERED"   # 已送達
+    CANCELLED = "CANCELLED"   # 已取消
+
+class PaymentTerm(str, enum.Enum):
+    CASH = "CASH"             # 現金
+    MONTHLY = "MONTHLY"       # 月結
+    TRANSFER = "TRANSFER"     # 轉帳
+    CREDIT_CARD = "CREDIT_CARD"  # 信用卡
+    CHECK = "CHECK"           # 支票
+
 
 # 採購明細項目 schemas
 class PurchaseOrderItemBase(BaseModel):
@@ -390,6 +405,78 @@ class GoodsReceipt(GoodsReceiptBase):
     warehouse_staff: Optional[User] = None
     purchase_order: Optional[PurchaseOrder] = None
     items: List[GoodsReceiptItem] = []
+
+    class Config:
+        from_attributes = True
+
+
+# 銷售明細項目 schemas
+class SalesOrderItemBase(BaseModel):
+    product_id: int = Field(..., description="產品ID")
+    quantity: int = Field(..., gt=0, description="數量，必須大於0")
+    unit_price: float = Field(..., ge=0, description="單價，必須大於等於0")
+    notes: Optional[str] = None
+
+class SalesOrderItemCreate(SalesOrderItemBase):
+    pass
+
+class SalesOrderItemUpdate(BaseModel):
+    product_id: Optional[int] = None
+    quantity: Optional[int] = Field(None, gt=0)
+    unit_price: Optional[float] = Field(None, ge=0)
+    notes: Optional[str] = None
+
+class SalesOrderItem(SalesOrderItemBase):
+    id: int
+    line_total: float  # 小計 (數量 × 單價)
+    product: Optional[Product] = None  # 包含產品詳細資訊
+    created_at: datetime
+    updated_at: Optional[datetime] = None
+
+    class Config:
+        from_attributes = True
+
+
+# 銷售單主檔 schemas
+class SalesOrderBase(BaseModel):
+    sales_date: date = Field(..., description="銷售日期")
+    customer_id: int = Field(..., description="客戶ID")
+    payment_term: PaymentTerm = PaymentTerm.CASH
+    notes: Optional[str] = None
+    tax_type: TaxType = TaxType.INCLUSIVE
+    tax_rate: float = Field(0.05, ge=0, le=1, description="稅率，0-1之間")
+    discount_rate: float = Field(0.0, ge=0, le=1, description="折扣率，0-1之間")
+
+class SalesOrderCreate(SalesOrderBase):
+    items: List[SalesOrderItemCreate] = Field(..., min_items=1, description="銷售明細，至少要有一項")
+
+class SalesOrderUpdate(BaseModel):
+    sales_date: Optional[date] = None
+    customer_id: Optional[int] = None
+    payment_term: Optional[PaymentTerm] = None
+    status: Optional[SalesOrderStatus] = None
+    notes: Optional[str] = None
+    tax_type: Optional[TaxType] = None
+    tax_rate: Optional[float] = Field(None, ge=0, le=1)
+    discount_rate: Optional[float] = Field(None, ge=0, le=1)
+    items: Optional[List[SalesOrderItemUpdate]] = None  # 銷售明細更新
+
+class SalesOrder(SalesOrderBase):
+    id: int
+    so_number: str  # 銷售單號
+    salesperson_id: int
+    status: SalesOrderStatus
+    subtotal: float  # 小計
+    tax_amount: float  # 稅額
+    discount_amount: float  # 折扣金額
+    total_amount: float  # 實收總額
+    created_at: datetime
+    updated_at: Optional[datetime] = None
+
+    # 關聯資料
+    salesperson: Optional[User] = None
+    customer: Optional[Customer] = None
+    items: List[SalesOrderItem] = []
 
     class Config:
         from_attributes = True

@@ -55,6 +55,22 @@ class WarehouseType(str, enum.Enum):
     QUARANTINE = "QUARANTINE" # 檢疫倉
     DAMAGED = "DAMAGED"       # 損壞品倉
 
+# 銷售單狀態
+class SalesOrderStatus(str, enum.Enum):
+    DRAFT = "DRAFT"           # 草稿
+    CONFIRMED = "CONFIRMED"   # 已確認
+    SHIPPED = "SHIPPED"       # 已出貨
+    DELIVERED = "DELIVERED"   # 已送達
+    CANCELLED = "CANCELLED"   # 已取消
+
+# 付款條件
+class PaymentTerm(str, enum.Enum):
+    CASH = "CASH"             # 現金
+    MONTHLY = "MONTHLY"       # 月結
+    TRANSFER = "TRANSFER"     # 轉帳
+    CREDIT_CARD = "CREDIT_CARD"  # 信用卡
+    CHECK = "CHECK"           # 支票
+
 # CustomerType, PaymentMethod, PaymentCategory 改為字串類型，支援動態值
 # 例如：customerType = "區域連鎖", paymentMethod = "月結30天", paymentCategory = "支票"
 
@@ -296,6 +312,69 @@ class GoodsReceiptItem(Base):
     # 儲位資訊
     storage_location = Column(String, nullable=True)  # 儲位/倉別
     notes = Column(Text, nullable=True)  # 備註（差異原因等）
+
+    # 時間戳記
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+
+# 銷售單主檔模型 (Sales Order Header)
+class SalesOrder(Base):
+    __tablename__ = "sales_orders"
+
+    id = Column(Integer, primary_key=True, index=True)
+    so_number = Column(String, unique=True, index=True, nullable=False)  # 銷售單號
+    sales_date = Column(Date, nullable=False)  # 銷售日期
+
+    # 客戶資訊
+    customer_id = Column(Integer, ForeignKey("customers.id"), nullable=False)
+    customer = relationship("Customer", foreign_keys=[customer_id])
+
+    # 銷售人員
+    salesperson_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    salesperson = relationship("User", foreign_keys=[salesperson_id])
+
+    # 付款和狀態
+    payment_term = Column(SQLAlchemyEnum(PaymentTerm), default=PaymentTerm.CASH)
+    status = Column(SQLAlchemyEnum(SalesOrderStatus), default=SalesOrderStatus.DRAFT)
+    notes = Column(Text, nullable=True)  # 備註
+
+    # 金額相關
+    subtotal = Column(Float, default=0.0)  # 小計
+    tax_type = Column(SQLAlchemyEnum(TaxType), default=TaxType.INCLUSIVE)  # 稅務類型
+    tax_rate = Column(Float, default=0.05)  # 稅率 (預設5%)
+    tax_amount = Column(Float, default=0.0)  # 稅額
+    discount_rate = Column(Float, default=0.0)  # 折扣率 (0-1)
+    discount_amount = Column(Float, default=0.0)  # 折扣金額
+    total_amount = Column(Float, default=0.0)  # 實收總額
+
+    # 時間戳記
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+    # 關聯到銷售明細
+    items = relationship("SalesOrderItem", back_populates="sales_order", cascade="all, delete-orphan")
+
+
+# 銷售明細模型 (Sales Order Line Items)
+class SalesOrderItem(Base):
+    __tablename__ = "sales_order_items"
+
+    id = Column(Integer, primary_key=True, index=True)
+
+    # 關聯到銷售單主檔
+    sales_order_id = Column(Integer, ForeignKey("sales_orders.id"), nullable=False)
+    sales_order = relationship("SalesOrder", back_populates="items")
+
+    # 產品資訊
+    product_id = Column(Integer, ForeignKey("products.id"), nullable=False)
+    product = relationship("Product")
+
+    # 銷售明細
+    quantity = Column(Integer, nullable=False)  # 數量
+    unit_price = Column(Float, nullable=False)  # 單價
+    line_total = Column(Float, nullable=False)  # 小計 (數量 × 單價)
+    notes = Column(Text, nullable=True)  # 此項商品的特殊說明
 
     # 時間戳記
     created_at = Column(DateTime(timezone=True), server_default=func.now())

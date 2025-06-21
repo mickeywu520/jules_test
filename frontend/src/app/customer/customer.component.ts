@@ -79,16 +79,9 @@ export class CustomerComponent implements OnInit {
     }
   }
 
-  // Get customer type display text
+  // Get customer type display text (現在直接返回中文字串)
   getCustomerTypeText(type: string): string {
-    const typeMap: { [key: string]: string } = {
-      'REGIONAL_CHAIN': 'REGIONAL_CHAIN',
-      'RETAIL': 'RETAIL',
-      'PET_KENNEL': 'PET_KENNEL',
-      'GENERAL_STORE': 'GENERAL_STORE',
-      'LARGE_CHAIN': 'LARGE_CHAIN'
-    };
-    return typeMap[type] || type;
+    return type || '-';
   }
 
   showMessage(message: string) {

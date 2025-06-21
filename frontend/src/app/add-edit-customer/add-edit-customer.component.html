@@ -180,7 +180,7 @@
             </option>
           </select>
           <!-- Monthly Payment Days Input -->
-          <div *ngIf="formData.paymentMethod === 'MONTHLY_SETTLEMENT'" class="monthly-days-input">
+          <div *ngIf="formData.paymentMethod === 'MONTHLY'" class="monthly-days-input">
             <input
               type="number"
               [(ngModel)]="formData.monthlyPaymentDays"

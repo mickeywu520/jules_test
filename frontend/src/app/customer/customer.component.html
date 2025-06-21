@@ -28,7 +28,7 @@
           <th>{{ 'CUSTOMER_TYPE' | translate }}</th>
           <th>{{ 'CONTACT_PERSON' | translate }}</th>
           <th>{{ 'PHONE_NUMBER' | translate }}</th>
-          <th>{{ 'SALES_PERSON_NAME' | translate }}</th>
+          <th>{{ 'PAYMENT_METHOD' | translate }}</th>
           <th>{{ 'CREDIT_LIMIT' | translate }}</th>
           <th>{{ 'ACTIONS' | translate }}</th>
         </tr>
@@ -37,10 +37,10 @@
         <tr *ngFor="let customer of filteredCustomers" class="customer-row">
           <td>{{ customer.customerCode }}</td>
           <td>{{ customer.customerName }}</td>
-          <td>{{ getCustomerTypeText(customer.customerType) | translate }}</td>
+          <td>{{ getCustomerTypeText(customer.customerType) }}</td>
           <td>{{ customer.contactPerson || '-' }}</td>
           <td>{{ customer.phoneNumber || '-' }}</td>
-          <td>{{ customer.salesPersonName || '-' }}</td>
+          <td>{{ customer.paymentMethod || '-' }}</td>
           <td>{{ customer.creditLimit | currency:'TWD':'symbol':'1.0-0' }}</td>
           <td class="actions">
             <button class="edit-btn" (click)="navigateToEditCustomerPage(customer.id)">

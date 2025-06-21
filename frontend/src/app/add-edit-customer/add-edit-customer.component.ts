@@ -18,30 +18,30 @@ export class AddEditCustomerComponent implements OnInit {
   isEditing: boolean = false;
   customerId: string | null = null;
 
-  // Customer type options
+  // Customer type options (使用中文字串值)
   customerTypes = [
-    { value: 'REGIONAL_CHAIN', label: 'REGIONAL_CHAIN' },
-    { value: 'RETAIL', label: 'RETAIL' },
-    { value: 'PET_KENNEL', label: 'PET_KENNEL' },
-    { value: 'GENERAL_STORE', label: 'GENERAL_STORE' },
-    { value: 'LARGE_CHAIN', label: 'LARGE_CHAIN' }
+    { value: '區域連鎖', label: 'REGIONAL_CHAIN' },
+    { value: '零售', label: 'RETAIL' },
+    { value: '犬貓舍', label: 'PET_KENNEL' },
+    { value: '一般店家', label: 'GENERAL_STORE' },
+    { value: '大型連鎖', label: 'LARGE_CHAIN' }
   ];
 
   // Payment method options (收款方式)
   paymentMethods = [
-    { value: 'MONTHLY_SETTLEMENT', label: 'MONTHLY_SETTLEMENT' },
+    { value: 'MONTHLY', label: 'MONTHLY_SETTLEMENT' },
     { value: 'IMMEDIATE_PAYMENT', label: 'IMMEDIATE_PAYMENT' }
   ];
 
-  // Payment category options (收款類別)
+  // Payment category options (收款類別，使用中文字串值)
   paymentCategories = [
-    { value: 'CHECK', label: 'CHECK' },
-    { value: 'CASH', label: 'CASH' },
-    { value: 'BANK_TRANSFER', label: 'BANK_TRANSFER' }
+    { value: '支票', label: 'CHECK' },
+    { value: '現金', label: 'CASH' },
+    { value: '匯款', label: 'BANK_TRANSFER' }
   ];
 
   formData: any = {
-    customerType: 'RETAIL',
+    customerType: '零售',
     salesPersonId: '',
     salesPersonName: '',
     customerCode: '',
@@ -56,7 +56,7 @@ export class AddEditCustomerComponent implements OnInit {
     paymentMethod: '',
     paymentCategory: '',
     creditLimit: 0,
-    monthlyPaymentDays: 30
+    monthlyPaymentDays: 30  // 用於前端顯示，不會直接傳送到後端
   };
 
   ngOnInit(): void {
@@ -70,6 +70,19 @@ export class AddEditCustomerComponent implements OnInit {
   fetchCustomer(): void {
     this.apiService.getCustomerById(this.customerId!).subscribe({
       next: (res: any) => {
+        // 解析 paymentMethod，如果是月結格式則提取天數
+        let paymentMethod = res.paymentMethod || '';
+        let monthlyPaymentDays = 30;
+
+        if (paymentMethod && paymentMethod.startsWith('月結') && paymentMethod.endsWith('天')) {
+          // 提取天數，例如 "月結30天" -> 30
+          const match = paymentMethod.match(/月結(\d+)天/);
+          if (match) {
+            monthlyPaymentDays = parseInt(match[1]);
+            paymentMethod = 'MONTHLY'; // 設定為月結選項
+          }
+        }
+
         this.formData = {
           customerType: res.customerType,
           salesPersonId: res.salesPersonId || '',
@@ -83,10 +96,10 @@ export class AddEditCustomerComponent implements OnInit {
           faxNumber: res.faxNumber || '',
           deliveryAddress: res.deliveryAddress || '',
           businessHours: res.businessHours || '',
-          paymentMethod: res.paymentMethod || '',
+          paymentMethod: paymentMethod,
           paymentCategory: res.paymentCategory || '',
           creditLimit: res.creditLimit || 0,
-          monthlyPaymentDays: res.monthlyPaymentDays || 30
+          monthlyPaymentDays: monthlyPaymentDays
         };
       },
       error: (error) => {
@@ -106,6 +119,13 @@ export class AddEditCustomerComponent implements OnInit {
       return;
     }
 
+    // 處理 paymentMethod，如果是月結則組合天數
+    let paymentMethodValue = this.formData.paymentMethod;
+    if (paymentMethodValue === 'MONTHLY') {
+      const days = parseInt(this.formData.monthlyPaymentDays) || 30;
+      paymentMethodValue = `月結${days}天`;
+    }
+
     //prepare data for submission
     const customerData = {
       customerType: this.formData.customerType,
@@ -120,10 +140,9 @@ export class AddEditCustomerComponent implements OnInit {
       faxNumber: this.formData.faxNumber || null,
       deliveryAddress: this.formData.deliveryAddress || null,
       businessHours: this.formData.businessHours || null,
-      paymentMethod: this.formData.paymentMethod || null,
+      paymentMethod: paymentMethodValue || null,
       paymentCategory: this.formData.paymentCategory || null,
-      creditLimit: parseFloat(this.formData.creditLimit) || 0,
-      monthlyPaymentDays: parseInt(this.formData.monthlyPaymentDays) || 30
+      creditLimit: parseFloat(this.formData.creditLimit) || 0
     };
 
     if (this.isEditing) {

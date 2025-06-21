@@ -242,6 +242,20 @@ class TaxType(str, enum.Enum):
     EXCLUSIVE = "EXCLUSIVE"   # 未稅
     ADDITIONAL = "ADDITIONAL" # 外加稅
 
+# 入庫單相關的枚舉類型
+class GoodsReceiptStatus(str, enum.Enum):
+    DRAFT = "DRAFT"           # 草稿
+    PENDING = "PENDING"       # 待處理
+    COMPLETED = "COMPLETED"   # 已完成
+    CANCELLED = "CANCELLED"   # 已取消
+
+class WarehouseType(str, enum.Enum):
+    MAIN = "MAIN"             # 主倉
+    RAW_MATERIAL = "RAW_MATERIAL"  # 原料倉
+    FINISHED_GOODS = "FINISHED_GOODS"  # 成品倉
+    QUARANTINE = "QUARANTINE" # 檢疫倉
+    DAMAGED = "DAMAGED"       # 損壞品倉
+
 
 # 採購明細項目 schemas
 class PurchaseOrderItemBase(BaseModel):
@@ -310,6 +324,69 @@ class PurchaseOrder(PurchaseOrderBase):
     purchaser: Optional[User] = None
     supplier: Optional[Supplier] = None
     items: List[PurchaseOrderItem] = []
+
+    class Config:
+        from_attributes = True
+
+
+# 入庫明細項目 schemas
+class GoodsReceiptItemBase(BaseModel):
+    purchase_order_item_id: int = Field(..., description="採購明細ID")
+    product_id: int = Field(..., description="產品ID")
+    ordered_quantity: int = Field(..., gt=0, description="採購數量")
+    received_quantity: int = Field(..., ge=0, description="實到數量，必須大於等於0")
+    storage_location: Optional[str] = None
+    notes: Optional[str] = None
+
+class GoodsReceiptItemCreate(GoodsReceiptItemBase):
+    pass
+
+class GoodsReceiptItemUpdate(BaseModel):
+    received_quantity: Optional[int] = Field(None, ge=0)
+    storage_location: Optional[str] = None
+    notes: Optional[str] = None
+
+class GoodsReceiptItem(GoodsReceiptItemBase):
+    id: int
+    product: Optional[Product] = None  # 包含產品詳細資訊
+    purchase_order_item: Optional[PurchaseOrderItem] = None  # 包含採購明細資訊
+    created_at: datetime
+    updated_at: Optional[datetime] = None
+
+    class Config:
+        from_attributes = True
+
+
+# 入庫單主檔 schemas
+class GoodsReceiptBase(BaseModel):
+    receipt_date: date = Field(..., description="入庫日期")
+    purchase_order_id: int = Field(..., description="採購單ID")
+    warehouse_type: WarehouseType = WarehouseType.MAIN
+    warehouse_location: Optional[str] = None
+    notes: Optional[str] = None
+
+class GoodsReceiptCreate(GoodsReceiptBase):
+    items: List[GoodsReceiptItemCreate] = Field(..., min_items=1, description="入庫明細，至少要有一項")
+
+class GoodsReceiptUpdate(BaseModel):
+    receipt_date: Optional[date] = None
+    warehouse_type: Optional[WarehouseType] = None
+    warehouse_location: Optional[str] = None
+    status: Optional[GoodsReceiptStatus] = None
+    notes: Optional[str] = None
+
+class GoodsReceipt(GoodsReceiptBase):
+    id: int
+    gr_number: str  # 入庫單號
+    warehouse_staff_id: int
+    status: GoodsReceiptStatus
+    created_at: datetime
+    updated_at: Optional[datetime] = None
+
+    # 關聯資料
+    warehouse_staff: Optional[User] = None
+    purchase_order: Optional[PurchaseOrder] = None
+    items: List[GoodsReceiptItem] = []
 
     class Config:
         from_attributes = True

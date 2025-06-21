@@ -40,6 +40,21 @@ class TaxType(str, enum.Enum):
     EXCLUSIVE = "EXCLUSIVE"   # 未稅
     ADDITIONAL = "ADDITIONAL" # 外加稅
 
+# 入庫單狀態
+class GoodsReceiptStatus(str, enum.Enum):
+    DRAFT = "DRAFT"           # 草稿
+    PENDING = "PENDING"       # 待處理
+    COMPLETED = "COMPLETED"   # 已完成
+    CANCELLED = "CANCELLED"   # 已取消
+
+# 倉庫類型
+class WarehouseType(str, enum.Enum):
+    MAIN = "MAIN"             # 主倉
+    RAW_MATERIAL = "RAW_MATERIAL"  # 原料倉
+    FINISHED_GOODS = "FINISHED_GOODS"  # 成品倉
+    QUARANTINE = "QUARANTINE" # 檢疫倉
+    DAMAGED = "DAMAGED"       # 損壞品倉
+
 # CustomerType, PaymentMethod, PaymentCategory 改為字串類型，支援動態值
 # 例如：customerType = "區域連鎖", paymentMethod = "月結30天", paymentCategory = "支票"
 
@@ -218,6 +233,69 @@ class PurchaseOrderItem(Base):
     unit_price = Column(Float, nullable=False)  # 單價
     line_total = Column(Float, nullable=False)  # 小計 (數量 × 單價)
     notes = Column(Text, nullable=True)  # 此項商品的特殊說明
+
+    # 時間戳記
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+
+# 入庫單主檔模型 (Goods Receipt Header)
+class GoodsReceipt(Base):
+    __tablename__ = "goods_receipts"
+
+    id = Column(Integer, primary_key=True, index=True)
+    gr_number = Column(String, unique=True, index=True, nullable=False)  # 入庫單號
+    receipt_date = Column(Date, nullable=False)  # 入庫日期
+
+    # 關聯採購單
+    purchase_order_id = Column(Integer, ForeignKey("purchase_orders.id"), nullable=False)
+    purchase_order = relationship("PurchaseOrder", foreign_keys=[purchase_order_id])
+
+    # 倉管人員
+    warehouse_staff_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    warehouse_staff = relationship("User", foreign_keys=[warehouse_staff_id])
+
+    # 倉庫資訊
+    warehouse_type = Column(SQLAlchemyEnum(WarehouseType), default=WarehouseType.MAIN)
+    warehouse_location = Column(String, nullable=True)  # 倉庫位置描述
+
+    # 狀態和備註
+    status = Column(SQLAlchemyEnum(GoodsReceiptStatus), default=GoodsReceiptStatus.DRAFT)
+    notes = Column(Text, nullable=True)  # 備註
+
+    # 時間戳記
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+    # 關聯到入庫明細
+    items = relationship("GoodsReceiptItem", back_populates="goods_receipt", cascade="all, delete-orphan")
+
+
+# 入庫明細模型 (Goods Receipt Line Items)
+class GoodsReceiptItem(Base):
+    __tablename__ = "goods_receipt_items"
+
+    id = Column(Integer, primary_key=True, index=True)
+
+    # 關聯到入庫單主檔
+    goods_receipt_id = Column(Integer, ForeignKey("goods_receipts.id"), nullable=False)
+    goods_receipt = relationship("GoodsReceipt", back_populates="items")
+
+    # 關聯到採購明細
+    purchase_order_item_id = Column(Integer, ForeignKey("purchase_order_items.id"), nullable=False)
+    purchase_order_item = relationship("PurchaseOrderItem")
+
+    # 產品資訊
+    product_id = Column(Integer, ForeignKey("products.id"), nullable=False)
+    product = relationship("Product")
+
+    # 數量資訊
+    ordered_quantity = Column(Integer, nullable=False)  # 採購數量（唯讀）
+    received_quantity = Column(Integer, nullable=False)  # 實到數量
+
+    # 儲位資訊
+    storage_location = Column(String, nullable=True)  # 儲位/倉別
+    notes = Column(Text, nullable=True)  # 備註（差異原因等）
 
     # 時間戳記
     created_at = Column(DateTime(timezone=True), server_default=func.now())

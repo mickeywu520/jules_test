@@ -39,39 +39,39 @@ class Category(CategoryBase): # For Read operations
     class Config:
         from_attributes = True
 
-# Base and Read schemas for Product
+# Base and Read schemas for Product - 根據客戶 Excel 欄位重新設計
 class ProductBase(BaseModel):
-    name: str
-    sku: Optional[str] = None
-    price: float
-    stockQuantity: Optional[int] = 0
-    description: Optional[str] = None
-    expiryDate: Optional[datetime] = None
-    imageUrl: Optional[str] = None
-    category_id: Optional[int] = None # For creation/update, directly pass category_id
+    categoryName: str = Field(..., description="貨品類別名稱")
+    productCode: str = Field(..., description="貨品編號，必須唯一")
+    productName: str = Field(..., description="貨品名稱")
+    unit: str = Field(..., description="單位（箱、盒等）")
+    stockQuantity: Optional[int] = 0  # 庫存
+    warehouse: Optional[str] = None  # 倉別
+    unitWeight: Optional[float] = None  # 單位重量(KG)
+    barcode: Optional[str] = None  # 條碼編號
 
 class ProductCreate(ProductBase):
     pass
 
-# To show category details when reading a product
-class Product(ProductBase): # For Read operations
+# For Read operations
+class Product(ProductBase):
     id: int
     createdAt: datetime
-    category: Optional[Category] = None # Nested schema for category details
+    updatedAt: Optional[datetime] = None
 
     class Config:
         from_attributes = True
 
 # Schemas for updating a product (all fields optional)
 class ProductUpdate(BaseModel):
-    name: Optional[str] = None
-    sku: Optional[str] = None
-    price: Optional[float] = None
+    categoryName: Optional[str] = None
+    productCode: Optional[str] = None
+    productName: Optional[str] = None
+    unit: Optional[str] = None
     stockQuantity: Optional[int] = None
-    description: Optional[str] = None
-    expiryDate: Optional[datetime] = None
-    imageUrl: Optional[str] = None
-    category_id: Optional[int] = None
+    warehouse: Optional[str] = None
+    unitWeight: Optional[float] = None
+    barcode: Optional[str] = None
 
 
 # Base and Read schemas for Supplier

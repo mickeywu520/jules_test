@@ -36,13 +36,13 @@ class User(Base):
 
     transactions = relationship("Transaction", back_populates="user")
 
-# Category Model
+# Category Model - 保留但不再與 Product 關聯（Product 現在使用 categoryName 字串）
 class Category(Base):
     __tablename__ = "categories"
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, unique=True, index=True, nullable=False)
 
-    products = relationship("Product", back_populates="category")
+    # 移除與 Product 的關聯，因為現在使用 categoryName 字串
 
 # Supplier Model
 class Supplier(Base):
@@ -79,22 +79,22 @@ class Customer(Base):
     # 可以添加與交易的關聯（如果需要的話）
     # transactions = relationship("Transaction", back_populates="customer")
 
-# Product Model
+# Product Model - 根據客戶 Excel 欄位重新設計
 class Product(Base):
     __tablename__ = "products"
     id = Column(Integer, primary_key=True, index=True)
-    name = Column(String, index=True, nullable=False)
-    sku = Column(String, unique=True, index=True, nullable=True) # SKU might be optional or unique
-    price = Column(Float, nullable=False)
-    stockQuantity = Column(Integer, default=0)
-    description = Column(Text, nullable=True)
-    expiryDate = Column(DateTime, nullable=True) # Assuming this can be null
-    imageUrl = Column(String, nullable=True) # Path to image or URL
+    categoryName = Column(String, nullable=False)  # 貨品類別名稱
+    productCode = Column(String, unique=True, index=True, nullable=False)  # 貨品編號
+    productName = Column(String, index=True, nullable=False)  # 貨品名稱
+    unit = Column(String, nullable=False)  # 單位（箱、盒等）
+    stockQuantity = Column(Integer, default=0)  # 庫存
+    warehouse = Column(String, nullable=True)  # 倉別
+    unitWeight = Column(Float, nullable=True)  # 單位重量(KG)
+    barcode = Column(String, nullable=True)  # 條碼編號
     createdAt = Column(DateTime(timezone=True), server_default=func.now())
+    updatedAt = Column(DateTime(timezone=True), onupdate=func.now())
 
-    category_id = Column(Integer, ForeignKey("categories.id"))
-    category = relationship("Category", back_populates="products")
-
+    # 保留與交易的關聯
     transactions = relationship("TransactionProductAssociation", back_populates="product")
 
 

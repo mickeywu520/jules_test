@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Float, DateTime, ForeignKey, Enum as SQLAlchemyEnum, Text
+from sqlalchemy import Column, Integer, String, Float, DateTime, Date, ForeignKey, Enum as SQLAlchemyEnum, Text
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func # For default DateTime values
 import enum
@@ -19,6 +19,26 @@ class TransactionStatus(str, enum.Enum):
     COMPLETED = "COMPLETED"
     CANCELLED = "CANCELLED"
     # Add other statuses as per your frontend's expectations for 'updateTransactionStatus'
+
+# 採購單狀態
+class PurchaseOrderStatus(str, enum.Enum):
+    DRAFT = "DRAFT"           # 草稿
+    PENDING = "PENDING"       # 待處理
+    CONFIRMED = "CONFIRMED"   # 已確認
+    RECEIVED = "RECEIVED"     # 已收貨
+    CANCELLED = "CANCELLED"   # 已取消
+
+# 付款狀態
+class PaymentStatus(str, enum.Enum):
+    UNPAID = "UNPAID"         # 未付款
+    PARTIAL = "PARTIAL"       # 部分付款
+    PAID = "PAID"             # 已付款
+
+# 稅務類型
+class TaxType(str, enum.Enum):
+    INCLUSIVE = "INCLUSIVE"   # 含稅
+    EXCLUSIVE = "EXCLUSIVE"   # 未稅
+    ADDITIONAL = "ADDITIONAL" # 外加稅
 
 # CustomerType, PaymentMethod, PaymentCategory 改為字串類型，支援動態值
 # 例如：customerType = "區域連鎖", paymentMethod = "月結30天", paymentCategory = "支票"
@@ -137,3 +157,68 @@ class TransactionProductAssociation(Base):
 
     transaction = relationship("Transaction", back_populates="products")
     product = relationship("Product", back_populates="transactions")
+
+
+# 採購單主檔模型 (Purchase Order Header)
+class PurchaseOrder(Base):
+    __tablename__ = "purchase_orders"
+
+    id = Column(Integer, primary_key=True, index=True)
+    po_number = Column(String, unique=True, index=True, nullable=False)  # 採購單號
+    purchase_date = Column(Date, nullable=False)  # 採購日期
+    expected_delivery_date = Column(Date, nullable=True)  # 預計到貨日
+
+    # 採購人員資訊
+    purchaser_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    purchaser = relationship("User", foreign_keys=[purchaser_id])
+
+    # 供應商資訊
+    supplier_id = Column(Integer, ForeignKey("suppliers.id"), nullable=False)
+    supplier = relationship("Supplier", foreign_keys=[supplier_id])
+
+    # 狀態和備註
+    status = Column(SQLAlchemyEnum(PurchaseOrderStatus), default=PurchaseOrderStatus.DRAFT)
+    notes = Column(Text, nullable=True)  # 備註/採購說明
+
+    # 金額相關
+    subtotal = Column(Float, default=0.0)  # 小計
+    tax_type = Column(SQLAlchemyEnum(TaxType), default=TaxType.INCLUSIVE)  # 稅務類型
+    tax_rate = Column(Float, default=0.05)  # 稅率 (預設5%)
+    tax_amount = Column(Float, default=0.0)  # 稅額
+    total_amount = Column(Float, default=0.0)  # 含稅總額
+
+    # 付款相關
+    payment_method = Column(String, nullable=True)  # 付款方式
+    payment_status = Column(SQLAlchemyEnum(PaymentStatus), default=PaymentStatus.UNPAID)
+
+    # 時間戳記
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+    # 關聯到採購明細
+    items = relationship("PurchaseOrderItem", back_populates="purchase_order", cascade="all, delete-orphan")
+
+
+# 採購明細模型 (Purchase Order Line Items)
+class PurchaseOrderItem(Base):
+    __tablename__ = "purchase_order_items"
+
+    id = Column(Integer, primary_key=True, index=True)
+
+    # 關聯到採購單主檔
+    purchase_order_id = Column(Integer, ForeignKey("purchase_orders.id"), nullable=False)
+    purchase_order = relationship("PurchaseOrder", back_populates="items")
+
+    # 產品資訊
+    product_id = Column(Integer, ForeignKey("products.id"), nullable=False)
+    product = relationship("Product")
+
+    # 採購明細
+    quantity = Column(Integer, nullable=False)  # 數量
+    unit_price = Column(Float, nullable=False)  # 單價
+    line_total = Column(Float, nullable=False)  # 小計 (數量 × 單價)
+    notes = Column(Text, nullable=True)  # 此項商品的特殊說明
+
+    # 時間戳記
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())

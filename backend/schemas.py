@@ -1,6 +1,6 @@
 from pydantic import BaseModel, EmailStr, Field
 from typing import List, Optional, Union
-from datetime import datetime
+from datetime import datetime, date
 import enum
 
 # Import Enum types from models.py to be used in Pydantic schemas
@@ -222,3 +222,94 @@ class TokenData(BaseModel):
 class UserLogin(BaseModel):
     email: EmailStr
     password: str
+
+
+# 採購單相關的枚舉類型
+class PurchaseOrderStatus(str, enum.Enum):
+    DRAFT = "DRAFT"           # 草稿
+    PENDING = "PENDING"       # 待處理
+    CONFIRMED = "CONFIRMED"   # 已確認
+    RECEIVED = "RECEIVED"     # 已收貨
+    CANCELLED = "CANCELLED"   # 已取消
+
+class PaymentStatus(str, enum.Enum):
+    UNPAID = "UNPAID"         # 未付款
+    PARTIAL = "PARTIAL"       # 部分付款
+    PAID = "PAID"             # 已付款
+
+class TaxType(str, enum.Enum):
+    INCLUSIVE = "INCLUSIVE"   # 含稅
+    EXCLUSIVE = "EXCLUSIVE"   # 未稅
+    ADDITIONAL = "ADDITIONAL" # 外加稅
+
+
+# 採購明細項目 schemas
+class PurchaseOrderItemBase(BaseModel):
+    product_id: int = Field(..., description="產品ID")
+    quantity: int = Field(..., gt=0, description="數量，必須大於0")
+    unit_price: float = Field(..., ge=0, description="單價，必須大於等於0")
+    notes: Optional[str] = None
+
+class PurchaseOrderItemCreate(PurchaseOrderItemBase):
+    pass
+
+class PurchaseOrderItemUpdate(BaseModel):
+    product_id: Optional[int] = None
+    quantity: Optional[int] = Field(None, gt=0)
+    unit_price: Optional[float] = Field(None, ge=0)
+    notes: Optional[str] = None
+
+class PurchaseOrderItem(PurchaseOrderItemBase):
+    id: int
+    line_total: float  # 小計 (數量 × 單價)
+    product: Optional[Product] = None  # 包含產品詳細資訊
+    created_at: datetime
+    updated_at: Optional[datetime] = None
+
+    class Config:
+        from_attributes = True
+
+
+# 採購單主檔 schemas
+class PurchaseOrderBase(BaseModel):
+    purchase_date: date = Field(..., description="採購日期")
+    expected_delivery_date: Optional[date] = None
+    supplier_id: int = Field(..., description="供應商ID")
+    notes: Optional[str] = None
+    tax_type: TaxType = TaxType.INCLUSIVE
+    tax_rate: float = Field(0.05, ge=0, le=1, description="稅率，0-1之間")
+    payment_method: Optional[str] = None
+
+class PurchaseOrderCreate(PurchaseOrderBase):
+    items: List[PurchaseOrderItemCreate] = Field(..., min_items=1, description="採購明細，至少要有一項")
+
+class PurchaseOrderUpdate(BaseModel):
+    purchase_date: Optional[date] = None
+    expected_delivery_date: Optional[date] = None
+    supplier_id: Optional[int] = None
+    status: Optional[PurchaseOrderStatus] = None
+    notes: Optional[str] = None
+    tax_type: Optional[TaxType] = None
+    tax_rate: Optional[float] = Field(None, ge=0, le=1)
+    payment_method: Optional[str] = None
+    payment_status: Optional[PaymentStatus] = None
+
+class PurchaseOrder(PurchaseOrderBase):
+    id: int
+    po_number: str  # 採購單號
+    purchaser_id: int
+    status: PurchaseOrderStatus
+    subtotal: float  # 小計
+    tax_amount: float  # 稅額
+    total_amount: float  # 含稅總額
+    payment_status: PaymentStatus
+    created_at: datetime
+    updated_at: Optional[datetime] = None
+
+    # 關聯資料
+    purchaser: Optional[User] = None
+    supplier: Optional[Supplier] = None
+    items: List[PurchaseOrderItem] = []
+
+    class Config:
+        from_attributes = True

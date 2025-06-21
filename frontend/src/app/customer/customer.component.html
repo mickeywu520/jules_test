@@ -1,0 +1,67 @@
+<div class="customer-page">
+  <p *ngIf="message" class="message">{{ message }}</p>
+
+  <!-- CUSTOMER HEADER -->
+  <div class="customer-header">
+    <h1>{{ 'CUSTOMER_LIST' | translate }}</h1>
+    <div class="search-section">
+      <input
+        type="text"
+        [(ngModel)]="searchTerm"
+        (input)="onSearch()"
+        [placeholder]="'SEARCH_CUSTOMERS_PLACEHOLDER' | translate"
+        class="search-input"
+      >
+    </div>
+    <div class="add-customer">
+      <button (click)="navigateToAddCustomerPage()">{{ 'ADD_CUSTOMER' | translate }}</button>
+    </div>
+  </div>
+
+  <!-- CUSTOMER LIST -->
+  <div class="customer-table-container" *ngIf="filteredCustomers.length > 0">
+    <table class="customer-table">
+      <thead>
+        <tr>
+          <th>{{ 'CUSTOMER_CODE' | translate }}</th>
+          <th>{{ 'CUSTOMER_NAME' | translate }}</th>
+          <th>{{ 'CUSTOMER_TYPE' | translate }}</th>
+          <th>{{ 'CONTACT_PERSON' | translate }}</th>
+          <th>{{ 'PHONE_NUMBER' | translate }}</th>
+          <th>{{ 'SALES_PERSON_NAME' | translate }}</th>
+          <th>{{ 'CREDIT_LIMIT' | translate }}</th>
+          <th>{{ 'ACTIONS' | translate }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let customer of filteredCustomers" class="customer-row">
+          <td>{{ customer.customerCode }}</td>
+          <td>{{ customer.customerName }}</td>
+          <td>{{ getCustomerTypeText(customer.customerType) | translate }}</td>
+          <td>{{ customer.contactPerson || '-' }}</td>
+          <td>{{ customer.phoneNumber || '-' }}</td>
+          <td>{{ customer.salesPersonName || '-' }}</td>
+          <td>{{ customer.creditLimit | currency:'TWD':'symbol':'1.0-0' }}</td>
+          <td class="actions">
+            <button class="edit-btn" (click)="navigateToEditCustomerPage(customer.id)">
+              {{ 'EDIT' | translate }}
+            </button>
+            <button class="delete-btn" (click)="handleDeleteCustomer(customer.id)">
+              {{ 'DELETE' | translate }}
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- NO CUSTOMERS MESSAGE -->
+  <div *ngIf="filteredCustomers.length === 0" class="no-customers">
+    <p *ngIf="searchTerm; else noCustomersTemplate">
+      {{ 'NO_CUSTOMERS_FOUND' | translate }}{{ searchTerm }}
+    </p>
+    <ng-template #noCustomersTemplate>
+      <p>{{ 'NO_CUSTOMERS_AVAILABLE' | translate }}</p>
+    </ng-template>
+  </div>
+</div>

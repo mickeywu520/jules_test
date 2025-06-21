@@ -24,6 +24,10 @@ export class ApiService {
   private suppliersSource = new BehaviorSubject<any[]>([]);
   public suppliers$ = this.suppliersSource.asObservable();
 
+  // BehaviorSubject for reactive customers
+  private customersSource = new BehaviorSubject<any[]>([]);
+  public customers$ = this.customersSource.asObservable();
+
   authStatuschanged = new EventEmitter<void>();
   private static BASE_URL = 'http://localhost:5050/api';
   private static ENCRYPTION_KEY = "phegon-dev-inventory";
@@ -116,6 +120,27 @@ export class ApiService {
       error: (err: any) => {
         console.error("Error fetching suppliers for BehaviorSubject:", err);
         this.suppliersSource.next([]);
+      }
+    });
+    return request;
+  }
+
+  public fetchAndBroadcastCustomers(): Observable<any[]> {
+    const httpOptions = { headers: this.getHeader() };
+    const request = this.http.get<any[]>(`${ApiService.BASE_URL}/customers/all`, httpOptions);
+
+    request.subscribe({
+      next: (customersArray: any[]) => {
+        if (Array.isArray(customersArray)) {
+          this.customersSource.next(customersArray);
+        } else {
+          console.warn("fetchAndBroadcastCustomers: Response was not an array.", customersArray);
+          this.customersSource.next([]);
+        }
+      },
+      error: (err: any) => {
+        console.error("Error fetching customers for BehaviorSubject:", err);
+        this.customersSource.next([]);
       }
     });
     return request;
@@ -237,6 +262,53 @@ export class ApiService {
 
   deleteSupplier(id: string): Observable<any> {
     return this.http.delete(`${ApiService.BASE_URL}/suppliers/delete/${id}`, {
+      headers: this.getHeader(),
+    });
+  }
+
+  /** CUSTOMER API */
+  addCustomer(body: any): Observable<any> {
+    return this.http.post(`${ApiService.BASE_URL}/customers/add`, body, {
+      headers: this.getHeader(),
+    });
+  }
+
+  getAllCustomers(): Observable<any> {
+    return this.http.get(`${ApiService.BASE_URL}/customers/all`, {
+      headers: this.getHeader(),
+    });
+  }
+
+  getCustomerById(id: string): Observable<any> {
+    return this.http.get(`${ApiService.BASE_URL}/customers/${id}`, {
+      headers: this.getHeader(),
+    });
+  }
+
+  getCustomerByCode(customerCode: string): Observable<any> {
+    return this.http.get(`${ApiService.BASE_URL}/customers/code/${customerCode}`, {
+      headers: this.getHeader(),
+    });
+  }
+
+  updateCustomer(id: string, body: any): Observable<any> {
+    return this.http.put(
+      `${ApiService.BASE_URL}/customers/update/${id}`,
+      body,
+      {
+        headers: this.getHeader(),
+      }
+    );
+  }
+
+  deleteCustomer(id: string): Observable<any> {
+    return this.http.delete(`${ApiService.BASE_URL}/customers/delete/${id}`, {
+      headers: this.getHeader(),
+    });
+  }
+
+  searchCustomers(searchTerm: string): Observable<any> {
+    return this.http.get(`${ApiService.BASE_URL}/customers/search/${searchTerm}`, {
       headers: this.getHeader(),
     });
   }

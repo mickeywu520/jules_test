@@ -1,52 +1,222 @@
-<div class="purchase-form-page">
-  <p *ngIf="message" class="message">{{ message }}</p>
-  <h1>{{ 'RECEIVE_INVENTORY' | translate }}</h1>
-
-  <!-- PRODUCT PURCHASE? INVENTORY RECEIVING PAGE -->
-  <form (ngSubmit)="handleSubmit()">
-
-    <div class="form-group">
-      <label for="">{{ 'SELECT_PRODUCT' | translate }}</label>
-      <select
-        name="productId"
-        class="form-control"
-        [(ngModel)]="productId"
-        id=""
-      >
-        <option value="">{{ 'SELECT_PRODUCT_PLACEHOLDER' | translate }}</option>
-        <option *ngFor="let product of products" [value]="product.id">
-          {{ product.productName }}
-        </option>
-      </select>
+<div class="purchase-page">
+  <!-- 頁面標題和操作按鈕 -->
+  <div class="page-header">
+    <h1>{{ showPurchaseOrderList ? ('PURCHASE_ORDER_LIST' | translate) : (isEditing ? ('EDIT_PURCHASE_ORDER' | translate) : ('NEW_PURCHASE_ORDER' | translate)) }}</h1>
+    <div class="header-actions">
+      <button type="button" class="btn-secondary" (click)="togglePurchaseOrderList()">
+        {{ showPurchaseOrderList ? ('NEW_PURCHASE_ORDER' | translate) : ('VIEW_PURCHASE_ORDER_LIST' | translate) }}
+      </button>
+      <button type="button" class="btn-secondary" (click)="resetForm()" *ngIf="!showPurchaseOrderList && isEditing">
+        {{ 'NEW_PURCHASE_ORDER' | translate }}
+      </button>
     </div>
+  </div>
 
-    <div class="form-group">
-      <label for="">{{ 'SELECT_SUPPLIER' | translate }}</label>
-      <select
-        name="supplierId"
-        class="form-control"
-        [(ngModel)]="supplierId"
-        id=""
-      >
-        <option value="">{{ 'SELECT_SUPPLIER_PLACEHOLDER' | translate }}</option>
-        <option *ngFor="let supplier of suppliers" [value]="supplier.id">
-          {{ supplier.name }}
-        </option>
-      </select>
+  <!-- 訊息提示 -->
+  <div *ngIf="message" class="toast-message" [ngClass]="{'success': message.includes('成功'), 'error': !message.includes('成功')}">
+    {{ message }}
+  </div>
+
+  <!-- 採購單列表 -->
+  <div *ngIf="showPurchaseOrderList" class="purchase-order-list">
+    <h2>{{ 'PURCHASE_ORDER_LIST' | translate }}</h2>
+    <div class="table-container">
+      <table class="purchase-order-table">
+        <thead>
+          <tr>
+            <th>{{ 'PO_NUMBER' | translate }}</th>
+            <th>{{ 'PURCHASE_DATE' | translate }}</th>
+            <th>{{ 'SUPPLIER' | translate }}</th>
+            <th>{{ 'STATUS' | translate }}</th>
+            <th>{{ 'TOTAL_AMOUNT' | translate }}</th>
+            <th>{{ 'ACTIONS' | translate }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let po of purchaseOrders" class="purchase-order-row">
+            <td>{{ po.po_number }}</td>
+            <td>{{ po.purchase_date | date:'yyyy-MM-dd' }}</td>
+            <td>{{ po.supplier?.name || '-' }}</td>
+            <td>
+              <select [(ngModel)]="po.status"
+                      (ngModelChange)="onStatusChange(po.id, $event)"
+                      [name]="'status_' + po.id"
+                      class="status-select">
+                <option *ngFor="let status of purchaseOrderStatuses" [value]="status.value">
+                  {{ status.label | translate }}
+                </option>
+              </select>
+            </td>
+            <td>{{ po.total_amount | currency:'TWD':'symbol':'1.0-0' }}</td>
+            <td class="actions">
+              <button class="btn-edit" (click)="editPurchaseOrder(po.id)">
+                {{ 'EDIT' | translate }}
+              </button>
+              <button class="btn-delete" (click)="deletePurchaseOrder(po.id)"
+                      *ngIf="po.status === 'DRAFT'"
+                      [title]="'只有草稿狀態才能刪除'">
+                {{ 'DELETE' | translate }}
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
+  </div>
 
-    <div class="form-group">
-        <label for="">{{ 'DESCRIPTION' | translate }}</label>
-        <input type="text" [(ngModel)]="description" name="description" class="form-control"/>
+  <!-- 採購單表單 -->
+  <div *ngIf="!showPurchaseOrderList" class="purchase-order-form">
+    <form (ngSubmit)="handleSubmit()">
+      <!-- 採購單主檔區塊 -->
+      <div class="form-section">
+        <h2>{{ 'PURCHASE_ORDER_HEADER' | translate }}</h2>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="purchase_date">{{ 'PURCHASE_DATE' | translate }}</label>
+            <input type="date" [(ngModel)]="formData.purchase_date" name="purchase_date" id="purchase_date" required>
+          </div>
+
+          <div class="form-group">
+            <label for="supplier_id">{{ 'SUPPLIER' | translate }}</label>
+            <select [(ngModel)]="formData.supplier_id" name="supplier_id" id="supplier_id" required>
+              <option value="">{{ 'SELECT_SUPPLIER' | translate }}</option>
+              <option *ngFor="let supplier of suppliers" [value]="supplier.id">
+                {{ supplier.name }}
+              </option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="expected_delivery_date">{{ 'EXPECTED_DELIVERY_DATE' | translate }}</label>
+            <input type="date" [(ngModel)]="formData.expected_delivery_date" name="expected_delivery_date" id="expected_delivery_date">
+          </div>
+
+          <div class="form-group">
+            <label for="payment_method">{{ 'PAYMENT_METHOD' | translate }}</label>
+            <input type="text" [(ngModel)]="formData.payment_method" name="payment_method" id="payment_method"
+                   [placeholder]="'PAYMENT_METHOD_PLACEHOLDER' | translate">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="tax_type">{{ 'TAX_TYPE' | translate }}</label>
+            <select [(ngModel)]="formData.tax_type" name="tax_type" id="tax_type" (change)="calculateTotals()">
+              <option *ngFor="let taxType of taxTypes" [value]="taxType.value">
+                {{ taxType.label | translate }}
+              </option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="tax_rate">{{ 'TAX_RATE' | translate }}</label>
+            <input type="number" [(ngModel)]="formData.tax_rate" name="tax_rate" id="tax_rate"
+                   step="0.01" min="0" max="1" (change)="calculateTotals()">
+          </div>
+        </div>
+
+        <div class="form-group full-width">
+          <label for="notes">{{ 'NOTES' | translate }}</label>
+          <textarea [(ngModel)]="formData.notes" name="notes" id="notes" rows="3"
+                    [placeholder]="'PURCHASE_NOTES_PLACEHOLDER' | translate"></textarea>
+        </div>
       </div>
 
+      <!-- 商品明細區塊 -->
+      <div class="form-section">
+        <h2>{{ 'PURCHASE_ITEMS' | translate }}</h2>
+        <div class="items-table">
+          <table class="items-table-content">
+            <thead>
+              <tr>
+                <th>{{ 'PRODUCT' | translate }}</th>
+                <th>{{ 'UNIT' | translate }}</th>
+                <th>{{ 'QUANTITY' | translate }}</th>
+                <th>{{ 'UNIT_PRICE' | translate }}</th>
+                <th>{{ 'LINE_TOTAL' | translate }}</th>
+                <th>{{ 'NOTES' | translate }}</th>
+                <th>{{ 'ACTIONS' | translate }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let item of items; let i = index" class="item-row">
+                <td>
+                  <select [(ngModel)]="item.product_id" [name]="'product_id_' + i"
+                          (change)="onProductChange(i)" required>
+                    <option value="">{{ 'SELECT_PRODUCT' | translate }}</option>
+                    <option *ngFor="let product of products" [value]="product.id">
+                      {{ product.productName }}
+                    </option>
+                  </select>
+                </td>
+                <td>
+                  <span class="unit-display">{{ item.product?.unit || '-' }}</span>
+                </td>
+                <td>
+                  <input type="number" [(ngModel)]="item.quantity" [name]="'quantity_' + i"
+                         min="1" (change)="onQuantityOrPriceChange()" required>
+                </td>
+                <td>
+                  <input type="number" [(ngModel)]="item.unit_price" [name]="'unit_price_' + i"
+                         step="0.01" min="0" (change)="onQuantityOrPriceChange()" required>
+                </td>
+                <td>
+                  <span class="line-total">{{ (item.quantity * item.unit_price) | currency:'TWD':'symbol':'1.0-2' }}</span>
+                </td>
+                <td>
+                  <input type="text" [(ngModel)]="item.notes" [name]="'notes_' + i"
+                         [placeholder]="'ITEM_NOTES_PLACEHOLDER' | translate">
+                </td>
+                <td>
+                  <button type="button" class="btn-remove" (click)="removeItem(i)"
+                          [disabled]="items.length <= 1">
+                    {{ 'REMOVE' | translate }}
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
 
-    <div class="form-group">
-        <label for="">{{ 'QUANTITY' | translate }}</label>
-        <input type="number" [(ngModel)]="quantity" name="quantity" class="form-control"/>
+        <div class="add-item-section">
+          <button type="button" class="btn-add-item" (click)="addItem()">
+            {{ 'ADD_ITEM' | translate }}
+          </button>
+        </div>
       </div>
 
+      <!-- 總計區塊 -->
+      <div class="form-section">
+        <h2>{{ 'TOTALS' | translate }}</h2>
+        <div class="totals-container">
+          <div class="totals-row">
+            <div class="totals-item">
+              <label>{{ 'SUBTOTAL' | translate }}:</label>
+              <span class="amount">{{ subtotal | currency:'TWD':'symbol':'1.0-2' }}</span>
+            </div>
+            <div class="totals-item">
+              <label>{{ 'TAX_AMOUNT' | translate }}:</label>
+              <span class="amount">{{ tax_amount | currency:'TWD':'symbol':'1.0-2' }}</span>
+            </div>
+            <div class="totals-item total">
+              <label>{{ 'TOTAL_AMOUNT' | translate }}:</label>
+              <span class="amount">{{ total_amount | currency:'TWD':'symbol':'1.0-2' }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
 
-      <button type="submit" class="btn btn-primary">{{ 'PURCHASE_PRODUCT' | translate }}</button>
-  </form>
+      <!-- 提交按鈕 -->
+      <div class="form-actions">
+        <button type="button" class="btn-secondary" (click)="resetForm()">
+          {{ 'RESET' | translate }}
+        </button>
+        <button type="submit" class="btn-primary">
+          {{ isEditing ? ('UPDATE_PURCHASE_ORDER' | translate) : ('CREATE_PURCHASE_ORDER' | translate) }}
+        </button>
+      </div>
+    </form>
+  </div>
 </div>

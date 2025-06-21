@@ -435,4 +435,47 @@ export class ApiService {
     return role === "ADMIN";
   }
 
+  /**PURCHASE ORDER ENDPOINTS */
+  // 新增採購單
+  createPurchaseOrder(purchaseOrderData: any): Observable<any> {
+    return this.http.post(`${ApiService.BASE_URL}/purchase-orders/`, purchaseOrderData, {
+      headers: this.getHeader(),
+    });
+  }
+
+  // 獲取所有採購單
+  getAllPurchaseOrders(skip: number = 0, limit: number = 100): Observable<any> {
+    return this.http.get(`${ApiService.BASE_URL}/purchase-orders/?skip=${skip}&limit=${limit}`, {
+      headers: this.getHeader(),
+    });
+  }
+
+  // 根據 ID 獲取採購單
+  getPurchaseOrderById(id: string): Observable<any> {
+    return this.http.get(`${ApiService.BASE_URL}/purchase-orders/${id}`, {
+      headers: this.getHeader(),
+    });
+  }
+
+  // 更新採購單
+  updatePurchaseOrder(id: string, purchaseOrderData: any): Observable<any> {
+    return this.http.put(`${ApiService.BASE_URL}/purchase-orders/${id}`, purchaseOrderData, {
+      headers: this.getHeader(),
+    });
+  }
+
+  // 刪除採購單
+  deletePurchaseOrder(id: string): Observable<any> {
+    return this.http.delete(`${ApiService.BASE_URL}/purchase-orders/${id}`, {
+      headers: this.getHeader(),
+    });
+  }
+
+  // 更新採購單狀態
+  updatePurchaseOrderStatus(id: string, status: string): Observable<any> {
+    return this.http.patch(`${ApiService.BASE_URL}/purchase-orders/${id}/status`, { status: status }, {
+      headers: this.getHeader(),
+    });
+  }
+
 }

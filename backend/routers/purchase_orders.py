@@ -1,5 +1,5 @@
 from typing import List
-from datetime import date, datetime
+from datetime import date
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session, joinedload
 
@@ -162,35 +162,65 @@ def update_purchase_order(
     return db_po
 
 # 刪除採購單
-@router.delete("/{po_id}", response_model=schemas.PurchaseOrder)
+@router.delete("/{po_id}")
 def delete_purchase_order(po_id: int, db: Session = Depends(database.get_db)):
-    db_po = db.query(models.PurchaseOrder).filter(models.PurchaseOrder.id == po_id).first()
+    db_po = db.query(models.PurchaseOrder)\
+        .options(
+            joinedload(models.PurchaseOrder.purchaser),
+            joinedload(models.PurchaseOrder.supplier),
+            joinedload(models.PurchaseOrder.items).joinedload(models.PurchaseOrderItem.product)
+        )\
+        .filter(models.PurchaseOrder.id == po_id)\
+        .first()
+
     if not db_po:
         raise HTTPException(status_code=404, detail="Purchase order not found")
-    
+
     # 檢查採購單狀態，只有草稿狀態才能刪除
     if db_po.status != models.PurchaseOrderStatus.DRAFT:
         raise HTTPException(
-            status_code=400, 
+            status_code=400,
             detail="Only draft purchase orders can be deleted"
         )
-    
+
+    # 保存要回傳的資料
+    po_data = {
+        "id": db_po.id,
+        "po_number": db_po.po_number,
+        "status": db_po.status.value,
+        "message": "Purchase order deleted successfully"
+    }
+
     db.delete(db_po)
     db.commit()
-    return db_po
+
+    return po_data
 
 # 更新採購單狀態
 @router.patch("/{po_id}/status", response_model=schemas.PurchaseOrder)
 def update_purchase_order_status(
-    po_id: int, 
-    status: schemas.PurchaseOrderStatus, 
+    po_id: int,
+    status_data: dict,
     db: Session = Depends(database.get_db)
 ):
     db_po = db.query(models.PurchaseOrder).filter(models.PurchaseOrder.id == po_id).first()
     if not db_po:
         raise HTTPException(status_code=404, detail="Purchase order not found")
-    
-    db_po.status = status
+
+    # 從字典中提取狀態值
+    if 'status' in status_data:
+        status_value = status_data['status']
+    else:
+        # 如果直接傳送狀態字串
+        status_value = status_data
+
+    # 驗證狀態值是否有效
+    try:
+        valid_status = schemas.PurchaseOrderStatus(status_value)
+        db_po.status = valid_status
+    except ValueError:
+        raise HTTPException(status_code=400, detail=f"Invalid status: {status_value}")
+
     db.commit()
     db.refresh(db_po)
     return db_po

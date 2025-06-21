@@ -2,50 +2,61 @@
     <p *ngIf="message" class="message">{{message}}</p>
     <h1>{{isEditing? ('EDIT_PRODUCT' | translate) : ('ADD_PRODUCT' | translate)}}</h1>
     <form (submit)="handleSubmit($event)">
-        <div class="form-group">
-            <label for="">{{ 'PRODUCT_NAME' | translate }}</label>
-            <input type="text" [(ngModel)]="name" name="name" required>
-        </div>
-
-        <div class="form-group">
-            <label for="">{{ 'SKU' | translate }}</label>
-            <input type="text" [(ngModel)]="sku" name="sku" required>
-        </div>
-
-        <div class="form-group">
-            <label for="">{{ 'STOCK_QUANTITY' | translate }}</label>
-            <input type="number" [(ngModel)]="stockQuantity" name="stockQuantity" required>
-        </div>
-
-        <div class="form-group">
-            <label for="">{{ 'PRICE' | translate }}</label>
-            <input type="number" [(ngModel)]="price" name="price" required>
-        </div>
-
-
-        <div class="form-group">
-            <label for="">{{ 'DESCRIPTION' | translate }}</label>
-            <textarea [(ngModel)]="description" name="description" required></textarea>
-        </div>
-
-
+        <!-- 類別選擇 -->
         <div class="form-group">
             <label for="">{{ 'CATEGORY' | translate }}</label>
-            <select [(ngModel)]="categoryId" name="categoryId" id="" required>
+            <select [(ngModel)]="categoryId" name="categoryId" required>
                 <option value="">{{ 'SELECT_CATEGORY' | translate }}</option>
                 <option *ngFor="let category of categories" [value]="category.id">{{category.name}}</option>
             </select>
         </div>
 
+        <!-- 貨品編號 -->
         <div class="form-group">
-            <label for="">{{ 'PRODUCT_IMAGE' | translate }}</label>
-            <input type="file" (change)="handleImageChange($event)">
-            <div *ngIf="imageUrl">
-                <img [src]="imageUrl" alt="preview" class="image-preview">
-            </div>
+            <label for="">{{ 'PRODUCT_CODE' | translate }}</label>
+            <input type="text" [(ngModel)]="productCode" name="productCode"
+                   [placeholder]="'PRODUCT_CODE_PLACEHOLDER' | translate" required>
         </div>
 
-        <button type="submit">{{isEditing? ('EDIT_PRODUCT' | translate) : ('ADD_PRODUCT' | translate)}}</button>
-    </form>
+        <!-- 貨品名稱 -->
+        <div class="form-group">
+            <label for="">{{ 'PRODUCT_NAME' | translate }}</label>
+            <input type="text" [(ngModel)]="productName" name="productName"
+                   [placeholder]="'PRODUCT_NAME_PLACEHOLDER' | translate" required>
+        </div>
 
+        <!-- 單位 -->
+        <div class="form-group">
+            <label for="">{{ 'UNIT' | translate }}</label>
+            <select [(ngModel)]="unit" name="unit" required>
+                <option value="">{{ 'SELECT_UNIT' | translate }}</option>
+                <option *ngFor="let unitOption of unitOptions" [value]="unitOption.value">
+                    {{ unitOption.label | translate }}
+                </option>
+            </select>
+        </div>
+
+        <!-- 倉別 -->
+        <div class="form-group">
+            <label for="">{{ 'WAREHOUSE' | translate }}</label>
+            <input type="text" [(ngModel)]="warehouse" name="warehouse"
+                   [placeholder]="'WAREHOUSE_PLACEHOLDER' | translate">
+        </div>
+
+        <!-- 單位重量(KG) -->
+        <div class="form-group">
+            <label for="">{{ 'UNIT_WEIGHT' | translate }}</label>
+            <input type="number" [(ngModel)]="unitWeight" name="unitWeight"
+                   [placeholder]="'UNIT_WEIGHT_PLACEHOLDER' | translate" step="0.1" min="0">
+        </div>
+
+        <!-- 條碼編號 -->
+        <div class="form-group">
+            <label for="">{{ 'BARCODE' | translate }}</label>
+            <input type="text" [(ngModel)]="barcode" name="barcode"
+                   [placeholder]="'BARCODE_PLACEHOLDER' | translate">
+        </div>
+
+        <button type="submit">{{isEditing? ('UPDATE_PRODUCT' | translate) : ('ADD_PRODUCT' | translate)}}</button>
+    </form>
 </div>

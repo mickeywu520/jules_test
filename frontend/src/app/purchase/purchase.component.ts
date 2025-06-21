@@ -54,9 +54,9 @@ export class PurchaseComponent implements OnInit {
     const productIdInt = parseInt(this.productId, 10);
     const supplierIdInt = parseInt(this.supplierId, 10);
 
-    // Find the product to get its price
-    const product = this.products.find(p => p.id === productIdInt);
-    const totalPrice = product ? product.price * quantityInt : 0;
+    // Since we removed price from Product model, set totalPrice to 0 for now
+    // Price should be handled in the purchase order/transaction system
+    const totalPrice = 0;
 
     const body = {
       products_involved: [{

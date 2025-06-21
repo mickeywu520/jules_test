@@ -319,15 +319,15 @@ export class ApiService {
 
 
 
-  /**PRODUICTS ENDPOINTS */
-  addProduct(formData: any): Observable<any> {
-    return this.http.post(`${ApiService.BASE_URL}/products/add`, formData, {
+  /**PRODUCTS ENDPOINTS */
+  addProduct(productData: any): Observable<any> {
+    return this.http.post(`${ApiService.BASE_URL}/products/add`, productData, {
       headers: this.getHeader(),
     });
   }
 
-  updateProduct(id: string, formData: any): Observable<any> {
-    return this.http.put(`${ApiService.BASE_URL}/products/update/${id}`, formData, {
+  updateProduct(id: string, productData: any): Observable<any> {
+    return this.http.put(`${ApiService.BASE_URL}/products/update/${id}`, productData, {
       headers: this.getHeader(),
     });
   }

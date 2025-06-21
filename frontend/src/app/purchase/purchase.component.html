@@ -15,7 +15,7 @@
       >
         <option value="">{{ 'SELECT_PRODUCT_PLACEHOLDER' | translate }}</option>
         <option *ngFor="let product of products" [value]="product.id">
-          {{ product.name }}
+          {{ product.productName }}
         </option>
       </select>
     </div>

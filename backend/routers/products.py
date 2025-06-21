@@ -19,15 +19,19 @@ def create_product(product: schemas.ProductCreate, db: Session = Depends(databas
     if db_product:
         raise HTTPException(status_code=400, detail="Product code already exists")
 
+    # 檢查類別是否存在
+    category = db.query(models.Category).filter(models.Category.id == product.category_id).first()
+    if not category:
+        raise HTTPException(status_code=404, detail="Category not found")
+
     new_product = models.Product(
-        categoryName=product.categoryName,
         productCode=product.productCode,
         productName=product.productName,
         unit=product.unit,
-        stockQuantity=product.stockQuantity,
         warehouse=product.warehouse,
         unitWeight=product.unitWeight,
-        barcode=product.barcode
+        barcode=product.barcode,
+        category_id=product.category_id
     )
 
     db.add(new_product)
@@ -47,6 +51,12 @@ def update_product(id: int, product: schemas.ProductUpdate, db: Session = Depend
         existing_product = db.query(models.Product).filter(models.Product.productCode == product.productCode).first()
         if existing_product:
             raise HTTPException(status_code=400, detail="Product code already exists")
+
+    # 如果要更新類別，檢查類別是否存在
+    if product.category_id:
+        category = db.query(models.Category).filter(models.Category.id == product.category_id).first()
+        if not category:
+            raise HTTPException(status_code=404, detail="Category not found")
 
     # 更新欄位
     update_data = product.model_dump(exclude_unset=True)

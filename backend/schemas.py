@@ -41,14 +41,13 @@ class Category(CategoryBase): # For Read operations
 
 # Base and Read schemas for Product - 根據客戶 Excel 欄位重新設計
 class ProductBase(BaseModel):
-    categoryName: str = Field(..., description="貨品類別名稱")
     productCode: str = Field(..., description="貨品編號，必須唯一")
     productName: str = Field(..., description="貨品名稱")
     unit: str = Field(..., description="單位（箱、盒等）")
-    stockQuantity: Optional[int] = 0  # 庫存
     warehouse: Optional[str] = None  # 倉別
     unitWeight: Optional[float] = None  # 單位重量(KG)
     barcode: Optional[str] = None  # 條碼編號
+    category_id: int = Field(..., description="類別ID")
 
 class ProductCreate(ProductBase):
     pass
@@ -58,20 +57,20 @@ class Product(ProductBase):
     id: int
     createdAt: datetime
     updatedAt: Optional[datetime] = None
+    category: Optional[Category] = None  # 包含類別詳細資訊
 
     class Config:
         from_attributes = True
 
 # Schemas for updating a product (all fields optional)
 class ProductUpdate(BaseModel):
-    categoryName: Optional[str] = None
     productCode: Optional[str] = None
     productName: Optional[str] = None
     unit: Optional[str] = None
-    stockQuantity: Optional[int] = None
     warehouse: Optional[str] = None
     unitWeight: Optional[float] = None
     barcode: Optional[str] = None
+    category_id: Optional[int] = None
 
 
 # Base and Read schemas for Supplier

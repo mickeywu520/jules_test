@@ -20,17 +20,27 @@ export class AddEditProductComponent implements OnInit {
   ){}
 
   productId: string | null = null
-  name:string = ''
-  sku:string = ''
-  price:string = ''
-  stockQuantity:string = ''
-  categoryId:string = ''
-  description:string = ''
-  imageFile:File | null = null
-  imageUrl:string = ''
-  isEditing:boolean = false
-  categories:any[] = []
-  message:string = ''
+  productCode: string = ''
+  productName: string = ''
+  unit: string = ''
+  warehouse: string = ''
+  unitWeight: string = ''
+  barcode: string = ''
+  categoryId: string = ''
+  isEditing: boolean = false
+  categories: any[] = []
+  message: string = ''
+
+  // 單位選項
+  unitOptions = [
+    { value: '箱', label: 'BOX' },
+    { value: '盒', label: 'PACKAGE' },
+    { value: '包', label: 'BAG' },
+    { value: '瓶', label: 'BOTTLE' },
+    { value: '罐', label: 'CAN' },
+    { value: '袋', label: 'SACK' },
+    { value: '個', label: 'PIECE' }
+  ];
 
 
 
@@ -44,104 +54,96 @@ export class AddEditProductComponent implements OnInit {
   }
 
 
-  //GET ALL CATEGORIES
-  fetchCategories():void{
+  // 獲取所有類別
+  fetchCategories(): void {
     this.apiService.categories$.subscribe((cats: any[]) => {
       this.categories = cats;
     });
-    // Ensure categories are fetched if not already, or to get latest
     this.apiService.fetchAndBroadcastCategories().subscribe({
       next: (res: any) => {
-        // console.log('Categories fetched for AddEditProductComponent');
-        // The BehaviorSubject in ApiService is now updated.
-        // this.categories will be updated by the categories$ subscription.
+        // Categories loaded successfully
       },
       error: (error: any) => {
-        this.showMessage(error?.error?.message || error?.message || "Unable to fetch categories for product form" + error);
+        this.showMessage(error?.error?.message || error?.message || "Unable to fetch categories" + error);
       }
     });
   }
 
-
-  //GET CATEGORY BY ID
-
-  fetchProductById(productId: string):void{
+  // 根據 ID 獲取產品資料
+  fetchProductById(productId: string): void {
     this.apiService.getProductById(productId).subscribe({
-      next:(res:any) =>{
-        const product = res; // Direct assignment as backend returns product object directly
-        this.name = product.name;
-        this.sku = product.sku;
-        this.price = product.price;
-        this.stockQuantity = product.stockQuantity;
-        this.categoryId = product.categoryId; // Corrected typo from caetgoryId
-        this.description = product.description;
-        this.imageUrl = product.imageUrl;
+      next: (res: any) => {
+        const product = res;
+        this.productCode = product.productCode || '';
+        this.productName = product.productName || '';
+        this.unit = product.unit || '';
+        this.warehouse = product.warehouse || '';
+        this.unitWeight = product.unitWeight || '';
+        this.barcode = product.barcode || '';
+        this.categoryId = product.category_id || '';
       },
-      error:(error) =>{
-        this.showMessage(error?.error?.message || error?.message || "Unable to get all categories" + error)
-      }})
-  }
-
-  handleImageChange(event: Event):void{
-    const input = event.target as HTMLInputElement;
-    if (input?.files?.[0]) {
-      this.imageFile = input.files[0]
-      const reader = new FileReader();
-      reader.onloadend = () =>{
-        this.imageUrl = reader.result as string
+      error: (error) => {
+        this.showMessage(error?.error?.message || error?.message || "Unable to get product by id" + error)
       }
-      reader.readAsDataURL(this.imageFile);
-    }
+    })
   }
 
-  handleSubmit(event : Event):void{
+  handleSubmit(event: Event): void {
     event.preventDefault()
-    const formData = new FormData();
-    formData.append("name", this.name);
-    formData.append("sku", this.sku);
-    formData.append("price", this.price);
-    formData.append("stockQuantity", this.stockQuantity);
-    formData.append("categoryId", this.categoryId);
-    formData.append("description", this.description);
 
-    if (this.imageFile) {
-      formData.append("imageFile", this.imageFile);
+    // 驗證必填欄位
+    if (!this.categoryId) {
+      this.showMessage('請選擇類別');
+      return;
     }
+
+    if (!this.productCode || !this.productName || !this.unit) {
+      this.showMessage('Product code, product name, and unit are required');
+      return;
+    }
+
+    // 準備提交資料
+    const productData = {
+      productCode: this.productCode,
+      productName: this.productName,
+      unit: this.unit,
+      warehouse: this.warehouse || null,
+      unitWeight: parseFloat(this.unitWeight) || null,
+      barcode: this.barcode || null,
+      category_id: parseInt(this.categoryId)
+    };
 
     if (this.isEditing) {
-      // Remove productId from formData as it's now passed in the URL
-      // formData.append("productId", this.productId!); // This line is removed
-      this.apiService.updateProduct(this.productId!, formData).subscribe({ // Pass productId as first argument
-        next:(res:any) =>{
-          this.showMessage("product updated successfully")
-          // Refresh the product list in ApiService before navigating
+      this.apiService.updateProduct(this.productId!, productData).subscribe({
+        next: (res: any) => {
+          this.showMessage("Product updated successfully")
+          // 刷新產品列表
           this.apiService.fetchAndBroadcastProducts().subscribe({
-            next: () => { /* console.log('Product list refreshed after add/update'); */ },
-            error: (err: any) => { console.error('Failed to refresh product list after add/update:', err); }
+            next: () => { /* console.log('Product list refreshed after update'); */ },
+            error: (err: any) => { console.error('Failed to refresh product list after update:', err); }
           });
           this.router.navigate(['/product'])
         },
-        error:(error) =>{
-          this.showMessage(error?.error?.message || error?.message || "Unable to update a product" + error)
-        }})
-    }else{
-      this.apiService.addProduct(formData).subscribe({
-        next:(res:any) =>{
-          this.showMessage("Product Saved successfully")
-          // Refresh the product list in ApiService before navigating
+        error: (error) => {
+          this.showMessage(error?.error?.message || error?.message || "Unable to update product" + error)
+        }
+      })
+    } else {
+      this.apiService.addProduct(productData).subscribe({
+        next: (res: any) => {
+          this.showMessage("Product saved successfully")
+          // 刷新產品列表
           this.apiService.fetchAndBroadcastProducts().subscribe({
-            next: () => { /* console.log('Product list refreshed after add/update'); */ },
-            error: (err: any) => { console.error('Failed to refresh product list after add/update:', err); }
+            next: () => { /* console.log('Product list refreshed after add'); */ },
+            error: (err: any) => { console.error('Failed to refresh product list after add:', err); }
           });
           this.router.navigate(['/product'])
         },
-        error:(error) =>{
-          this.showMessage(error?.error?.message || error?.message || "Unable to save a product" + error)
-        }})
-
+        error: (error) => {
+          this.showMessage(error?.error?.message || error?.message || "Unable to save product" + error)
+        }
+      })
     }
-
-
   }
 
 

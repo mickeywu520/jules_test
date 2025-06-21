@@ -41,83 +41,77 @@
     background-color: #2F4F4F;
     }
     .product-list {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    /* Display 7 items per row */
-    gap: 15px;
-    /* Increased gap for better spacing between items */
-    }
-     
-    .product-item {
     background-color: white;
-    padding: 15px;
     border-radius: 10px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-     
+    overflow: hidden;
     }
-     
-    .product-item:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+
+    .product-table {
+    width: 100%;
+    border-collapse: collapse;
     }
-    .product-info {
-    text-align: center;
+
+    .product-table th,
+    .product-table td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid #e0e0e0;
     }
-     
-    .product-info .name {
-    font-size: 1.2rem;
+
+    .product-table th {
+    background-color: #17a2b8;
+    color: white;
     font-weight: bold;
-    color: #333;
-    margin-bottom: 10px;
-    }
-     
-    .product-info .name {
-    color: #2F4F4F;
-    }
-     
-    .product-info .sku,
-    .product-info .price,
-    .product-info .quantity {
-     
-    color: #777;
-    /* color: #014646; */
     font-size: 0.9rem;
-    margin-bottom: 5px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
     }
-     
-    .product-actions {
+
+    .product-table tbody tr:hover {
+    background-color: #f8f9fa;
+    }
+
+    .product-table tbody tr:last-child td {
+    border-bottom: none;
+    }
+
+    .product-table td {
+    font-size: 0.9rem;
+    color: #333;
+    }
+
+    .actions {
     display: flex;
-    justify-content: center;
-    margin-top: 10px;
+    gap: 8px;
     }
      
     .edit-btn,
     .delete-btn {
-    padding: 8px 15px;
-    margin: 0 5px;
+    padding: 6px 12px;
     border: none;
-    border-radius: 5px;
+    border-radius: 4px;
     cursor: pointer;
+    font-size: 0.8rem;
     transition: background-color 0.3s ease;
     }
-     
+
     .edit-btn {
     background-color: #17a2b8;
     color: white;
     }
-     
+
     .edit-btn:hover {
-    background-color: #2F4F4F;
+    background-color: #138496;
     }
-     
+
     .delete-btn {
     background-color: #dc3545;
     color: white;
     }
-     
+
     .delete-btn:hover {
-    background-color: #a5202e;
+    background-color: #c82333;
     }
      
     .loading {

@@ -72,7 +72,7 @@ def update_customer(id: int, customer_update: schemas.CustomerUpdate, db: Sessio
             raise HTTPException(status_code=400, detail=f"Customer with code '{customer_update.customerCode}' already exists")
 
     # Update fields if provided
-    update_data = customer_update.dict(exclude_unset=True)
+    update_data = customer_update.model_dump(exclude_unset=True)
     for field, value in update_data.items():
         setattr(db_customer, field, value)
 

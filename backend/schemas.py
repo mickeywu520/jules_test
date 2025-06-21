@@ -23,26 +23,8 @@ class TransactionStatus(str, enum.Enum):
     COMPLETED = "COMPLETED"
     CANCELLED = "CANCELLED"
 
-class CustomerType(str, enum.Enum):
-    INDIVIDUAL = "INDIVIDUAL"  # 個人客戶
-    COMPANY = "COMPANY"        # 公司客戶
-    GOVERNMENT = "GOVERNMENT"  # 政府機關
-    OTHER = "OTHER"           # 其他
-
-class PaymentMethod(str, enum.Enum):
-    CASH = "CASH"             # 現金
-    CREDIT_CARD = "CREDIT_CARD"  # 信用卡
-    BANK_TRANSFER = "BANK_TRANSFER"  # 銀行轉帳
-    CHECK = "CHECK"           # 支票
-    MONTHLY_PAYMENT = "MONTHLY_PAYMENT"  # 月結
-    OTHER = "OTHER"           # 其他
-
-class PaymentCategory(str, enum.Enum):
-    PREPAID = "PREPAID"       # 預付
-    CASH_ON_DELIVERY = "CASH_ON_DELIVERY"  # 貨到付款
-    CREDIT = "CREDIT"         # 賒帳
-    MONTHLY_SETTLEMENT = "MONTHLY_SETTLEMENT"  # 月結
-    OTHER = "OTHER"           # 其他
+# CustomerType 和 PaymentCategory 改為字串類型，支援動態值
+# PaymentMethod 改為支援動態字串，如 "月結30天", "下收" 等
 
 # Base and Read schemas for Category
 class CategoryBase(BaseModel):
@@ -109,7 +91,7 @@ class Supplier(SupplierBase): # For Read operations
 
 # Base and Read schemas for Customer
 class CustomerBase(BaseModel):
-    customerType: CustomerType
+    customerType: str
     salesPersonId: Optional[str] = None
     salesPersonName: Optional[str] = None
     customerCode: str = Field(..., description="客戶編號，必須唯一")
@@ -121,15 +103,15 @@ class CustomerBase(BaseModel):
     faxNumber: Optional[str] = None
     deliveryAddress: Optional[str] = None
     businessHours: Optional[str] = None
-    paymentMethod: Optional[PaymentMethod] = None
-    paymentCategory: Optional[PaymentCategory] = None
+    paymentMethod: Optional[str] = None
+    paymentCategory: Optional[str] = None
     creditLimit: Optional[float] = 0.0
 
 class CustomerCreate(CustomerBase):
     pass
 
 class CustomerUpdate(BaseModel):
-    customerType: Optional[CustomerType] = None
+    customerType: Optional[str] = None
     salesPersonId: Optional[str] = None
     salesPersonName: Optional[str] = None
     customerCode: Optional[str] = None
@@ -141,8 +123,8 @@ class CustomerUpdate(BaseModel):
     faxNumber: Optional[str] = None
     deliveryAddress: Optional[str] = None
     businessHours: Optional[str] = None
-    paymentMethod: Optional[PaymentMethod] = None
-    paymentCategory: Optional[PaymentCategory] = None
+    paymentMethod: Optional[str] = None
+    paymentCategory: Optional[str] = None
     creditLimit: Optional[float] = None
 
 class Customer(CustomerBase): # For Read operations

@@ -20,26 +20,8 @@ class TransactionStatus(str, enum.Enum):
     CANCELLED = "CANCELLED"
     # Add other statuses as per your frontend's expectations for 'updateTransactionStatus'
 
-class CustomerType(str, enum.Enum):
-    INDIVIDUAL = "INDIVIDUAL"  # 個人客戶
-    COMPANY = "COMPANY"        # 公司客戶
-    GOVERNMENT = "GOVERNMENT"  # 政府機關
-    OTHER = "OTHER"           # 其他
-
-class PaymentMethod(str, enum.Enum):
-    CASH = "CASH"             # 現金
-    CREDIT_CARD = "CREDIT_CARD"  # 信用卡
-    BANK_TRANSFER = "BANK_TRANSFER"  # 銀行轉帳
-    CHECK = "CHECK"           # 支票
-    MONTHLY_PAYMENT = "MONTHLY_PAYMENT"  # 月結
-    OTHER = "OTHER"           # 其他
-
-class PaymentCategory(str, enum.Enum):
-    PREPAID = "PREPAID"       # 預付
-    CASH_ON_DELIVERY = "CASH_ON_DELIVERY"  # 貨到付款
-    CREDIT = "CREDIT"         # 賒帳
-    MONTHLY_SETTLEMENT = "MONTHLY_SETTLEMENT"  # 月結
-    OTHER = "OTHER"           # 其他
+# CustomerType, PaymentMethod, PaymentCategory 改為字串類型，支援動態值
+# 例如：customerType = "區域連鎖", paymentMethod = "月結30天", paymentCategory = "支票"
 
 # User Model
 class User(Base):
@@ -76,7 +58,7 @@ class Supplier(Base):
 class Customer(Base):
     __tablename__ = "customers"
     id = Column(Integer, primary_key=True, index=True)
-    customerType = Column(SQLAlchemyEnum(CustomerType), nullable=False)  # 客戶類型
+    customerType = Column(String, nullable=False)  # 客戶類型 (字串類型，支援動態值)
     createdDate = Column(DateTime(timezone=True), server_default=func.now())  # 建檔日期
     salesPersonId = Column(String, nullable=True)  # 業務員編號
     salesPersonName = Column(String, nullable=True)  # 業務員名稱
@@ -89,8 +71,8 @@ class Customer(Base):
     faxNumber = Column(String, nullable=True)  # 傳真號碼
     deliveryAddress = Column(Text, nullable=True)  # 送貨地址
     businessHours = Column(Text, nullable=True)  # 營業時間/公休日
-    paymentMethod = Column(SQLAlchemyEnum(PaymentMethod), nullable=True)  # 收款方式
-    paymentCategory = Column(SQLAlchemyEnum(PaymentCategory), nullable=True)  # 收款類別
+    paymentMethod = Column(String, nullable=True)  # 收款方式 (支援動態月結天數，如 "月結30天")
+    paymentCategory = Column(String, nullable=True)  # 收款類別 (字串類型，支援動態值)
     creditLimit = Column(Float, nullable=True, default=0.0)  # 銷貨額度
     updatedAt = Column(DateTime(timezone=True), onupdate=func.now())
 

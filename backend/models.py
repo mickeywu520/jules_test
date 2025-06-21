@@ -20,6 +20,27 @@ class TransactionStatus(str, enum.Enum):
     CANCELLED = "CANCELLED"
     # Add other statuses as per your frontend's expectations for 'updateTransactionStatus'
 
+class CustomerType(str, enum.Enum):
+    INDIVIDUAL = "INDIVIDUAL"  # 個人客戶
+    COMPANY = "COMPANY"        # 公司客戶
+    GOVERNMENT = "GOVERNMENT"  # 政府機關
+    OTHER = "OTHER"           # 其他
+
+class PaymentMethod(str, enum.Enum):
+    CASH = "CASH"             # 現金
+    CREDIT_CARD = "CREDIT_CARD"  # 信用卡
+    BANK_TRANSFER = "BANK_TRANSFER"  # 銀行轉帳
+    CHECK = "CHECK"           # 支票
+    MONTHLY_PAYMENT = "MONTHLY_PAYMENT"  # 月結
+    OTHER = "OTHER"           # 其他
+
+class PaymentCategory(str, enum.Enum):
+    PREPAID = "PREPAID"       # 預付
+    CASH_ON_DELIVERY = "CASH_ON_DELIVERY"  # 貨到付款
+    CREDIT = "CREDIT"         # 賒帳
+    MONTHLY_SETTLEMENT = "MONTHLY_SETTLEMENT"  # 月結
+    OTHER = "OTHER"           # 其他
+
 # User Model
 class User(Base):
     __tablename__ = "users"
@@ -50,6 +71,31 @@ class Supplier(Base):
     address = Column(Text, nullable=True)
 
     transactions = relationship("Transaction", back_populates="supplier")
+
+# Customer Model
+class Customer(Base):
+    __tablename__ = "customers"
+    id = Column(Integer, primary_key=True, index=True)
+    customerType = Column(SQLAlchemyEnum(CustomerType), nullable=False)  # 客戶類型
+    createdDate = Column(DateTime(timezone=True), server_default=func.now())  # 建檔日期
+    salesPersonId = Column(String, nullable=True)  # 業務員編號
+    salesPersonName = Column(String, nullable=True)  # 業務員名稱
+    customerCode = Column(String, unique=True, index=True, nullable=False)  # 客戶編號
+    customerName = Column(String, index=True, nullable=False)  # 客戶名稱
+    contactPerson = Column(String, nullable=True)  # 客戶聯絡人
+    invoiceTitle = Column(String, nullable=True)  # 發票抬頭
+    taxId = Column(String, nullable=True)  # 統一編號
+    phoneNumber = Column(String, nullable=True)  # 電話號碼
+    faxNumber = Column(String, nullable=True)  # 傳真號碼
+    deliveryAddress = Column(Text, nullable=True)  # 送貨地址
+    businessHours = Column(Text, nullable=True)  # 營業時間/公休日
+    paymentMethod = Column(SQLAlchemyEnum(PaymentMethod), nullable=True)  # 收款方式
+    paymentCategory = Column(SQLAlchemyEnum(PaymentCategory), nullable=True)  # 收款類別
+    creditLimit = Column(Float, nullable=True, default=0.0)  # 銷貨額度
+    updatedAt = Column(DateTime(timezone=True), onupdate=func.now())
+
+    # 可以添加與交易的關聯（如果需要的話）
+    # transactions = relationship("Transaction", back_populates="customer")
 
 # Product Model
 class Product(Base):

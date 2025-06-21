@@ -3,7 +3,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 
 from .database import engine, create_db_and_tables #, SessionLocal, Base (not directly used here but good for context)
-from .routers import auth, users, categories, suppliers, products, transactions
+from .routers import auth, users, categories, suppliers, products, transactions, customers
 # from . import models # models are used by create_db_and_tables via database.py
 
 # Call this function to create DB tables when the application starts
@@ -58,6 +58,7 @@ app.include_router(categories.router)
 app.include_router(suppliers.router)
 app.include_router(products.router)
 app.include_router(transactions.router)
+app.include_router(customers.router)
 
 
 # Root endpoint (optional, good for a health check or API info)

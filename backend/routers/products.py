@@ -70,9 +70,26 @@ def update_product(id: int, product: schemas.ProductUpdate, db: Session = Depend
     return db_product
 
 
-# 獲取所有產品（只顯示未刪除的產品）
+# 獲取所有產品（可選擇是否包含已刪除的產品）
 @router.get("/all", response_model=List[schemas.Product])
-def get_products(skip: int = 0, limit: int = 100, db: Session = Depends(database.get_db)):
+def get_products(
+    skip: int = 0,
+    limit: int = 100,
+    include_deleted: bool = False,
+    db: Session = Depends(database.get_db)
+):
+    query = db.query(models.Product)
+
+    if not include_deleted:
+        # 預設只顯示未刪除的產品
+        query = query.filter(models.Product.is_deleted == False)
+
+    products = query.offset(skip).limit(limit).all()
+    return products
+
+# 獲取有效產品（只用於銷售單等業務邏輯）
+@router.get("/active", response_model=List[schemas.Product])
+def get_active_products(skip: int = 0, limit: int = 100, db: Session = Depends(database.get_db)):
     products = db.query(models.Product)\
         .filter(models.Product.is_deleted == False)\
         .offset(skip).limit(limit).all()

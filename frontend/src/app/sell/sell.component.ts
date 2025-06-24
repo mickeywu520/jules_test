@@ -99,9 +99,9 @@ export class SellComponent implements OnInit {
     });
   }
 
-  // 載入產品列表
+  // 載入產品列表（只載入有效產品，不包含已刪除的產品）
   fetchProducts(): void {
-    this.apiService.getAllProducts().subscribe({
+    this.apiService.getActiveProducts().subscribe({
       next: (res: any) => {
         this.products = res;
       },

@@ -27,15 +27,11 @@ export class ProductComponent implements OnInit {
 
   // Renamed from fetchProducts to reflect new reactive approach
   setupProductSubscriptionAndLoad(): void {
-    this.apiService.products$.subscribe((allProducts: any[]) => {
-      this.fullProductList = allProducts; // Store the full list
-      this.applyPagination(); // Apply pagination to the new full list
-    });
-    // Trigger initial load / refresh of products from backend
-    this.apiService.fetchAndBroadcastProducts().subscribe({
-      next: () => {
-        // console.log('Initial products fetched for ProductComponent');
-        // Data is now in BehaviorSubject, products$ subscription will handle it.
+    // 直接載入包含已刪除產品的列表（用於產品管理頁面）
+    this.apiService.getAllProducts(true).subscribe({
+      next: (allProducts: any[]) => {
+        this.fullProductList = allProducts; // Store the full list including deleted
+        this.applyPagination(); // Apply pagination to the new full list
       },
       error: (error: any) => {
         const errorMessage = error?.error?.message || error?.error?.detail || error?.message || this.translate.instant('UNABLE_TO_FETCH_INITIAL_PRODUCTS');
@@ -53,22 +49,34 @@ export class ProductComponent implements OnInit {
     );
   }
 
-  //DELETE A PRODUCT
+  //DELETE A PRODUCT (軟刪除)
   handleProductDelete(productId: string): void {
     if (window.confirm(this.translate.instant('CONFIRM_DELETE_PRODUCT'))) {
       this.apiService.deleteProduct(productId).subscribe({
         next: (res: any) => {
           this.showMessage(this.translate.instant('PRODUCT_DELETED_SUCCESSFULLY'));
-          this.apiService.fetchAndBroadcastProducts().subscribe({
-            next: () => { /* console.log('Products refreshed after delete'); */ },
-            error: (err: any) => {
-              console.error('Failed to refresh products after delete:', err);
-              this.showMessage(this.translate.instant('FAILED_TO_REFRESH_PRODUCT_LIST'));
-            }
-          }); //reload the products
+          // 重新載入包含已刪除產品的列表
+          this.setupProductSubscriptionAndLoad();
         },
         error: (error) => {
           const errorMessage = error?.error?.message || error?.error?.detail || error?.message || this.translate.instant('UNABLE_TO_DELETE_PRODUCT');
+          this.showMessage(errorMessage);
+        },
+      });
+    }
+  }
+
+  // 恢復已刪除的產品
+  restoreProduct(productId: string): void {
+    if (window.confirm(this.translate.instant('CONFIRM_RESTORE_PRODUCT'))) {
+      this.apiService.restoreProduct(productId).subscribe({
+        next: (res: any) => {
+          this.showMessage(this.translate.instant('PRODUCT_RESTORED_SUCCESSFULLY'));
+          // 重新載入包含已刪除產品的列表
+          this.setupProductSubscriptionAndLoad();
+        },
+        error: (error) => {
+          const errorMessage = error?.error?.message || error?.error?.detail || error?.message || this.translate.instant('UNABLE_TO_RESTORE_PRODUCT');
           this.showMessage(errorMessage);
         },
       });

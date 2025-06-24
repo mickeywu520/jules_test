@@ -25,20 +25,40 @@
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let product of products" class="product-row">
+        <tr *ngFor="let product of products"
+            class="product-row"
+            [ngClass]="{'deleted-product': product.is_deleted}">
           <td>{{ product.category?.name || '-' }}</td>
-          <td>{{ product.productCode }}</td>
-          <td>{{ product.productName }}</td>
+          <td>
+            {{ product.productCode }}
+            <span *ngIf="product.is_deleted" class="deleted-label">{{ 'DELETED' | translate }}</span>
+          </td>
+          <td>
+            {{ product.productName }}
+            <span *ngIf="product.is_deleted" class="deleted-label">{{ 'DELETED' | translate }}</span>
+          </td>
           <td>{{ product.unit }}</td>
           <td>{{ product.warehouse || '-' }}</td>
           <td>{{ product.unitWeight ? (product.unitWeight + ' KG') : '-' }}</td>
           <td>{{ product.barcode || '-' }}</td>
           <td class="actions">
-            <button (click)="navigateToEditProductPage(product.id)" class="edit-btn">
+            <button
+              *ngIf="!product.is_deleted"
+              (click)="navigateToEditProductPage(product.id)"
+              class="edit-btn">
               {{ 'EDIT' | translate }}
             </button>
-            <button (click)="handleProductDelete(product.id)" class="delete-btn">
+            <button
+              *ngIf="!product.is_deleted"
+              (click)="handleProductDelete(product.id)"
+              class="delete-btn">
               {{ 'DELETE' | translate }}
+            </button>
+            <button
+              *ngIf="product.is_deleted"
+              (click)="restoreProduct(product.id)"
+              class="restore-btn">
+              {{ 'RESTORE' | translate }}
             </button>
           </td>
         </tr>

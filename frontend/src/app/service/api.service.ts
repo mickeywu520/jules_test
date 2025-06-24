@@ -83,8 +83,8 @@ export class ApiService {
 
 
   public fetchAndBroadcastProducts(): Observable<any[]> {
-    const httpOptions = { headers: this.getHeader() };
-    const request = this.http.get<any[]>(`${ApiService.BASE_URL}/products/all`, httpOptions);
+    // 使用 getActiveProducts 只獲取有效產品（用於採購單等業務邏輯）
+    const request = this.getActiveProducts();
 
     request.subscribe({
       next: (productsArray: any[]) => {
@@ -332,8 +332,17 @@ export class ApiService {
     });
   }
 
-  getAllProducts(): Observable<any> {
-    return this.http.get(`${ApiService.BASE_URL}/products/all`, {
+  // 獲取所有產品（可選擇是否包含已刪除）
+  getAllProducts(includeDeleted: boolean = false): Observable<any> {
+    const params = includeDeleted ? '?include_deleted=true' : '';
+    return this.http.get(`${ApiService.BASE_URL}/products/all${params}`, {
+      headers: this.getHeader(),
+    });
+  }
+
+  // 獲取有效產品（只用於銷售單等業務邏輯）
+  getActiveProducts(): Observable<any> {
+    return this.http.get(`${ApiService.BASE_URL}/products/active`, {
       headers: this.getHeader(),
     });
   }
@@ -346,6 +355,13 @@ export class ApiService {
 
   deleteProduct(id: string): Observable<any> {
     return this.http.delete(`${ApiService.BASE_URL}/products/delete/${id}`, {
+      headers: this.getHeader(),
+    });
+  }
+
+  // 恢復已刪除的產品
+  restoreProduct(id: string): Observable<any> {
+    return this.http.patch(`${ApiService.BASE_URL}/products/restore/${id}`, {}, {
       headers: this.getHeader(),
     });
   }

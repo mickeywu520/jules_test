@@ -113,6 +113,46 @@
     .delete-btn:hover {
     background-color: #c82333;
     }
+
+    /* 已刪除產品樣式 */
+    .deleted-product {
+    background-color: #f8f9fa !important;
+    color: #6c757d !important;
+    opacity: 0.6;
+    }
+
+    .deleted-product td {
+    color: #6c757d !important;
+    text-decoration: line-through;
+    }
+
+    .deleted-label {
+    background-color: #dc3545;
+    color: white;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 0.7rem;
+    margin-left: 8px;
+    font-weight: bold;
+    text-decoration: none !important;
+    }
+
+    /* 恢復按鈕樣式 */
+    .restore-btn {
+    background-color: #28a745;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    margin-right: 5px;
+    transition: background-color 0.3s ease;
+    }
+
+    .restore-btn:hover {
+    background-color: #218838;
+    }
      
     .loading {
     font-size: 1.2rem;

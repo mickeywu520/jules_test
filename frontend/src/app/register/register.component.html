@@ -1,6 +1,6 @@
 <div class="auth-container">
   <h2>{{ 'REGISTER' | translate }}</h2>
-  <p *ngIf="message" class="message">{{ message }}</p>
+  <p *ngIf="message" class="message" [ngClass]="{'success': messageType === 'success', 'error': messageType === 'error'}">{{ message }}</p>
 
   <form (ngSubmit)="handleSubmit()">
     <input

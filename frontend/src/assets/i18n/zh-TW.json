@@ -15,6 +15,7 @@
   "PASSWORD_PLACEHOLDER": "密碼 ...",
   "DONT_HAVE_ACCOUNT": "沒有帳號？",
   "REGISTER_LINK": "註冊",
+  "REGISTER_SUCCESS_MESSAGE": "註冊成功！即將跳轉到登入頁面...",
   "NAME_PLACEHOLDER": "姓名 ...",
   "PHONE_NUMBER_PLACEHOLDER": "電話號碼 ...",
   "ALREADY_HAVE_ACCOUNT": "已經有帳號了？",

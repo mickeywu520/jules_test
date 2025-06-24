@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { ApiService } from '../service/api.service';
 import { firstValueFrom } from 'rxjs';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-register',
@@ -15,7 +15,7 @@ import { TranslateModule } from '@ngx-translate/core';
 })
 
 export class RegisterComponent {
-  constructor(private apiService:ApiService, private router:Router){}
+  constructor(private apiService:ApiService, private router:Router, private translate:TranslateService){}
 
   formData: any = {
     email: '',
@@ -24,15 +24,16 @@ export class RegisterComponent {
     password: ''
   };
   message:string | null = null;
+  messageType: 'success' | 'error' = 'error';
 
   async handleSubmit(){
-    if( 
-      !this.formData.email || 
-      !this.formData.name || 
-      !this.formData.phoneNumber || 
-      !this.formData.password 
+    if(
+      !this.formData.email ||
+      !this.formData.name ||
+      !this.formData.phoneNumber ||
+      !this.formData.password
     ){
-      this.showMessage("All fields are required");
+      this.showMessage("All fields are required", 'error');
       return;
     }
 
@@ -42,25 +43,63 @@ export class RegisterComponent {
         phoneNumber: String(this.formData.phoneNumber)
       };
 
+      console.log('發送註冊請求，資料:', payload_for_api);
+
       const response: any = await firstValueFrom(
         this.apiService.registerUser(payload_for_api)
       );
-      if (response.status === 200) {
-        this.showMessage(response.message)
-        this.router.navigate(["/login"]);
+
+      console.log('註冊回應:', response);
+
+      // 註冊成功：後端返回用戶物件（包含 id, email, name 等）
+      if (response && response.id) {
+        console.log('註冊成功，用戶 ID:', response.id);
+
+        // 顯示成功訊息
+        const successMessage = this.translate.instant('REGISTER_SUCCESS_MESSAGE');
+        this.showMessage(successMessage, 'success');
+
+        console.log('顯示成功訊息，2秒後跳轉到登入頁面');
+
+        // 延遲跳轉，讓用戶看到成功訊息
+        setTimeout(() => {
+          console.log('開始跳轉到登入頁面');
+          this.router.navigate(["/login"]);
+        }, 2000);
+      } else {
+        console.log('註冊回應格式不符預期:', response);
+        // 如果回應格式不符預期
+        this.showMessage("註冊過程中發生未知錯誤", 'error');
       }
     } catch (error:any) {
-      console.log(error)
-      this.showMessage(error?.error?.message || error?.message || "Unable to register a user" + error)
-      
+      console.log('Registration error:', error);
+
+      // 處理不同類型的錯誤
+      let errorMessage = "註冊失敗，請稍後再試";
+
+      if (error?.error?.detail) {
+        // FastAPI 錯誤格式
+        errorMessage = error.error.detail;
+      } else if (error?.message) {
+        errorMessage = error.message;
+      } else if (error?.error?.message) {
+        errorMessage = error.error.message;
+      }
+
+      this.showMessage(errorMessage, 'error');
     }
   }
 
-  showMessage(message:string){
+  showMessage(message:string, type: 'success' | 'error' = 'error'){
     this.message = message;
+    this.messageType = type;
+
+    // 成功訊息顯示較短時間，錯誤訊息顯示較長時間
+    const timeout = type === 'success' ? 2500 : 4000;
+
     setTimeout(() =>{
       this.message = null
-    }, 4000)
+    }, timeout)
   }
 
 }

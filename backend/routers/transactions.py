@@ -56,6 +56,84 @@ def _process_transaction_products(
     return associations, calculated_total_price, calculated_total_products
 
 
+def _convert_purchase_order_to_transaction(purchase_order: models.PurchaseOrder, db: Session) -> models.Transaction:
+    """將採購單轉換為 Transaction 格式"""
+    # 計算總產品數量和總價格
+    total_products = sum(item.quantity for item in purchase_order.items)
+    total_price = purchase_order.total_amount
+
+    # 創建虛擬的 Transaction 物件
+    transaction = models.Transaction(
+        id=purchase_order.id * 1000000 + 1,  # 使用大數字避免與原有 Transaction ID 衝突
+        totalProducts=total_products,
+        totalPrice=total_price,
+        transactionType=models.TransactionType.PURCHASE,
+        transactionStatus=models.TransactionStatus.COMPLETED,
+        description=f"採購單: {purchase_order.po_number}",
+        note=purchase_order.notes,
+        createdAt=purchase_order.created_at,
+        updatedAt=purchase_order.updated_at,
+        user_id=purchase_order.purchaser_id,
+        supplier_id=purchase_order.supplier_id
+    )
+
+    # 設置關聯資料
+    transaction.user = purchase_order.purchaser
+    transaction.supplier = purchase_order.supplier
+
+    # 轉換產品關聯
+    transaction.products = []
+    for item in purchase_order.items:
+        assoc = models.TransactionProductAssociation(
+            transaction_id=transaction.id,
+            product_id=item.product_id,
+            quantity=item.quantity
+        )
+        assoc.product = item.product
+        transaction.products.append(assoc)
+
+    return transaction
+
+
+def _convert_sales_order_to_transaction(sales_order: models.SalesOrder, db: Session) -> models.Transaction:
+    """將銷售單轉換為 Transaction 格式"""
+    # 計算總產品數量和總價格
+    total_products = sum(item.quantity for item in sales_order.items)
+    total_price = sales_order.total_amount
+
+    # 創建虛擬的 Transaction 物件
+    transaction = models.Transaction(
+        id=sales_order.id * 1000000 + 2,  # 使用大數字避免與原有 Transaction ID 衝突
+        totalProducts=total_products,
+        totalPrice=total_price,
+        transactionType=models.TransactionType.SELL,
+        transactionStatus=models.TransactionStatus.COMPLETED,
+        description=f"銷售單: {sales_order.so_number}",
+        note=sales_order.notes,
+        createdAt=sales_order.created_at,
+        updatedAt=sales_order.updated_at,
+        user_id=sales_order.salesperson_id,
+        supplier_id=None  # 銷售單沒有供應商
+    )
+
+    # 設置關聯資料
+    transaction.user = sales_order.salesperson
+    transaction.supplier = None
+
+    # 轉換產品關聯
+    transaction.products = []
+    for item in sales_order.items:
+        assoc = models.TransactionProductAssociation(
+            transaction_id=transaction.id,
+            product_id=item.product_id,
+            quantity=item.quantity
+        )
+        assoc.product = item.product
+        transaction.products.append(assoc)
+
+    return transaction
+
+
 @router.post("/purchase", response_model=schemas.Transaction, status_code=status.HTTP_201_CREATED)
 def create_purchase_transaction(
     transaction_data: schemas.TransactionCreate,
@@ -143,29 +221,122 @@ def read_transactions(
     limit: int = 100,
     db: Session = Depends(database.get_db)
 ):
-    query = db.query(models.Transaction)
+    """
+    獲取所有交易記錄，包括：
+    1. 原有的 Transaction 記錄
+    2. 已完成的採購單 (RECEIVED 狀態)
+    3. 已出貨的銷售單 (SHIPPED 或 DELIVERED 狀態)
+    """
+    all_transactions = []
 
+    # 1. 獲取原有的 Transaction 記錄
+    original_query = db.query(models.Transaction)
     if searchText:
         search_term = f"%{searchText.lower()}%"
-        query = query.join(models.User).outerjoin(models.Supplier).filter(
+        original_query = original_query.join(models.User).outerjoin(models.Supplier).filter(
             models.Transaction.id.cast(str).ilike(search_term) |
             models.Transaction.description.ilike(search_term) |
             models.Transaction.note.ilike(search_term) |
             models.User.name.ilike(search_term) |
             models.User.email.ilike(search_term) |
             models.Supplier.name.ilike(search_term)
-            # Could also join products and search product names, but that's more complex for a simple search
         )
 
-    transactions = query.order_by(models.Transaction.createdAt.desc()).offset(skip).limit(limit).all()
-    return transactions
+    original_transactions = original_query.order_by(models.Transaction.createdAt.desc()).all()
+    all_transactions.extend(original_transactions)
+
+    # 2. 獲取已完成的採購單並轉換為 Transaction 格式
+    purchase_query = db.query(models.PurchaseOrder).filter(
+        models.PurchaseOrder.status == models.PurchaseOrderStatus.RECEIVED
+    )
+    if searchText:
+        search_term = f"%{searchText.lower()}%"
+        purchase_query = purchase_query.join(models.User).outerjoin(models.Supplier).filter(
+            models.PurchaseOrder.po_number.ilike(search_term) |
+            models.PurchaseOrder.notes.ilike(search_term) |
+            models.User.name.ilike(search_term) |
+            models.User.email.ilike(search_term) |
+            models.Supplier.name.ilike(search_term)
+        )
+
+    purchase_orders = purchase_query.order_by(models.PurchaseOrder.created_at.desc()).all()
+
+    # 轉換採購單為 Transaction 格式
+    for po in purchase_orders:
+        transaction_data = _convert_purchase_order_to_transaction(po, db)
+        all_transactions.append(transaction_data)
+
+    # 3. 獲取已出貨的銷售單並轉換為 Transaction 格式
+    sales_query = db.query(models.SalesOrder).filter(
+        models.SalesOrder.status.in_([
+            models.SalesOrderStatus.SHIPPED,
+            models.SalesOrderStatus.DELIVERED
+        ])
+    )
+    if searchText:
+        search_term = f"%{searchText.lower()}%"
+        sales_query = sales_query.join(models.User).outerjoin(models.Customer).filter(
+            models.SalesOrder.so_number.ilike(search_term) |
+            models.SalesOrder.notes.ilike(search_term) |
+            models.User.name.ilike(search_term) |
+            models.User.email.ilike(search_term) |
+            models.Customer.customerName.ilike(search_term)
+        )
+
+    sales_orders = sales_query.order_by(models.SalesOrder.created_at.desc()).all()
+
+    # 轉換銷售單為 Transaction 格式
+    for so in sales_orders:
+        transaction_data = _convert_sales_order_to_transaction(so, db)
+        all_transactions.append(transaction_data)
+
+    # 按創建時間排序
+    all_transactions.sort(key=lambda x: x.createdAt, reverse=True)
+
+    # 應用分頁
+    total_transactions = all_transactions[skip:skip + limit] if limit > 0 else all_transactions[skip:]
+
+    return total_transactions
 
 @router.get("/{id}", response_model=schemas.Transaction)
 def read_transaction(id: int, db: Session = Depends(database.get_db)):
-    db_transaction = db.query(models.Transaction).filter(models.Transaction.id == id).first()
-    if db_transaction is None:
-        raise HTTPException(status_code=404, detail="Transaction not found")
-    return db_transaction
+    """
+    獲取單個交易記錄，支援：
+    1. 原有的 Transaction ID (小於 1000000)
+    2. 採購單轉換的 Transaction ID (1000000 * po_id + 1)
+    3. 銷售單轉換的 Transaction ID (1000000 * so_id + 2)
+    """
+    # 檢查是否為採購單轉換的 ID
+    if id > 1000000 and id % 1000000 == 1:
+        po_id = id // 1000000
+        purchase_order = db.query(models.PurchaseOrder).filter(
+            models.PurchaseOrder.id == po_id,
+            models.PurchaseOrder.status == models.PurchaseOrderStatus.RECEIVED
+        ).first()
+        if purchase_order is None:
+            raise HTTPException(status_code=404, detail="Purchase order transaction not found")
+        return _convert_purchase_order_to_transaction(purchase_order, db)
+
+    # 檢查是否為銷售單轉換的 ID
+    elif id > 1000000 and id % 1000000 == 2:
+        so_id = id // 1000000
+        sales_order = db.query(models.SalesOrder).filter(
+            models.SalesOrder.id == so_id,
+            models.SalesOrder.status.in_([
+                models.SalesOrderStatus.SHIPPED,
+                models.SalesOrderStatus.DELIVERED
+            ])
+        ).first()
+        if sales_order is None:
+            raise HTTPException(status_code=404, detail="Sales order transaction not found")
+        return _convert_sales_order_to_transaction(sales_order, db)
+
+    # 原有的 Transaction 查詢
+    else:
+        db_transaction = db.query(models.Transaction).filter(models.Transaction.id == id).first()
+        if db_transaction is None:
+            raise HTTPException(status_code=404, detail="Transaction not found")
+        return db_transaction
 
 @router.put("/update/{id}", response_model=schemas.Transaction)
 def update_transaction_status_endpoint( # Renamed to avoid conflict with schema name
@@ -173,36 +344,76 @@ def update_transaction_status_endpoint( # Renamed to avoid conflict with schema 
     status_update: schemas.TransactionStatusUpdate, # This expects a single 'status' field
     db: Session = Depends(database.get_db)
 ):
-    db_transaction = db.query(models.Transaction).filter(models.Transaction.id == id).first()
-    if db_transaction is None:
-        raise HTTPException(status_code=404, detail="Transaction not found")
+    """
+    更新交易狀態，支援：
+    1. 原有的 Transaction 記錄 (小於 1000000)
+    2. 採購單交易 (1000000 * po_id + 1) - 會更新對應的採購單狀態
+    3. 銷售單交易 (1000000 * so_id + 2) - 會更新對應的銷售單狀態
+    """
 
-    # Frontend sends JSON.stringify(status), so status_update.status will be the string value of the enum
-    # The Pydantic schema TransactionStatusUpdate already has 'status: TransactionStatus'
-    # So FastAPI should handle the conversion from string to the enum member.
+    # 檢查是否為採購單轉換的 ID
+    if id > 1000000 and id % 1000000 == 1:
+        po_id = id // 1000000
+        purchase_order = db.query(models.PurchaseOrder).filter(models.PurchaseOrder.id == po_id).first()
+        if purchase_order is None:
+            raise HTTPException(status_code=404, detail="Purchase order not found")
 
-    # TODO: Consider implications of changing status, e.g., rolling back stock changes if cancelled.
-    # This is complex and depends on business rules. For now, just update status.
-    if db_transaction.transactionStatus == schemas.TransactionStatus.COMPLETED and \
-       status_update.status == schemas.TransactionStatus.CANCELLED:
-        # Basic example: if cancelling a completed transaction, revert stock quantities
-        # This is a simplified example; real-world scenarios might be more complex
-        # (e.g., what if products were from multiple batches, or prices changed?)
-        for assoc in db_transaction.products:
-            db_product = db.query(models.Product).filter(models.Product.id == assoc.product_id).first()
-            if db_product:
-                if db_transaction.transactionType == schemas.TransactionType.SELL:
-                    db_product.stockQuantity += assoc.quantity # Add back stock
-                elif db_transaction.transactionType == schemas.TransactionType.PURCHASE:
-                    db_product.stockQuantity -= assoc.quantity # Remove stock
-                db.add(db_product)
+        # 將 Transaction 狀態映射到採購單狀態
+        if status_update.status == schemas.TransactionStatus.CANCELLED:
+            purchase_order.status = models.PurchaseOrderStatus.CANCELLED
+        elif status_update.status == schemas.TransactionStatus.COMPLETED:
+            purchase_order.status = models.PurchaseOrderStatus.RECEIVED
+        else:
+            raise HTTPException(status_code=400, detail="Invalid status for purchase order transaction")
 
+        purchase_order.updated_at = datetime.utcnow()
+        db.commit()
+        db.refresh(purchase_order)
+        return _convert_purchase_order_to_transaction(purchase_order, db)
 
-    db_transaction.transactionStatus = status_update.status
-    db_transaction.updatedAt = datetime.utcnow() # Manually set updatedAt if not auto by DB
-    db.commit()
-    db.refresh(db_transaction)
-    return db_transaction
+    # 檢查是否為銷售單轉換的 ID
+    elif id > 1000000 and id % 1000000 == 2:
+        so_id = id // 1000000
+        sales_order = db.query(models.SalesOrder).filter(models.SalesOrder.id == so_id).first()
+        if sales_order is None:
+            raise HTTPException(status_code=404, detail="Sales order not found")
+
+        # 將 Transaction 狀態映射到銷售單狀態
+        if status_update.status == schemas.TransactionStatus.CANCELLED:
+            sales_order.status = models.SalesOrderStatus.CANCELLED
+        elif status_update.status == schemas.TransactionStatus.COMPLETED:
+            sales_order.status = models.SalesOrderStatus.DELIVERED
+        else:
+            raise HTTPException(status_code=400, detail="Invalid status for sales order transaction")
+
+        sales_order.updated_at = datetime.utcnow()
+        db.commit()
+        db.refresh(sales_order)
+        return _convert_sales_order_to_transaction(sales_order, db)
+
+    # 原有的 Transaction 更新邏輯
+    else:
+        db_transaction = db.query(models.Transaction).filter(models.Transaction.id == id).first()
+        if db_transaction is None:
+            raise HTTPException(status_code=404, detail="Transaction not found")
+
+        # 處理庫存回滾邏輯（僅適用於原有的 Transaction）
+        if db_transaction.transactionStatus == schemas.TransactionStatus.COMPLETED and \
+           status_update.status == schemas.TransactionStatus.CANCELLED:
+            for assoc in db_transaction.products:
+                db_product = db.query(models.Product).filter(models.Product.id == assoc.product_id).first()
+                if db_product:
+                    if db_transaction.transactionType == schemas.TransactionType.SELL:
+                        db_product.stockQuantity += assoc.quantity # Add back stock
+                    elif db_transaction.transactionType == schemas.TransactionType.PURCHASE:
+                        db_product.stockQuantity -= assoc.quantity # Remove stock
+                    db.add(db_product)
+
+        db_transaction.transactionStatus = status_update.status
+        db_transaction.updatedAt = datetime.utcnow()
+        db.commit()
+        db.refresh(db_transaction)
+        return db_transaction
 
 @router.get("/by-month-year", response_model=List[schemas.Transaction])
 def read_transactions_by_month_year(

@@ -75,16 +75,7 @@ export class RegisterComponent {
       console.log('Registration error:', error);
 
       // 處理不同類型的錯誤
-      let errorMessage = "註冊失敗，請稍後再試";
-
-      if (error?.error?.detail) {
-        // FastAPI 錯誤格式
-        errorMessage = error.error.detail;
-      } else if (error?.message) {
-        errorMessage = error.message;
-      } else if (error?.error?.message) {
-        errorMessage = error.error.message;
-      }
+      const errorMessage = error?.error?.message || error?.error?.detail || error?.message || "註冊失敗，請稍後再試";
 
       this.showMessage(errorMessage, 'error');
     }

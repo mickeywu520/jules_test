@@ -16,7 +16,7 @@ def create_category(category: schemas.CategoryCreate, db: Session = Depends(data
     # Check if category with the same name already exists
     db_category = db.query(models.Category).filter(models.Category.name == category.name).first()
     if db_category:
-        raise HTTPException(status_code=400, detail=f"Category with name '{category.name}' already exists")
+        raise HTTPException(status_code=400, detail="Category with name already exists")
 
     new_category = models.Category(name=category.name)
     db.add(new_category)
@@ -46,7 +46,7 @@ def update_category(id: int, category_update: schemas.CategoryCreate, db: Sessio
     if category_update.name != db_category.name:
         existing_category_with_new_name = db.query(models.Category).filter(models.Category.name == category_update.name).first()
         if existing_category_with_new_name:
-            raise HTTPException(status_code=400, detail=f"Category with name '{category_update.name}' already exists")
+            raise HTTPException(status_code=400, detail="Category with name already exists")
 
     db_category.name = category_update.name
     db.commit()

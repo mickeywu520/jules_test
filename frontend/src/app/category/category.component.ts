@@ -38,7 +38,8 @@ export class CategoryComponent implements OnInit {
         // console.log('Initial categories fetched by CategoryComponent');
       },
       error: (error: any) => {
-        this.showMessage(error?.error?.message || error?.message || this.translate.instant("UNABLE_TO_FETCH_INITIAL_CATEGORIES") + error);
+        const errorMessage = error?.error?.message || error?.error?.detail || error?.message || this.translate.instant("UNABLE_TO_FETCH_INITIAL_CATEGORIES");
+        this.showMessage(errorMessage);
       }
     });
   }
@@ -63,7 +64,8 @@ export class CategoryComponent implements OnInit {
         });
       },
       error:(error) =>{
-        this.showMessage(error?.error?.message || error?.message || this.translate.instant("UNABLE_TO_SAVE_CATEGORY") + error)
+        const errorMessage = error?.error?.message || error?.error?.detail || error?.message || this.translate.instant("UNABLE_TO_SAVE_CATEGORY");
+        this.showMessage(errorMessage);
       }
     })
   }
@@ -91,7 +93,8 @@ export class CategoryComponent implements OnInit {
         });
       },
       error:(error) =>{
-        this.showMessage(error?.error?.message || error?.message || this.translate.instant("UNABLE_TO_EDIT_CATEGORY") + error)
+        const errorMessage = error?.error?.message || error?.error?.detail || error?.message || this.translate.instant("UNABLE_TO_EDIT_CATEGORY");
+        this.showMessage(errorMessage);
       }
     })
   }
@@ -118,7 +121,8 @@ export class CategoryComponent implements OnInit {
           }); //reload the category
         },
         error:(error) =>{
-          this.showMessage(error?.error?.message || error?.message || this.translate.instant("UNABLE_TO_DELETE_CATEGORY") + error)
+          const errorMessage = error?.error?.message || error?.error?.detail || error?.message || this.translate.instant("UNABLE_TO_DELETE_CATEGORY");
+          this.showMessage(errorMessage);
         }
       })
     }

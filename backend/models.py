@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Float, DateTime, Date, ForeignKey, Enum as SQLAlchemyEnum, Text
+from sqlalchemy import Column, Integer, String, Float, DateTime, Date, ForeignKey, Enum as SQLAlchemyEnum, Text, Boolean
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func # For default DateTime values
 import enum
@@ -142,12 +142,21 @@ class Product(Base):
     unitWeight = Column(Float, nullable=True)  # 單位重量(KG)
     barcode = Column(String, nullable=True)  # 條碼編號
     stock = Column(Integer, default=0, nullable=False)  # 庫存數量，預設為0
+
+    # 軟刪除相關欄位
+    is_deleted = Column(Boolean, default=False, nullable=False)  # 軟刪除標記
+    deleted_at = Column(DateTime(timezone=True), nullable=True)  # 刪除時間
+    deleted_by = Column(Integer, ForeignKey("users.id"), nullable=True)  # 刪除者
+
     createdAt = Column(DateTime(timezone=True), server_default=func.now())
     updatedAt = Column(DateTime(timezone=True), onupdate=func.now())
 
     # 與 Category 的關聯
     category_id = Column(Integer, ForeignKey("categories.id"), nullable=False)
     category = relationship("Category", back_populates="products")
+
+    # 軟刪除關聯
+    deleted_by_user = relationship("User", foreign_keys=[deleted_by])
 
     # 保留與交易的關聯
     transactions = relationship("TransactionProductAssociation", back_populates="product")

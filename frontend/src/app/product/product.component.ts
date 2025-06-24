@@ -38,11 +38,8 @@ export class ProductComponent implements OnInit {
         // Data is now in BehaviorSubject, products$ subscription will handle it.
       },
       error: (error: any) => {
-        this.showMessage(
-          error?.error?.message ||
-          error?.message ||
-          this.translate.instant('UNABLE_TO_FETCH_INITIAL_PRODUCTS') + error
-        );
+        const errorMessage = error?.error?.message || error?.error?.detail || error?.message || this.translate.instant('UNABLE_TO_FETCH_INITIAL_PRODUCTS');
+        this.showMessage(errorMessage);
       }
     });
   }
@@ -71,11 +68,8 @@ export class ProductComponent implements OnInit {
           }); //reload the products
         },
         error: (error) => {
-          this.showMessage(
-            error?.error?.message ||
-              error?.message ||
-              this.translate.instant('UNABLE_TO_DELETE_PRODUCT') + error
-          );
+          const errorMessage = error?.error?.message || error?.error?.detail || error?.message || this.translate.instant('UNABLE_TO_DELETE_PRODUCT');
+          this.showMessage(errorMessage);
         },
       });
     }

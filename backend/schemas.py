@@ -56,6 +56,9 @@ class ProductCreate(ProductBase):
 class Product(ProductBase):
     id: int
     stock: int = Field(default=0, description="庫存數量")  # 添加庫存欄位
+    is_deleted: bool = Field(default=False, description="是否已刪除")
+    deleted_at: Optional[datetime] = None
+    deleted_by: Optional[int] = None
     createdAt: datetime
     updatedAt: Optional[datetime] = None
     category: Optional[Category] = None  # 包含類別詳細資訊

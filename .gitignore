@@ -1,0 +1,21 @@
+# frontend
+
+# dependencies
+/frontend/node_modules
+
+# production
+/frontend/dist
+/frontend/build
+
+# misc
+/frontend/.sass-cache/
+/frontend/.vscode/
+/frontend/npm-debug.log*
+/frontend/yarn-debug.log*
+/frontend/yarn-error.log*
+/frontend/.env
+/frontend/.angular/
+/frontend/.idea/
+/frontend/.DS_Store
+
+# backend

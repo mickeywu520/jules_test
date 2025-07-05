@@ -1,0 +1,279 @@
+<div class="shipping-order-page">
+  <!-- 頁面標題區 -->
+  <div class="page-header">
+    <h1>{{ 'SHIPPING_ORDER' | translate }}</h1>
+    <div class="header-actions">
+      <button 
+        class="btn-primary" 
+        (click)="toggleShippingOrderList()"
+        *ngIf="showShippingOrderList">
+        {{ 'NEW_SHIPPING_ORDER' | translate }}
+      </button>
+      <button 
+        class="btn-secondary" 
+        (click)="toggleShippingOrderList()"
+        *ngIf="!showShippingOrderList">
+        {{ 'VIEW_SHIPPING_ORDER_LIST' | translate }}
+      </button>
+    </div>
+  </div>
+
+  <!-- Toast 訊息 -->
+  <div *ngIf="message" class="toast-message" [ngClass]="{'success': message.includes('成功'), 'error': !message.includes('成功')}">
+    {{ message }}
+  </div>
+
+  <!-- 出貨單列表 -->
+  <div *ngIf="showShippingOrderList" class="shipping-order-list">
+    <h2>{{ 'SHIPPING_ORDER_LIST' | translate }}</h2>
+    
+    <!-- 搜尋和篩選區 -->
+    <div class="search-container">
+      <div class="search-input-group">
+        <input 
+          type="text" 
+          [(ngModel)]="searchTerm" 
+          (input)="onSearchChange()"
+          [placeholder]="'SEARCH_SHIPPING_ORDER_PLACEHOLDER' | translate"
+          class="search-input">
+        
+        <select [(ngModel)]="statusFilter" (change)="onStatusFilterChange()" class="search-input">
+          <option value="">{{ 'ALL_STATUS' | translate }}</option>
+          <option *ngFor="let status of shippingOrderStatuses" [value]="status.value">
+            {{ status.label | translate }}
+          </option>
+        </select>
+        
+        <button class="btn-clear" (click)="clearSearch()">
+          {{ 'CLEAR' | translate }}
+        </button>
+      </div>
+      <div class="search-info">
+        {{ 'SEARCH_RESULTS' | translate }}: {{ filteredShippingOrders.length }} {{ 'ITEMS' | translate }}
+      </div>
+    </div>
+
+    <!-- 出貨單表格 -->
+    <div class="table-container">
+      <table class="shipping-order-table">
+        <thead>
+          <tr>
+            <th>{{ 'SHIPPING_ORDER_NUMBER' | translate }}</th>
+            <th>{{ 'SALES_ORDER_NUMBER' | translate }}</th>
+            <th>{{ 'CUSTOMER_NAME' | translate }}</th>
+            <th>{{ 'SHIPPING_DATE' | translate }}</th>
+            <th>{{ 'SHIPPER_NAME' | translate }}</th>
+            <th>{{ 'SHIPPING_METHOD' | translate }}</th>
+            <th>{{ 'STATUS' | translate }}</th>
+            <th>{{ 'ACTIONS' | translate }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let shippingOrder of filteredShippingOrders">
+            <td>{{ shippingOrder.sh_number }}</td>
+            <td>{{ shippingOrder.sales_order?.so_number || '-' }}</td>
+            <td>{{ shippingOrder.customer?.customerName || getCustomerName(shippingOrder.customer_id) }}</td>
+            <td>{{ shippingOrder.shipping_date }}</td>
+            <td>{{ shippingOrder.shipper_name || '-' }}</td>
+            <td>{{ ('SHIPPING_' + shippingOrder.shipping_method) | translate }}</td>
+            <td>
+              <select
+                [value]="shippingOrder.status"
+                (change)="onStatusChange(shippingOrder.id, $any($event.target).value)"
+                class="status-select">
+                <option *ngFor="let status of shippingOrderStatuses" [value]="status.value">
+                  {{ status.label | translate }}
+                </option>
+              </select>
+            </td>
+            <td class="actions">
+              <button 
+                class="btn-edit" 
+                (click)="editShippingOrder(shippingOrder.id)"
+                [title]="'EDIT' | translate">
+                {{ 'EDIT' | translate }}
+              </button>
+              <button 
+                class="btn-delete" 
+                (click)="deleteShippingOrder(shippingOrder.id)"
+                [title]="'DELETE' | translate"
+                *ngIf="shippingOrder.status === 'PREPARING' || shippingOrder.status === 'CANCELLED'">
+                {{ 'DELETE' | translate }}
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      
+      <!-- 無資料顯示 -->
+      <div *ngIf="filteredShippingOrders.length === 0" class="no-items">
+        <p>{{ 'NO_SHIPPING_ORDERS_MESSAGE' | translate }}</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 出貨單表單 -->
+  <div *ngIf="!showShippingOrderList" class="shipping-order-form">
+    <form #shippingOrderForm="ngForm" (ngSubmit)="createFromSalesOrder()">
+      
+      <!-- 出貨單主檔 -->
+      <div class="form-section">
+        <h2>{{ 'SHIPPING_ORDER_HEADER' | translate }}</h2>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label for="sales_order_id">{{ 'SALES_ORDER' | translate }} *</label>
+            <select 
+              id="sales_order_id" 
+              name="sales_order_id" 
+              [(ngModel)]="formData.sales_order_id" 
+              (change)="onSalesOrderChange()"
+              required 
+              [disabled]="isEditing">
+              <option value="">{{ 'SELECT_SALES_ORDER' | translate }}</option>
+              <option *ngFor="let salesOrder of salesOrders" [value]="salesOrder.id">
+                {{ salesOrder.so_number }} - {{ salesOrder.customer?.customerName }}
+              </option>
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <label for="shipping_date">{{ 'SHIPPING_DATE' | translate }} *</label>
+            <input 
+              type="date" 
+              id="shipping_date" 
+              name="shipping_date" 
+              [(ngModel)]="formData.shipping_date" 
+              required>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="shipper_name">{{ 'SHIPPER_NAME' | translate }}</label>
+            <input 
+              type="text" 
+              id="shipper_name" 
+              name="shipper_name" 
+              [(ngModel)]="formData.shipper_name"
+              [placeholder]="'SHIPPER_NAME_PLACEHOLDER' | translate">
+          </div>
+          
+          <div class="form-group">
+            <label for="shipping_method">{{ 'SHIPPING_METHOD' | translate }}</label>
+            <select 
+              id="shipping_method" 
+              name="shipping_method" 
+              [(ngModel)]="formData.shipping_method">
+              <option *ngFor="let method of shippingMethods" [value]="method.value">
+                {{ method.label | translate }}
+              </option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="tracking_number">{{ 'TRACKING_NUMBER' | translate }}</label>
+            <input 
+              type="text" 
+              id="tracking_number" 
+              name="tracking_number" 
+              [(ngModel)]="formData.tracking_number"
+              [placeholder]="'TRACKING_NUMBER_PLACEHOLDER' | translate">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group full-width">
+            <label for="shipping_address">{{ 'SHIPPING_ADDRESS' | translate }}</label>
+            <textarea 
+              id="shipping_address" 
+              name="shipping_address" 
+              [(ngModel)]="formData.shipping_address"
+              [placeholder]="'SHIPPING_ADDRESS_PLACEHOLDER' | translate"
+              rows="3"></textarea>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group full-width">
+            <label for="notes">{{ 'NOTES' | translate }}</label>
+            <textarea 
+              id="notes" 
+              name="notes" 
+              [(ngModel)]="formData.notes"
+              [placeholder]="'SHIPPING_ORDER_NOTES_PLACEHOLDER' | translate"
+              rows="3"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- 出貨明細 (編輯模式時顯示) -->
+      <div *ngIf="isEditing && items.length > 0" class="form-section">
+        <h2>{{ 'SHIPPING_ORDER_ITEMS' | translate }}</h2>
+        
+        <div class="items-table">
+          <table class="items-table-content">
+            <thead>
+              <tr>
+                <th>{{ 'PRODUCT_NAME' | translate }}</th>
+                <th>{{ 'UNIT' | translate }}</th>
+                <th>{{ 'ORDERED_QUANTITY' | translate }}</th>
+                <th>{{ 'SHIPPED_QUANTITY' | translate }}</th>
+                <th>{{ 'BATCH_NUMBER' | translate }}</th>
+                <th>{{ 'NOTES' | translate }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let item of items; let i = index" class="item-row">
+                <td>{{ item.product?.productName || '-' }}</td>
+                <td class="unit-display">{{ item.product?.unit || '-' }}</td>
+                <td>{{ item.ordered_quantity }}</td>
+                <td>
+                  <input 
+                    type="number" 
+                    [(ngModel)]="item.shipped_quantity" 
+                    [name]="'shipped_quantity_' + i"
+                    min="0" 
+                    [max]="item.ordered_quantity"
+                    [class.stock-warning]="item.shipped_quantity > (item.product?.stock || 0)">
+                </td>
+                <td>
+                  <input 
+                    type="text" 
+                    [(ngModel)]="item.batch_number" 
+                    [name]="'batch_number_' + i"
+                    [placeholder]="'BATCH_NUMBER_PLACEHOLDER' | translate">
+                </td>
+                <td>
+                  <input 
+                    type="text" 
+                    [(ngModel)]="item.notes" 
+                    [name]="'item_notes_' + i"
+                    [placeholder]="'ITEM_NOTES_PLACEHOLDER' | translate">
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- 表單操作按鈕 -->
+      <div class="form-actions">
+        <button 
+          type="submit" 
+          class="btn-primary"
+          [disabled]="!shippingOrderForm.form.valid || !formData.sales_order_id">
+          {{ isEditing ? ('UPDATE_SHIPPING_ORDER' | translate) : ('CREATE_SHIPPING_ORDER' | translate) }}
+        </button>
+        <button 
+          type="button" 
+          class="btn-secondary" 
+          (click)="resetForm()">
+          {{ 'RESET' | translate }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

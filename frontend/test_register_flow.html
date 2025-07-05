@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>註冊流程測試</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ccc; }
+        .success { color: green; }
+        .error { color: red; }
+        button { padding: 10px 15px; margin: 5px; }
+        input { padding: 8px; margin: 5px; width: 200px; }
+    </style>
+</head>
+<body>
+    <h1>註冊流程測試工具</h1>
+    
+    <div class="test-section">
+        <h2>1. 測試註冊 API</h2>
+        <input type="email" id="email" placeholder="電子郵件" value="test@example.com">
+        <input type="text" id="name" placeholder="姓名" value="測試用戶">
+        <input type="text" id="phone" placeholder="電話" value="0912345678">
+        <input type="password" id="password" placeholder="密碼" value="password123">
+        <br>
+        <button onclick="testRegister()">測試註冊</button>
+        <div id="registerResult"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>2. 測試登入 API</h2>
+        <input type="email" id="loginEmail" placeholder="電子郵件" value="test@example.com">
+        <input type="password" id="loginPassword" placeholder="密碼" value="password123">
+        <br>
+        <button onclick="testLogin()">測試登入</button>
+        <div id="loginResult"></div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8000/api';
+
+        async function testRegister() {
+            const email = document.getElementById('email').value;
+            const name = document.getElementById('name').value;
+            const phone = document.getElementById('phone').value;
+            const password = document.getElementById('password').value;
+            
+            const resultDiv = document.getElementById('registerResult');
+            resultDiv.innerHTML = '測試中...';
+
+            try {
+                const response = await fetch(`${API_BASE}/auth/register`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        email: email,
+                        name: name,
+                        phoneNumber: phone,
+                        password: password
+                    })
+                });
+
+                console.log('註冊回應狀態:', response.status);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log('註冊回應資料:', data);
+                    
+                    resultDiv.innerHTML = `
+                        <div class="success">
+                            <h3>註冊成功！</h3>
+                            <p>狀態碼: ${response.status}</p>
+                            <p>用戶 ID: ${data.id}</p>
+                            <p>用戶名稱: ${data.name}</p>
+                            <p>電子郵件: ${data.email}</p>
+                            <p>電話: ${data.phoneNumber}</p>
+                            <p>角色: ${data.role}</p>
+                            <pre>${JSON.stringify(data, null, 2)}</pre>
+                        </div>
+                    `;
+                } else {
+                    const errorData = await response.json();
+                    console.log('註冊錯誤:', errorData);
+                    
+                    resultDiv.innerHTML = `
+                        <div class="error">
+                            <h3>註冊失敗</h3>
+                            <p>狀態碼: ${response.status}</p>
+                            <p>錯誤訊息: ${errorData.detail || errorData.message || '未知錯誤'}</p>
+                            <pre>${JSON.stringify(errorData, null, 2)}</pre>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('註冊請求錯誤:', error);
+                resultDiv.innerHTML = `
+                    <div class="error">
+                        <h3>請求失敗</h3>
+                        <p>錯誤: ${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+
+        async function testLogin() {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            const resultDiv = document.getElementById('loginResult');
+            resultDiv.innerHTML = '測試中...';
+
+            try {
+                const response = await fetch(`${API_BASE}/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        email: email,
+                        password: password
+                    })
+                });
+
+                console.log('登入回應狀態:', response.status);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log('登入回應資料:', data);
+                    
+                    resultDiv.innerHTML = `
+                        <div class="success">
+                            <h3>登入成功！</h3>
+                            <p>狀態碼: ${response.status}</p>
+                            <p>Token 類型: ${data.token_type}</p>
+                            <p>Access Token: ${data.access_token ? '已獲得' : '未獲得'}</p>
+                            <pre>${JSON.stringify(data, null, 2)}</pre>
+                        </div>
+                    `;
+                } else {
+                    const errorData = await response.json();
+                    console.log('登入錯誤:', errorData);
+                    
+                    resultDiv.innerHTML = `
+                        <div class="error">
+                            <h3>登入失敗</h3>
+                            <p>狀態碼: ${response.status}</p>
+                            <p>錯誤訊息: ${errorData.detail || errorData.message || '未知錯誤'}</p>
+                            <pre>${JSON.stringify(errorData, null, 2)}</pre>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('登入請求錯誤:', error);
+                resultDiv.innerHTML = `
+                    <div class="error">
+                        <h3>請求失敗</h3>
+                        <p>錯誤: ${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+
+        // 頁面載入時的說明
+        window.onload = function() {
+            console.log('註冊流程測試工具已載入');
+            console.log('請確認後端服務正在運行於 http://localhost:8000');
+        };
+    </script>
+</body>
+</html>

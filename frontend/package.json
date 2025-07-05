@@ -21,8 +21,10 @@
     "@ngx-translate/core": "^16.0.4",
     "@ngx-translate/http-loader": "^16.0.1",
     "crypto-js": "^4.2.0",
+    "file-saver": "^2.0.5",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",
+    "xlsx": "^0.18.5",
     "zone.js": "~0.14.10"
   },
   "devDependencies": {
@@ -31,6 +33,7 @@
     "@angular/compiler-cli": "^18.2.0",
     "@swimlane/ngx-charts": "^20.5.0",
     "@types/crypto-js": "^4.2.2",
+    "@types/file-saver": "^2.0.5",
     "@types/jasmine": "~5.1.0",
     "jasmine-core": "~5.2.0",
     "karma": "~6.4.0",

@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Data Structure Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+        .data-display {
+            background-color: #f0f0f0;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .error {
+            color: red;
+            background-color: #ffe6e6;
+        }
+        .success {
+            color: green;
+            background-color: #e6ffe6;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .analysis {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <h1>API Data Structure Test</h1>
+    <p>This script will test the API endpoints and analyze the data structure to identify issues.</p>
+    
+    <div class="test-section">
+        <h2>Authentication Status</h2>
+        <button onclick="checkAuthStatus()">Check Authentication</button>
+        <div id="auth-status" class="data-display"></div>
+        <div style="margin-top: 10px;">
+            <strong>If authentication fails:</strong><br>
+            1. Make sure you're logged into the main application<br>
+            2. The token should be automatically available in localStorage<br>
+            3. Try refreshing this page after logging in
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>Test 1: Get All Transactions</h2>
+        <button onclick="testGetAllTransactions()">Test getAllTransactions API</button>
+        <div id="transactions-result" class="data-display"></div>
+        <div id="transactions-analysis" class="analysis" style="display: none;"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Test 2: Analyze Transaction Structure</h2>
+        <button onclick="analyzeTransactionStructure()">Analyze Transaction Data Structure</button>
+        <div id="structure-result" class="data-display"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Test 3: Filter SELL Transactions</h2>
+        <button onclick="testSellTransactions()">Test SELL Transaction Filtering</button>
+        <div id="sell-result" class="data-display"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Test 4: Check Customer and Product Data</h2>
+        <button onclick="testCustomerProductData()">Check Customer & Product Data</button>
+        <div id="customer-product-result" class="data-display"></div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js"></script>
+    <script>
+        let allTransactions = [];
+        const API_BASE_URL = 'http://localhost:5050/api';
+
+        // Get auth token from localStorage (handling encryption)
+        function getAuthToken() {
+            try {
+                const encryptedToken = localStorage.getItem('token');
+                if (encryptedToken) {
+                    // Try to decrypt using CryptoJS (if available)
+                    if (typeof CryptoJS !== 'undefined') {
+                        const decryptedToken = CryptoJS.AES.decrypt(encryptedToken, 'phegon-dev-inventory').toString(CryptoJS.enc.Utf8);
+                        return decryptedToken;
+                    } else {
+                        // If CryptoJS not available, try the encrypted token directly
+                        return encryptedToken;
+                    }
+                }
+            } catch (e) {
+                console.error('Error getting token:', e);
+            }
+            return null;
+        }
+
+        function getHeaders() {
+            const token = getAuthToken();
+            const headers = {
+                'Content-Type': 'application/json'
+            };
+            if (token) {
+                headers['Authorization'] = `Bearer ${token}`;
+            }
+            return headers;
+        }
+
+        async function testGetAllTransactions() {
+            const resultDiv = document.getElementById('transactions-result');
+            const analysisDiv = document.getElementById('transactions-analysis');
+            
+            try {
+                resultDiv.textContent = 'Loading...';
+                
+                const response = await fetch(`${API_BASE_URL}/transactions/all`, {
+                    method: 'GET',
+                    headers: getHeaders()
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const data = await response.json();
+                allTransactions = data;
+
+                resultDiv.className = 'data-display success';
+                resultDiv.textContent = `✅ Success! Retrieved ${data.length} transactions\n\n` + 
+                                       `Sample data (first transaction):\n${JSON.stringify(data[0], null, 2)}`;
+
+                // Show analysis
+                analysisDiv.style.display = 'block';
+                analysisDiv.innerHTML = `
+                    <strong>Analysis:</strong><br>
+                    • Total transactions: ${data.length}<br>
+                    • Transaction types found: ${[...new Set(data.map(t => t.transactionType))].join(', ')}<br>
+                    • SELL transactions: ${data.filter(t => t.transactionType === 'SELL').length}<br>
+                    • PURCHASE transactions: ${data.filter(t => t.transactionType === 'PURCHASE').length}<br>
+                    • Transactions with customer data: ${data.filter(t => t.customer).length}<br>
+                    • Transactions with products data: ${data.filter(t => t.products && t.products.length > 0).length}
+                `;
+
+            } catch (error) {
+                resultDiv.className = 'data-display error';
+                resultDiv.textContent = `❌ Error: ${error.message}\n\nPlease make sure:\n1. Backend server is running on localhost:5050\n2. You are logged in to the application\n3. CORS is properly configured`;
+                analysisDiv.style.display = 'none';
+            }
+        }
+
+        function analyzeTransactionStructure() {
+            const resultDiv = document.getElementById('structure-result');
+            
+            if (allTransactions.length === 0) {
+                resultDiv.className = 'data-display error';
+                resultDiv.textContent = '❌ No transaction data available. Please run "Get All Transactions" test first.';
+                return;
+            }
+
+            let analysis = 'Transaction Structure Analysis:\n\n';
+            
+            // Analyze first few transactions
+            const sampleSize = Math.min(5, allTransactions.length);
+            for (let i = 0; i < sampleSize; i++) {
+                const transaction = allTransactions[i];
+                analysis += `Transaction ${i + 1} (ID: ${transaction.id}):\n`;
+                analysis += `  Type: ${transaction.transactionType}\n`;
+                analysis += `  Has customer: ${!!transaction.customer}\n`;
+                if (transaction.customer) {
+                    analysis += `    Customer Code: ${transaction.customer.customerCode || 'N/A'}\n`;
+                    analysis += `    Customer Name: ${transaction.customer.customerName || 'N/A'}\n`;
+                }
+                analysis += `  Has products: ${!!(transaction.products && transaction.products.length > 0)}\n`;
+                if (transaction.products && transaction.products.length > 0) {
+                    analysis += `    Products count: ${transaction.products.length}\n`;
+                    const firstProduct = transaction.products[0];
+                    analysis += `    First product has product data: ${!!firstProduct.product}\n`;
+                    if (firstProduct.product) {
+                        analysis += `      Product Code: ${firstProduct.product.productCode || 'N/A'}\n`;
+                        analysis += `      Product Name: ${firstProduct.product.productName || 'N/A'}\n`;
+                    }
+                    analysis += `    Has unit_price: ${firstProduct.unit_price !== undefined}\n`;
+                    analysis += `    Has line_total: ${firstProduct.line_total !== undefined}\n`;
+                }
+                analysis += `  Has user: ${!!transaction.user}\n`;
+                if (transaction.user) {
+                    analysis += `    User ID: ${transaction.user.id || 'N/A'}\n`;
+                    analysis += `    User Name: ${transaction.user.name || 'N/A'}\n`;
+                }
+                analysis += '\n';
+            }
+
+            resultDiv.className = 'data-display';
+            resultDiv.textContent = analysis;
+        }
+
+        function testSellTransactions() {
+            const resultDiv = document.getElementById('sell-result');
+            
+            if (allTransactions.length === 0) {
+                resultDiv.className = 'data-display error';
+                resultDiv.textContent = '❌ No transaction data available. Please run "Get All Transactions" test first.';
+                return;
+            }
+
+            const sellTransactions = allTransactions.filter(t => t.transactionType === 'SELL');
+            
+            let analysis = `SELL Transactions Analysis:\n\n`;
+            analysis += `Total SELL transactions: ${sellTransactions.length}\n`;
+            analysis += `Total transactions: ${allTransactions.length}\n`;
+            analysis += `Percentage SELL: ${((sellTransactions.length / allTransactions.length) * 100).toFixed(1)}%\n\n`;
+
+            if (sellTransactions.length > 0) {
+                analysis += 'Sample SELL transactions:\n';
+                const sampleSize = Math.min(3, sellTransactions.length);
+                for (let i = 0; i < sampleSize; i++) {
+                    const transaction = sellTransactions[i];
+                    analysis += `\nSELL Transaction ${i + 1}:\n`;
+                    analysis += `  ID: ${transaction.id}\n`;
+                    analysis += `  Date: ${transaction.createdAt}\n`;
+                    analysis += `  Total Price: ${transaction.totalPrice}\n`;
+                    analysis += `  Customer: ${transaction.customer?.customerName || 'N/A'}\n`;
+                    analysis += `  Products: ${transaction.products?.length || 0}\n`;
+                }
+            }
+
+            resultDiv.className = 'data-display';
+            resultDiv.textContent = analysis;
+        }
+
+        function testCustomerProductData() {
+            const resultDiv = document.getElementById('customer-product-result');
+            
+            if (allTransactions.length === 0) {
+                resultDiv.className = 'data-display error';
+                resultDiv.textContent = '❌ No transaction data available. Please run "Get All Transactions" test first.';
+                return;
+            }
+
+            const sellTransactions = allTransactions.filter(t => t.transactionType === 'SELL');
+            
+            let analysis = 'Customer & Product Data Analysis:\n\n';
+            
+            // Customer data analysis
+            const transactionsWithCustomer = sellTransactions.filter(t => t.customer);
+            const transactionsWithCustomerCode = sellTransactions.filter(t => t.customer?.customerCode);
+            const transactionsWithCustomerName = sellTransactions.filter(t => t.customer?.customerName);
+            
+            analysis += `Customer Data:\n`;
+            analysis += `  SELL transactions with customer object: ${transactionsWithCustomer.length}/${sellTransactions.length}\n`;
+            analysis += `  SELL transactions with customer code: ${transactionsWithCustomerCode.length}/${sellTransactions.length}\n`;
+            analysis += `  SELL transactions with customer name: ${transactionsWithCustomerName.length}/${sellTransactions.length}\n\n`;
+
+            // Product data analysis
+            const transactionsWithProducts = sellTransactions.filter(t => t.products && t.products.length > 0);
+            let transactionsWithProductDetails = 0;
+            let transactionsWithProductCode = 0;
+            let transactionsWithProductName = 0;
+            let transactionsWithUnitPrice = 0;
+            let transactionsWithLineTotal = 0;
+
+            sellTransactions.forEach(t => {
+                if (t.products && t.products.length > 0) {
+                    t.products.forEach(p => {
+                        if (p.product) transactionsWithProductDetails++;
+                        if (p.product?.productCode) transactionsWithProductCode++;
+                        if (p.product?.productName) transactionsWithProductName++;
+                        if (p.unit_price !== undefined) transactionsWithUnitPrice++;
+                        if (p.line_total !== undefined) transactionsWithLineTotal++;
+                    });
+                }
+            });
+
+            analysis += `Product Data:\n`;
+            analysis += `  SELL transactions with products array: ${transactionsWithProducts.length}/${sellTransactions.length}\n`;
+            analysis += `  Product associations with product details: ${transactionsWithProductDetails}\n`;
+            analysis += `  Product associations with product code: ${transactionsWithProductCode}\n`;
+            analysis += `  Product associations with product name: ${transactionsWithProductName}\n`;
+            analysis += `  Product associations with unit_price: ${transactionsWithUnitPrice}\n`;
+            analysis += `  Product associations with line_total: ${transactionsWithLineTotal}\n\n`;
+
+            // Sample data
+            if (transactionsWithCustomer.length > 0) {
+                const sampleTransaction = transactionsWithCustomer[0];
+                analysis += `Sample transaction with customer data:\n`;
+                analysis += JSON.stringify({
+                    id: sampleTransaction.id,
+                    customer: sampleTransaction.customer,
+                    products: sampleTransaction.products?.slice(0, 1) // First product only
+                }, null, 2);
+            }
+
+            resultDiv.className = 'data-display';
+            resultDiv.textContent = analysis;
+        }
+
+        function checkAuthStatus() {
+            const resultDiv = document.getElementById('auth-status');
+            const token = getAuthToken();
+            
+            if (!token) {
+                resultDiv.className = 'data-display error';
+                resultDiv.textContent = '❌ No authentication token found in localStorage.\n\nPlease:\n1. Log into the main application first\n2. Refresh this page\n3. Try again';
+                return;
+            }
+            
+            resultDiv.className = 'data-display success';
+            resultDiv.textContent = `✅ Token found!\nToken length: ${token.length} characters\nToken preview: ${token.substring(0, 50)}...`;
+        }
+
+        // Auto-run auth check when page loads
+        window.onload = function() {
+            console.log('Page loaded. Checking authentication status...');
+            checkAuthStatus();
+        };
+    </script>
+</body>
+</html>

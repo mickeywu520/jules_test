@@ -119,6 +119,9 @@ def _convert_sales_order_to_transaction(sales_order: models.SalesOrder, db: Sess
     # 設置關聯資料
     transaction.user = sales_order.salesperson
     transaction.supplier = None
+    
+    # 添加客戶資訊 - 這是關鍵修正
+    transaction.customer = sales_order.customer
 
     # 轉換產品關聯
     transaction.products = []
@@ -128,7 +131,11 @@ def _convert_sales_order_to_transaction(sales_order: models.SalesOrder, db: Sess
             product_id=item.product_id,
             quantity=item.quantity
         )
+        # 確保產品資訊完整載入
         assoc.product = item.product
+        # 添加單價資訊到關聯中（雖然模型中沒有這個欄位，但我們可以動態添加）
+        assoc.unit_price = item.unit_price
+        assoc.line_total = item.line_total
         transaction.products.append(assoc)
 
     return transaction

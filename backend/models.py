@@ -183,6 +183,9 @@ class Transaction(Base):
 
     # For Many-to-Many relationship between Transaction and Product
     products = relationship("TransactionProductAssociation", back_populates="transaction")
+    
+    # 添加客戶關聯 - 動態屬性，不存儲在資料庫中
+    customer = None
 
 # Association table for Many-to-Many relationship between Transaction and Product
 # Based on your schema, a transaction seems to be linked to *a* product, but the `totalProducts`

@@ -159,7 +159,9 @@ async def shutdown_event():
 # Mount the static directory to serve product images
 # The path "/static" means that files in "backend/static" directory will be accessible via "/static/..." URL
 # For example, an image at "backend/static/product_images/foo.jpg" will be at "/static/product_images/foo.jpg"
-app.mount("/static", StaticFiles(directory="backend/static"), name="static")
+import os
+static_dir = os.path.join(os.path.dirname(__file__), "static")
+app.mount("/static", StaticFiles(directory=static_dir), name="static")
 
 
 # --- API Routers ---

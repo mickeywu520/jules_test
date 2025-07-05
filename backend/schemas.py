@@ -164,19 +164,21 @@ class User(UserBase): # For Read operations (e.g., /users/current)
         from_attributes = True
 
 
-# Schemas for TransactionProductAssociation (if needed directly in API, often handled via Transaction)
+# Schemas for TransactionProductAssociation (enhanced with pricing information)
 class TransactionProductAssociationBase(BaseModel):
     product_id: int
     quantity: Optional[int] = 1
+    unit_price: Optional[float] = None
+    line_total: Optional[float] = None
+    notes: Optional[str] = None
 
 class TransactionProductAssociationCreate(TransactionProductAssociationBase):
     pass
 
 class TransactionProductAssociation(TransactionProductAssociationBase): # For Read
-    # Potentially include product details if needed when reading this association directly
-    # product: Product # This could cause circular dependencies if not handled carefully.
-    # For now, keeping it simple as the frontend likely gets product details via the Transaction schema.
-    pass
+    # Include product details for complete information
+    product: Optional[Product] = None
+
     class Config:
         from_attributes = True
 
@@ -191,6 +193,7 @@ class TransactionBase(BaseModel):
     note: Optional[str] = None
     user_id: Optional[int] = None # Assuming user_id is set based on authenticated user
     supplier_id: Optional[int] = None
+    customer_id: Optional[int] = None # For sell transactions
     # For creating transactions, the frontend might send a list of products involved
     # This needs to align with how api.service.ts sends data for purchase/sell
     # For example: products_involved: List[TransactionProductAssociationCreate]
@@ -207,6 +210,7 @@ class Transaction(TransactionBase): # For Read operations
     updatedAt: Optional[datetime] = None
     user: Optional[User] = None # Nested user details
     supplier: Optional[Supplier] = None # Nested supplier details
+    customer: Optional[Customer] = None # Nested customer details for sell transactions
     products: List[TransactionProductAssociation] # List of products involved in the transaction
 
     class Config:

@@ -87,8 +87,12 @@ def _convert_purchase_order_to_transaction(purchase_order: models.PurchaseOrder,
         assoc = models.TransactionProductAssociation(
             transaction_id=transaction.id,
             product_id=item.product_id,
-            quantity=item.quantity
+            quantity=item.quantity,
+            unit_price=item.unit_price,
+            line_total=item.line_total,
+            notes=item.notes
         )
+        # 確保產品資訊完整載入
         assoc.product = item.product
         transaction.products.append(assoc)
 
@@ -113,7 +117,8 @@ def _convert_sales_order_to_transaction(sales_order: models.SalesOrder, db: Sess
         createdAt=sales_order.created_at,
         updatedAt=sales_order.updated_at,
         user_id=sales_order.salesperson_id,
-        supplier_id=None  # 銷售單沒有供應商
+        supplier_id=None,  # 銷售單沒有供應商
+        customer_id=sales_order.customer_id  # 設置客戶ID
     )
 
     # 設置關聯資料
@@ -129,13 +134,13 @@ def _convert_sales_order_to_transaction(sales_order: models.SalesOrder, db: Sess
         assoc = models.TransactionProductAssociation(
             transaction_id=transaction.id,
             product_id=item.product_id,
-            quantity=item.quantity
+            quantity=item.quantity,
+            unit_price=item.unit_price,
+            line_total=item.line_total,
+            notes=item.notes
         )
         # 確保產品資訊完整載入
         assoc.product = item.product
-        # 添加單價資訊到關聯中（雖然模型中沒有這個欄位，但我們可以動態添加）
-        assoc.unit_price = item.unit_price
-        assoc.line_total = item.line_total
         transaction.products.append(assoc)
 
     return transaction
@@ -236,24 +241,38 @@ def read_transactions(
     """
     all_transactions = []
 
-    # 1. 獲取原有的 Transaction 記錄
-    original_query = db.query(models.Transaction)
+    # 1. 獲取原有的 Transaction 記錄，預載入所有關聯資料
+    from sqlalchemy.orm import joinedload
+
+    original_query = db.query(models.Transaction).options(
+        joinedload(models.Transaction.user),
+        joinedload(models.Transaction.supplier),
+        joinedload(models.Transaction.customer),
+        joinedload(models.Transaction.products).joinedload(models.TransactionProductAssociation.product)
+    )
+
     if searchText:
         search_term = f"%{searchText.lower()}%"
-        original_query = original_query.join(models.User).outerjoin(models.Supplier).filter(
+        original_query = original_query.join(models.User).outerjoin(models.Supplier).outerjoin(models.Customer).filter(
             models.Transaction.id.cast(str).ilike(search_term) |
             models.Transaction.description.ilike(search_term) |
             models.Transaction.note.ilike(search_term) |
             models.User.name.ilike(search_term) |
             models.User.email.ilike(search_term) |
-            models.Supplier.name.ilike(search_term)
+            models.Supplier.name.ilike(search_term) |
+            models.Customer.customerName.ilike(search_term) |
+            models.Customer.customerCode.ilike(search_term)
         )
 
     original_transactions = original_query.order_by(models.Transaction.createdAt.desc()).all()
     all_transactions.extend(original_transactions)
 
-    # 2. 獲取已完成的採購單並轉換為 Transaction 格式
-    purchase_query = db.query(models.PurchaseOrder).filter(
+    # 2. 獲取已完成的採購單並轉換為 Transaction 格式，預載入關聯資料
+    purchase_query = db.query(models.PurchaseOrder).options(
+        joinedload(models.PurchaseOrder.purchaser),
+        joinedload(models.PurchaseOrder.supplier),
+        joinedload(models.PurchaseOrder.items).joinedload(models.PurchaseOrderItem.product)
+    ).filter(
         models.PurchaseOrder.status == models.PurchaseOrderStatus.RECEIVED
     )
     if searchText:
@@ -273,8 +292,12 @@ def read_transactions(
         transaction_data = _convert_purchase_order_to_transaction(po, db)
         all_transactions.append(transaction_data)
 
-    # 3. 獲取已出貨的銷售單並轉換為 Transaction 格式
-    sales_query = db.query(models.SalesOrder).filter(
+    # 3. 獲取已出貨的銷售單並轉換為 Transaction 格式，預載入關聯資料
+    sales_query = db.query(models.SalesOrder).options(
+        joinedload(models.SalesOrder.salesperson),
+        joinedload(models.SalesOrder.customer),
+        joinedload(models.SalesOrder.items).joinedload(models.SalesOrderItem.product)
+    ).filter(
         models.SalesOrder.status.in_([
             models.SalesOrderStatus.SHIPPED,
             models.SalesOrderStatus.DELIVERED

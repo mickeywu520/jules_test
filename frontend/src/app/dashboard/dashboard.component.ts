@@ -296,6 +296,57 @@ export class DashboardComponent {
     this.excelPreviewData = [];
   }
 
+  // Get Excel preview rows with product details (first 5 rows)
+  getExcelPreviewRows(): any[] {
+    const previewRows: any[] = [];
+
+    for (const transaction of this.excelPreviewData.slice(0, 5)) {
+      const customerCode = transaction.customer?.customerCode || '-';
+      const customerName = transaction.customer?.customerName || '-';
+      const productDetails = transaction.products || [];
+
+      if (productDetails.length > 0) {
+        // Create separate rows for each product in the transaction
+        for (const productAssoc of productDetails) {
+          const unitPrice = productAssoc.unit_price || productAssoc.product?.price || 0;
+          const lineTotal = productAssoc.line_total || (unitPrice * productAssoc.quantity);
+
+          previewRows.push({
+            date: new Date(transaction.createdAt).toLocaleDateString(),
+            customerCode: customerCode,
+            customerName: customerName,
+            salesOrderNumber: transaction.id,
+            productCode: productAssoc.product?.productCode || '-',
+            productName: productAssoc.product?.productName || '-',
+            quantity: productAssoc.quantity || 0,
+            salespersonName: transaction.user?.name || '-',
+            totalAmount: lineTotal.toFixed(2),
+            note: productAssoc.notes || transaction.note || '-'
+          });
+        }
+      } else {
+        // If no product details, create single row with transaction info
+        previewRows.push({
+          date: new Date(transaction.createdAt).toLocaleDateString(),
+          customerCode: customerCode,
+          customerName: customerName,
+          salesOrderNumber: transaction.id,
+          productCode: '-',
+          productName: '-',
+          quantity: transaction.totalProducts || 0,
+          salespersonName: transaction.user?.name || '-',
+          totalAmount: transaction.totalPrice.toFixed(2),
+          note: transaction.note || '-'
+        });
+      }
+
+      // Limit to 5 rows total for preview
+      if (previewRows.length >= 5) break;
+    }
+
+    return previewRows;
+  }
+
   // Get daily report data - SALES ONLY
   getDailyReportData(): any[] {
     // If specific date is selected, use it; otherwise use today
@@ -554,23 +605,55 @@ export class DashboardComponent {
     ];
   }
 
-  // Generate preview transaction data (first 10 records)
+  // Generate preview transaction data (first 10 records with product details)
   generatePreviewTransactionData(transactions: any[]): any[] {
-    return transactions.slice(0, 10).map(transaction => {
-      // 現在所有銷售交易都應該有客戶資訊
+    const previewData: any[] = [];
+
+    for (const transaction of transactions.slice(0, 10)) {
       const customerCode = transaction.customer?.customerCode || 'N/A';
       const customerName = transaction.customer?.customerName || 'N/A';
-      
-      return {
-        date: new Date(transaction.createdAt).toLocaleDateString(),
-        id: transaction.id,
-        customerCode: customerCode,
-        customerName: customerName,
-        salesperson: transaction.user?.name || 'N/A',
-        amount: transaction.totalPrice.toFixed(2),
-        status: transaction.transactionStatus
-      };
-    });
+      const productDetails = transaction.products || [];
+
+      if (productDetails.length > 0) {
+        // Create separate rows for each product in the transaction
+        for (const productAssoc of productDetails) {
+          const unitPrice = productAssoc.unit_price || productAssoc.product?.price || 0;
+          const lineTotal = productAssoc.line_total || (unitPrice * productAssoc.quantity);
+
+          previewData.push({
+            date: new Date(transaction.createdAt).toLocaleDateString(),
+            id: transaction.id,
+            customerCode: customerCode,
+            customerName: customerName,
+            productCode: productAssoc.product?.productCode || 'N/A',
+            productName: productAssoc.product?.productName || 'N/A',
+            quantity: productAssoc.quantity || 0,
+            salesperson: transaction.user?.name || 'N/A',
+            amount: lineTotal.toFixed(2),
+            note: productAssoc.notes || transaction.note || 'N/A'
+          });
+        }
+      } else {
+        // If no product details, create single row with transaction info
+        previewData.push({
+          date: new Date(transaction.createdAt).toLocaleDateString(),
+          id: transaction.id,
+          customerCode: customerCode,
+          customerName: customerName,
+          productCode: 'N/A',
+          productName: 'N/A',
+          quantity: transaction.totalProducts || 0,
+          salesperson: transaction.user?.name || 'N/A',
+          amount: transaction.totalPrice.toFixed(2),
+          note: transaction.note || 'N/A'
+        });
+      }
+
+      // Limit to 10 rows total
+      if (previewData.length >= 10) break;
+    }
+
+    return previewData;
   }
 
   // Generate preview performance data

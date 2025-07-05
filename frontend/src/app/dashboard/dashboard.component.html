@@ -99,8 +99,12 @@
                  <th>{{ 'TRANSACTION_ID' | translate }}</th>
                  <th>{{ 'CUSTOMER_CODE' | translate }}</th>
                  <th>{{ 'CUSTOMER_NAME' | translate }}</th>
+                 <th>{{ 'PRODUCT_CODE' | translate }}</th>
+                 <th>{{ 'PRODUCT_NAME' | translate }}</th>
+                 <th>{{ 'QUANTITY' | translate }}</th>
                  <th>{{ 'SALESPERSON_NAME' | translate }}</th>
                  <th>{{ 'TOTAL_AMOUNT' | translate }}</th>
+                 <th>{{ 'NOTE' | translate }}</th>
                </tr>
              </thead>
              <tbody>
@@ -109,8 +113,12 @@
                  <td>{{ transaction.id }}</td>
                  <td>{{ transaction.customerCode }}</td>
                  <td>{{ transaction.customerName }}</td>
+                 <td>{{ transaction.productCode }}</td>
+                 <td>{{ transaction.productName }}</td>
+                 <td>{{ transaction.quantity }}</td>
                  <td>{{ transaction.salesperson }}</td>
                  <td>{{ transaction.amount }}</td>
+                 <td>{{ transaction.note }}</td>
                </tr>
              </tbody>
            </table>
@@ -168,18 +176,26 @@
                      <th>{{ 'CUSTOMER_CODE' | translate }}</th>
                      <th>{{ 'CUSTOMER_NAME' | translate }}</th>
                      <th>{{ 'SALES_ORDER_NUMBER' | translate }}</th>
+                     <th>{{ 'PRODUCT_CODE' | translate }}</th>
+                     <th>{{ 'PRODUCT_NAME' | translate }}</th>
+                     <th>{{ 'QUANTITY' | translate }}</th>
                      <th>{{ 'SALESPERSON_NAME' | translate }}</th>
                      <th>{{ 'TOTAL_AMOUNT' | translate }}</th>
+                     <th>{{ 'NOTE' | translate }}</th>
                    </tr>
                  </thead>
                  <tbody>
-                   <tr *ngFor="let transaction of excelPreviewData.slice(0, 5)">
-                     <td>{{ transaction.createdAt | date:'short' }}</td>
-                     <td>{{ transaction.customer?.customerCode || '-' }}</td>
-                     <td>{{ transaction.customer?.customerName || '-' }}</td>
-                     <td>{{ transaction.id }}</td>
-                     <td>{{ transaction.user?.name || '-' }}</td>
-                     <td>{{ transaction.totalPrice | currency }}</td>
+                   <tr *ngFor="let row of getExcelPreviewRows()">
+                     <td>{{ row.date }}</td>
+                     <td>{{ row.customerCode }}</td>
+                     <td>{{ row.customerName }}</td>
+                     <td>{{ row.salesOrderNumber }}</td>
+                     <td>{{ row.productCode }}</td>
+                     <td>{{ row.productName }}</td>
+                     <td>{{ row.quantity }}</td>
+                     <td>{{ row.salespersonName }}</td>
+                     <td>{{ row.totalAmount }}</td>
+                     <td>{{ row.note }}</td>
                    </tr>
                  </tbody>
                </table>

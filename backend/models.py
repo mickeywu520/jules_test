@@ -181,23 +181,23 @@ class Transaction(Base):
     supplier_id = Column(Integer, ForeignKey("suppliers.id"), nullable=True) # A transaction might not always have a supplier (e.g., a direct sell)
     supplier = relationship("Supplier", back_populates="transactions")
 
+    # 添加客戶關聯 - 用於銷售交易
+    customer_id = Column(Integer, ForeignKey("customers.id"), nullable=True) # For sell transactions
+    customer = relationship("Customer", foreign_keys=[customer_id])
+
     # For Many-to-Many relationship between Transaction and Product
     products = relationship("TransactionProductAssociation", back_populates="transaction")
-    
-    # 添加客戶關聯 - 動態屬性，不存儲在資料庫中
-    customer = None
 
 # Association table for Many-to-Many relationship between Transaction and Product
-# Based on your schema, a transaction seems to be linked to *a* product, but the `totalProducts`
-# field suggests a transaction could involve quantities of multiple products.
-# The schema `Transaction -> Product -> PRODUCT` is a bit ambiguous for a list.
-# If a transaction can have many products and a product can be in many transactions:
+# Enhanced to include pricing information for complete transaction details
 class TransactionProductAssociation(Base):
     __tablename__ = "transaction_product_association"
     transaction_id = Column(Integer, ForeignKey("transactions.id"), primary_key=True)
     product_id = Column(Integer, ForeignKey("products.id"), primary_key=True)
     quantity = Column(Integer, default=1) # Quantity of this specific product in this transaction
-    # You might add price_at_transaction if product prices can change
+    unit_price = Column(Float, nullable=True) # Price per unit at the time of transaction
+    line_total = Column(Float, nullable=True) # Total amount for this line item (quantity * unit_price)
+    notes = Column(Text, nullable=True) # Notes specific to this product in this transaction
 
     transaction = relationship("Transaction", back_populates="products")
     product = relationship("Product", back_populates="transactions")

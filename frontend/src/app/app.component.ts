@@ -17,7 +17,6 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 export class AppComponent implements OnInit, AfterViewInit {
   title = 'ims';
   @ViewChild('navLinks', { static: false }) navLinks!: ElementRef;
-  private scrollInterval: any;
   sidebarOpen = false;
 
   constructor(
@@ -63,44 +62,26 @@ logOut():void{
     // 初始化滾動功能
   }
 
-  // 滑鼠進入導航區域下半部時開始向下滾動
-  onMouseEnterBottom(): void {
-    this.startAutoScroll('down');
-  }
+  // 滑鼠滾輪事件處理
+  onMouseWheel(event: WheelEvent): void {
+    // 阻止事件冒泡，避免影響頁面滾動
+    event.stopPropagation();
 
-  // 滑鼠進入導航區域上半部時開始向上滾動
-  onMouseEnterTop(): void {
-    this.startAutoScroll('up');
-  }
+    if (!this.navLinks) return;
 
-  // 滑鼠離開時停止滾動
-  onMouseLeave(): void {
-    this.stopAutoScroll();
-  }
+    const element = this.navLinks.nativeElement;
+    const scrollAmount = 30; // 每次滾動的像素數
 
-  // 開始自動滾動
-  private startAutoScroll(direction: 'up' | 'down'): void {
-    this.stopAutoScroll(); // 先停止之前的滾動
-
-    if (this.navLinks) {
-      const scrollSpeed = 2; // 滾動速度
-      this.scrollInterval = setInterval(() => {
-        const element = this.navLinks.nativeElement;
-        if (direction === 'down') {
-          element.scrollTop += scrollSpeed;
-        } else {
-          element.scrollTop -= scrollSpeed;
-        }
-      }, 16); // 約60fps
+    if (event.deltaY > 0) {
+      // 向下滾動
+      element.scrollTop += scrollAmount;
+    } else {
+      // 向上滾動
+      element.scrollTop -= scrollAmount;
     }
-  }
 
-  // 停止自動滾動
-  private stopAutoScroll(): void {
-    if (this.scrollInterval) {
-      clearInterval(this.scrollInterval);
-      this.scrollInterval = null;
-    }
+    // 阻止默認滾動行為
+    event.preventDefault();
   }
 
   // 切換側邊欄顯示/隱藏

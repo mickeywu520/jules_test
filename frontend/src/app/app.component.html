@@ -15,14 +15,8 @@
   <div class="sidebar" [class.open]="sidebarOpen">
     <h1 class="ims">IMS</h1>
 
-    <!-- 滾動觸發區域 - 上半部 -->
-    <div class="scroll-trigger scroll-trigger-top"
-         (mouseenter)="onMouseEnterTop()"
-         (mouseleave)="onMouseLeave()">
-    </div>
-
     <!-- 導航連結容器 -->
-    <ul class="nav-links" #navLinks (mouseleave)="onMouseLeave()">
+    <ul class="nav-links" #navLinks (wheel)="onMouseWheel($event)">
       <li *ngIf="isAuth()"><a routerLink="/dashboard" (click)="onNavItemClick()">{{ 'DASHBOARD' | translate }}</a></li>
       <li *ngIf="isAuth()"><a routerLink="/transaction" (click)="onNavItemClick()">{{ 'TRANSACTIONS' | translate }}</a></li>
       <li *ngIf="isAdmin()"><a routerLink="/category" (click)="onNavItemClick()">{{ 'CATEGORY' | translate }}</a></li>
@@ -37,12 +31,6 @@
       <li *ngIf="!isAuth()"><a routerLink="/register" (click)="onNavItemClick()">{{ 'REGISTER' | translate }}</a></li>
       <li *ngIf="isAuth()"><a (click)="logOut()" >{{ 'LOGOUT' | translate }}</a></li>
     </ul>
-
-    <!-- 滾動觸發區域 - 下半部 -->
-    <div class="scroll-trigger scroll-trigger-bottom"
-         (mouseenter)="onMouseEnterBottom()"
-         (mouseleave)="onMouseLeave()">
-    </div>
   </div>
 
   <!-- MAIN CONTENT Area-->

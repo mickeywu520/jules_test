@@ -4,17 +4,18 @@
     }
      
     .sidebar {
-     
+
     width: 13%;
     height: 100vh;
     background: linear-gradient(135deg, #1c1e21, #3a3f44);
     color: #f1f1f1;
+    display: flex;
     flex-direction: column;
-    justify-content: space-between;
     padding: 30px 0px;
     box-shadow: 5px 0 15px rgba(0, 0, 0, 0.2);
     position: fixed;
     transition: all 0.3s ease;
+    overflow: hidden;
     }
      
     .ims {
@@ -32,6 +33,85 @@
     list-style: none;
     padding: 0;
     margin: 0;
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding-right: 5px;
+    }
+
+    /* 自定義滾動條樣式 */
+    .nav-links::-webkit-scrollbar {
+    width: 6px;
+    }
+
+    .nav-links::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+    }
+
+    .nav-links::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 3px;
+    transition: background 0.3s ease;
+    }
+
+    .nav-links::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.5);
+    }
+
+    /* 滾動觸發區域樣式 */
+    .scroll-trigger {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 50px;
+    z-index: 10;
+    pointer-events: auto;
+    transition: background-color 0.3s ease;
+    }
+
+    .scroll-trigger-top {
+    top: 80px; /* 在標題下方 */
+    background: linear-gradient(to bottom, rgba(23, 162, 184, 0.1), transparent);
+    }
+
+    .scroll-trigger-bottom {
+    bottom: 20px;
+    background: linear-gradient(to top, rgba(23, 162, 184, 0.1), transparent);
+    }
+
+    .scroll-trigger:hover {
+    background-color: rgba(23, 162, 184, 0.2);
+    }
+
+    /* 滾動指示器 */
+    .scroll-trigger::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    opacity: 0.6;
+    transition: opacity 0.3s ease;
+    }
+
+    .scroll-trigger-top::after {
+    top: 15px;
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    border-bottom: 12px solid #17a2b8;
+    }
+
+    .scroll-trigger-bottom::after {
+    bottom: 15px;
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    border-top: 12px solid #17a2b8;
+    }
+
+    .scroll-trigger:hover::after {
+    opacity: 1;
     }
      
     .nav-links li {

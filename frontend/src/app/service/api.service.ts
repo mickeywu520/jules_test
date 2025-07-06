@@ -2,6 +2,7 @@ import { EventEmitter, Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, BehaviorSubject } from 'rxjs';
 import CryptoJS from "crypto-js";
+import { environment } from '../../environments/environment';
 
 
 
@@ -29,7 +30,7 @@ export class ApiService {
   public customers$ = this.customersSource.asObservable();
 
   authStatuschanged = new EventEmitter<void>();
-  private static BASE_URL = 'http://localhost:5050/api';
+  private static BASE_URL = environment.apiUrl;
   private static ENCRYPTION_KEY = "phegon-dev-inventory";
 
 
@@ -149,7 +150,7 @@ export class ApiService {
 
   // Method to get data from the new FastAPI backend
   getFastApiData(): Observable<any> {
-    return this.http.get('http://localhost:8000/api/data');
+    return this.http.get(`${ApiService.BASE_URL}/data`);
   }
 
 

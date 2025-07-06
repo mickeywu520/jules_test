@@ -28,20 +28,20 @@
         <tr *ngFor="let product of products"
             class="product-row"
             [ngClass]="{'deleted-product': product.is_deleted}">
-          <td>{{ product.category?.name || '-' }}</td>
-          <td>
+          <td [attr.data-label]="'CATEGORY' | translate">{{ product.category?.name || '-' }}</td>
+          <td [attr.data-label]="'PRODUCT_CODE' | translate">
             {{ product.productCode }}
             <span *ngIf="product.is_deleted" class="deleted-label">{{ 'DELETED' | translate }}</span>
           </td>
-          <td>
+          <td [attr.data-label]="'PRODUCT_NAME' | translate">
             {{ product.productName }}
             <span *ngIf="product.is_deleted" class="deleted-label">{{ 'DELETED' | translate }}</span>
           </td>
-          <td>{{ product.unit }}</td>
-          <td>{{ product.warehouse || '-' }}</td>
-          <td>{{ product.unitWeight ? (product.unitWeight + ' KG') : '-' }}</td>
-          <td>{{ product.barcode || '-' }}</td>
-          <td class="actions">
+          <td [attr.data-label]="'UNIT' | translate">{{ product.unit }}</td>
+          <td [attr.data-label]="'WAREHOUSE' | translate">{{ product.warehouse || '-' }}</td>
+          <td [attr.data-label]="'UNIT_WEIGHT' | translate">{{ product.unitWeight ? (product.unitWeight + ' KG') : '-' }}</td>
+          <td [attr.data-label]="'BARCODE' | translate">{{ product.barcode || '-' }}</td>
+          <td [attr.data-label]="'ACTIONS' | translate" class="actions">
             <button
               *ngIf="!product.is_deleted"
               (click)="navigateToEditProductPage(product.id)"

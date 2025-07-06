@@ -30,12 +30,12 @@
 
       <tbody>
         <tr *ngFor="let transaction of transactions">
-          <td>{{ transaction.transactionType }}</td>
-          <td>{{ transaction.transactionStatus }}</td>
-          <td>{{ transaction.totalPrice }}</td>
-          <td>{{ transaction.totalProducts }}</td>
-          <td>{{ transaction.createdAt | date : "short" }}</td>
-          <td (click)="navigateTOTransactionsDetailsPage(transaction.id)">
+          <td [attr.data-label]="'TYPE' | translate">{{ transaction.transactionType }}</td>
+          <td [attr.data-label]="'STATUS' | translate">{{ transaction.transactionStatus }}</td>
+          <td [attr.data-label]="'TOTAL_PRICE' | translate">{{ transaction.totalPrice }}</td>
+          <td [attr.data-label]="'TOTAL_PRODUCTS' | translate">{{ transaction.totalProducts }}</td>
+          <td [attr.data-label]="'DATE' | translate">{{ transaction.createdAt | date : "short" }}</td>
+          <td [attr.data-label]="'ACTIONS' | translate" (click)="navigateTOTransactionsDetailsPage(transaction.id)">
             <button>{{ 'VIEW_DETAILS' | translate }}</button>
           </td>
         </tr>

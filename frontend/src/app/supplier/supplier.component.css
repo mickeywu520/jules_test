@@ -59,4 +59,74 @@
     .supplier-actions button:last-child {
     background-color: #dc3545;
     }
+
+/* 響應式設計 */
+@media (max-width: 1024px) and (min-width: 769px) {
+  .supplier-page {
+    padding: 15px;
+  }
+
+  .supplier-item {
+    font-size: 18px;
+    padding: 15px;
+  }
+
+  .supplier-actions button {
+    font-size: 14px;
+    padding: 8px 16px;
+  }
+}
+
+@media (max-width: 768px) {
+  .supplier-page {
+    padding: 10px;
+  }
+
+  .supplier-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 15px;
+    margin-left: 0;
+  }
+
+  .supplier-header h1 {
+    font-size: 1.5rem;
+    text-align: center;
+    margin: 0;
+  }
+
+  .add-sup {
+    margin: 0;
+  }
+
+  .supplier-header button {
+    width: 100%;
+    padding: 15px;
+    font-size: 16px;
+  }
+
+  .supplier-list {
+    margin-top: 20px;
+  }
+
+  .supplier-item {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 15px;
+    font-size: 16px;
+    padding: 15px;
+  }
+
+  .supplier-actions {
+    display: flex;
+    gap: 10px;
+  }
+
+  .supplier-actions button {
+    flex: 1;
+    font-size: 14px;
+    padding: 10px;
+    margin-left: 0;
+  }
+}
     

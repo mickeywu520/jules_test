@@ -1,6 +1,18 @@
 <div class="dashboard-layout">
+  <!-- 漢堡選單按鈕 (手機版) -->
+  <button class="mobile-menu-btn" (click)="toggleSidebar()">
+    <span *ngIf="!sidebarOpen">☰</span>
+    <span *ngIf="sidebarOpen">✕</span>
+  </button>
+
+  <!-- 遮罩層 (手機版) -->
+  <div class="sidebar-overlay"
+       [class.show]="sidebarOpen"
+       (click)="closeSidebar()">
+  </div>
+
   <!-- SIDEBAR -->
-  <div class="sidebar">
+  <div class="sidebar" [class.open]="sidebarOpen">
     <h1 class="ims">IMS</h1>
 
     <!-- 滾動觸發區域 - 上半部 -->
@@ -34,7 +46,7 @@
   </div>
 
   <!-- MAIN CONTENT Area-->
-   <div class="main-content">
+   <div class="main-content" [class.sidebar-open]="sidebarOpen">
       <h1>{{ 'WELCOME_MESSAGE' | translate }}</h1>
       <router-outlet></router-outlet>
    </div>

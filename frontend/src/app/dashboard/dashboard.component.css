@@ -49,6 +49,65 @@
     cursor: not-allowed;
     }
 
+/* 響應式設計 */
+@media (max-width: 1024px) and (min-width: 769px) {
+  .dashboard-container {
+    padding: 15px;
+  }
+
+  .dashboard-container select {
+    font-size: 16px;
+    margin: 5px;
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboard-container {
+    padding: 10px;
+  }
+
+  .dashboard-container select {
+    font-size: 14px;
+    padding: 6px;
+    margin: 5px 2px;
+    width: 100%;
+    max-width: 200px;
+  }
+
+  h1 {
+    font-size: 1.5rem;
+    margin-bottom: 15px;
+  }
+
+  h2 {
+    font-size: 1.2rem;
+    margin-bottom: 10px;
+  }
+
+  /* 圖表容器響應式 */
+  ngx-charts-bar-vertical,
+  ngx-charts-pie-chart {
+    width: 100% !important;
+    height: 300px !important;
+  }
+
+  /* 導出區域手機版適配 */
+  .export-section {
+    margin-left: 0;
+    border-left: none;
+    border-top: 2px solid #e0e0e0;
+    padding-left: 0;
+    padding-top: 15px;
+    margin-top: 20px;
+  }
+
+  .export-button {
+    width: 100%;
+    max-width: 200px;
+    margin: 5px 0;
+  }
+}
+
     .controls-container {
     display: flex;
     align-items: center;

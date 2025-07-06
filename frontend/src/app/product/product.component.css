@@ -160,4 +160,130 @@
     text-align: center;
     margin-top: 50px;
     }
+
+/* 響應式設計 */
+@media (max-width: 1024px) and (min-width: 769px) {
+  .product-page {
+    padding: 15px;
+  }
+
+  .product-header h1 {
+    font-size: 1.8rem;
+  }
+
+  .product-table th,
+  .product-table td {
+    padding: 10px 12px;
+    font-size: 0.85rem;
+  }
+
+  .actions {
+    gap: 6px;
+  }
+
+  .edit-btn,
+  .delete-btn,
+  .restore-btn {
+    padding: 5px 10px;
+    font-size: 0.75rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .product-page {
+    padding: 10px;
+    background-color: #f3f4f6;
+  }
+
+  .product-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 15px;
+    margin-bottom: 1rem;
+  }
+
+  .product-header h1 {
+    font-size: 1.5rem;
+    text-align: center;
+    margin: 0;
+  }
+
+  .add-product-btn {
+    width: 100%;
+    padding: 15px;
+    font-size: 1rem;
+  }
+
+  /* 表格響應式處理 - 卡片式佈局 */
+  .product-list {
+    border-radius: 8px;
+  }
+
+  .product-table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+
+  .product-table thead {
+    display: none;
+  }
+
+  .product-table tbody {
+    display: block;
+  }
+
+  .product-table tr {
+    display: block;
+    margin-bottom: 15px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 15px;
+    background: white;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+
+  .product-table td {
+    display: block;
+    text-align: left;
+    border: none;
+    padding: 8px 0;
+    position: relative;
+    padding-left: 50%;
+    white-space: normal;
+  }
+
+  .product-table td:before {
+    content: attr(data-label) ": ";
+    position: absolute;
+    left: 0;
+    width: 45%;
+    padding-right: 10px;
+    white-space: nowrap;
+    font-weight: bold;
+    color: #17a2b8;
+  }
+
+  .actions {
+    justify-content: center;
+    margin-top: 10px;
+  }
+
+  .edit-btn,
+  .delete-btn,
+  .restore-btn {
+    padding: 8px 16px;
+    font-size: 0.85rem;
+  }
+
+  .deleted-product {
+    opacity: 0.7;
+  }
+
+  .deleted-label {
+    display: inline-block;
+    margin-left: 0;
+    margin-top: 5px;
+  }
+}
     

@@ -17,6 +17,7 @@ export class AppComponent implements OnInit, AfterViewInit {
   title = 'ims';
   @ViewChild('navLinks', { static: false }) navLinks!: ElementRef;
   private scrollInterval: any;
+  sidebarOpen = false;
 
   constructor(
     private apiService: ApiService,
@@ -92,6 +93,16 @@ logOut():void{
       clearInterval(this.scrollInterval);
       this.scrollInterval = null;
     }
+  }
+
+  // 切換側邊欄顯示/隱藏
+  toggleSidebar(): void {
+    this.sidebarOpen = !this.sidebarOpen;
+  }
+
+  // 關閉側邊欄
+  closeSidebar(): void {
+    this.sidebarOpen = false;
   }
 
 

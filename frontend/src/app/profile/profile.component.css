@@ -87,4 +87,71 @@
     opacity: 0;
     }
     }
+
+/* 響應式設計 */
+@media (max-width: 1024px) and (min-width: 769px) {
+  .profile-page {
+    padding: 15px;
+  }
+
+  .profile-card {
+    width: 70%;
+    padding: 30px;
+  }
+
+  .profile-card h1 {
+    font-size: 2.2rem;
+    margin-bottom: 60px;
+  }
+
+  .profile-item {
+    font-size: 18px;
+  }
+}
+
+@media (max-width: 768px) {
+  .profile-page {
+    height: auto;
+    min-height: 100vh;
+    padding: 20px 10px;
+    align-items: flex-start;
+    padding-top: 50px;
+  }
+
+  .profile-card {
+    width: 100%;
+    padding: 20px;
+    border-radius: 10px;
+  }
+
+  .profile-card:hover {
+    transform: none; /* 移除手機版的縮放效果 */
+  }
+
+  .profile-card h1 {
+    font-size: 1.8rem;
+    margin-bottom: 30px;
+  }
+
+  .profile-info {
+    padding: 15px;
+  }
+
+  .profile-item {
+    flex-direction: column;
+    align-items: flex-start;
+    font-size: 16px;
+    padding: 12px 0;
+  }
+
+  .profile-item label {
+    margin-bottom: 5px;
+    font-size: 14px;
+  }
+
+  .profile-item span {
+    font-size: 16px;
+    font-weight: 500;
+  }
+}
     

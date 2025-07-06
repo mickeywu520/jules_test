@@ -2,11 +2,35 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.sql import text # For db.execute(text("SELECT 1"))
+import os
+from dotenv import load_dotenv
 
-# Replace with your actual PostgreSQL connection string
-# Format: postgresql://user:password@host:port/database_name
-DATABASE_URL = "postgresql://postgres:123456@localhost:5432/inventory_db_fastapi"
-# It's good practice to use environment variables for credentials in a real app.
+# 載入環境變量
+load_dotenv()
+
+# 檢查是否為生產環境
+PRODUCTION = os.getenv("PRODUCTION", "false").lower() == "true"
+
+if PRODUCTION:
+    # 生產環境：使用 Hugging Face Space 注入的環境變數
+    print("🚀 Production mode: Using Hugging Face Space database configuration...")
+    DB_HOST = os.getenv("DB_HOST")
+    DB_PORT = os.getenv("DB_PORT", "6543")  # HF Space 默認端口
+    DB_NAME = os.getenv("DB_NAME")
+    DB_USER = os.getenv("DB_USER")
+    DB_PASSWORD = os.getenv("DB_PASSWORD")
+
+    # 檢查必要的環境變數
+    if not all([DB_HOST, DB_NAME, DB_USER, DB_PASSWORD]):
+        raise ValueError("Missing required database environment variables for production mode")
+
+    DATABASE_URL = f"postgresql+psycopg://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+    print(f"✅ Production database URL configured: postgresql+psycopg://{DB_USER}:***@{DB_HOST}:{DB_PORT}/{DB_NAME}")
+else:
+    # 開發環境：使用本地資料庫配置
+    print("🔧 Development mode: Using local database configuration...")
+    DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://postgres:123456@localhost:5432/inventory_db_fastapi")
+    print(f"✅ Development database URL configured: {DATABASE_URL}")
 
 engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)

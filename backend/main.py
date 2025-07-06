@@ -6,6 +6,7 @@ from fastapi.exceptions import RequestValidationError
 from sqlalchemy.exc import SQLAlchemyError
 import logging
 import traceback
+import os
 
 from .database import engine, create_db_and_tables #, SessionLocal, Base (not directly used here but good for context)
 from .routers import auth, users, categories, suppliers, products, transactions, customers, purchase_orders, goods_receipts, sales_orders
@@ -100,20 +101,25 @@ async def global_exception_handler(request: Request, exc: Exception):
     )
 
 # CORS Middleware Configuration
-# The frontend runs on localhost:4200, backend will run on localhost:5050
-origins = [
-    "http://localhost",
-    "http://localhost:4200", # Default Angular dev port
-    # Add any other origins if necessary (e.g., deployed frontend URL)
-]
+# 使用 PRODUCTION flag 來控制 CORS 設定
+# 在 Hugging Face Spaces 中設定 PRODUCTION=true 來跳過 CORS 配置
+PRODUCTION = os.getenv("PRODUCTION", "false").lower() == "true"
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=origins,
-    allow_credentials=True,
-    allow_methods=["*"], # Allows all methods (GET, POST, etc.)
-    allow_headers=["*"], # Allows all headers
-)
+if not PRODUCTION:
+    # 非生產環境（開發/測試）：配置 CORS 以支持本地和手機測試
+    print("🔧 Development mode: Configuring CORS for local testing...")
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=["*"],  # 開發環境允許所有來源以支持手機測試
+        allow_credentials=True,
+        allow_methods=["*"], # Allows all methods (GET, POST, etc.)
+        allow_headers=["*"], # Allows all headers
+    )
+    print("✅ CORS configured for development environment")
+else:
+    # 生產環境：跳過 CORS 配置，讓 Hugging Face Spaces 處理
+    print("🚀 Production mode: Skipping CORS configuration (handled by deployment platform)")
+    print("✅ CORS configuration skipped for production environment")
 
 # 請求記錄中介軟體
 @app.middleware("http")

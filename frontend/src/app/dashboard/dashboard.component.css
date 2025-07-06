@@ -29,6 +29,19 @@
     padding-left: 20px;
     }
 
+    .export-controls-group {
+    display: flex;
+    align-items: flex-end;
+    gap: 15px;
+    flex-wrap: wrap;
+    }
+
+    .export-buttons-group {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    }
+
     .export-button {
     background-color: #28a745;
     color: white;
@@ -88,7 +101,55 @@
   ngx-charts-bar-vertical,
   ngx-charts-pie-chart {
     width: 100% !important;
-    height: 300px !important;
+    max-width: 100% !important;
+    height: auto !important;
+    overflow: hidden;
+  }
+
+  /* 圖表外層容器 */
+  .dashboard-container > div {
+    overflow-x: auto;
+    margin-bottom: 20px;
+  }
+
+  /* 手機版控制項適配 */
+  .date-selection-group {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 10px;
+  }
+
+  .control-group {
+    flex: 1;
+    min-width: 80px;
+    max-width: calc(33.333% - 7px);
+  }
+
+  .control-group:last-child {
+    flex: 0 0 100%;
+    max-width: 100%;
+    margin-top: 10px;
+  }
+
+  .control-group select {
+    width: 100%;
+    min-width: auto;
+    font-size: 12px;
+    padding: 6px 8px;
+  }
+
+  .control-group label {
+    font-size: 12px;
+    margin-bottom: 3px;
+  }
+
+  .show-data-button {
+    width: 100%;
+    min-width: auto;
+    font-size: 14px;
+    padding: 10px 16px;
   }
 
   /* 導出區域手機版適配 */
@@ -101,16 +162,35 @@
     margin-top: 20px;
   }
 
-  .export-button {
+  .export-controls-group {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 15px;
+  }
+
+  .export-buttons-group {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .export-button,
+  .preview-button {
     width: 100%;
-    max-width: 200px;
-    margin: 5px 0;
+    max-width: none;
+    margin: 0;
   }
 }
 
     .controls-container {
     display: flex;
-    align-items: center;
+    flex-direction: column;
+    gap: 20px;
+    }
+
+    /* 日期選擇區域 */
+    .date-selection-group {
+    display: flex;
+    align-items: flex-end;
     gap: 15px;
     flex-wrap: wrap;
     }
@@ -118,17 +198,39 @@
     .control-group {
     display: flex;
     flex-direction: column;
-    gap: 5px;
+    gap: 8px;
+    min-width: 120px;
     }
 
     .control-group label {
     font-weight: 500;
     color: #333;
     font-size: 14px;
+    margin-bottom: 5px;
     }
 
     .control-group select {
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
     min-width: 120px;
+    }
+
+    .show-data-button {
+    background-color: #17a2b8;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s ease;
+    min-width: 120px;
+    }
+
+    .show-data-button:hover {
+    background-color: #138496;
     }
 
     .preview-button {
@@ -325,6 +427,31 @@
     .confirm-export-button:hover:not(:disabled) {
     background-color: #218838;
     }
+
+/* 超小螢幕優化 (480px 以下) */
+@media (max-width: 480px) {
+  .dashboard-container {
+    padding: 5px;
+  }
+
+  .dashboard-container h1,
+  .dashboard-container h2 {
+    font-size: 1.2rem;
+    margin-bottom: 15px;
+  }
+
+  /* 圖表容器進一步優化 */
+  ngx-charts-bar-vertical,
+  ngx-charts-pie-chart {
+    margin: 0 auto;
+  }
+
+  /* 圖表外層容器 */
+  .dashboard-container > div {
+    padding: 10px 5px;
+    margin-bottom: 15px;
+  }
+}
 
     .confirm-export-button:disabled {
     background-color: #6c757d;

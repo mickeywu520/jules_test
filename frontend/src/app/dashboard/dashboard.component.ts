@@ -1,6 +1,6 @@
 // Import necessary Angular modules and services
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, HostListener } from '@angular/core';
 import { NgxChartsModule } from '@swimlane/ngx-charts';  // Module for charts
 import { ApiService } from '../service/api.service'; // Service to interact with API
 import { FormsModule } from '@angular/forms'; // Forms module for two-way binding
@@ -72,6 +72,33 @@ export class DashboardComponent {
   // Constructor to inject ApiService for API calls
   constructor(private apiService: ApiService, private translate: TranslateService) {
     // Translate month names will be done in ngOnInit after translate service is ready
+    this.updateChartSize();
+    this.onResize();
+  }
+
+  // 響應式圖表尺寸調整
+  updateChartSize(): void {
+    const screenWidth = window.innerWidth;
+
+    if (screenWidth <= 480) {
+      // 小手機
+      this.view = [screenWidth - 40, 250];
+    } else if (screenWidth <= 768) {
+      // 手機版
+      this.view = [screenWidth - 60, 300];
+    } else if (screenWidth <= 1024) {
+      // 平板版
+      this.view = [screenWidth - 100, 350];
+    } else {
+      // 桌面版
+      this.view = [700, 400];
+    }
+  }
+
+  // 監聽視窗大小變化
+  @HostListener('window:resize', ['$event'])
+  onResize(): void {
+    this.updateChartSize();
   }
 
   // ngOnInit lifecycle hook, called when the component initializes

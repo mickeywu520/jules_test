@@ -5,56 +5,58 @@
     <!-- Transaction Selection and Export Section -->
     <div style="margin-bottom: 50px; margin-top: 30px;">
         <div class="controls-container">
-            <div class="control-group">
-                <label>{{ 'SELECT_MONTH' | translate }}</label>
-                <select [(ngModel)]="selectedMonth" (ngModelChange)="onMonthYearChange()">
-                  <option value="">{{ 'SELECT_MONTH' | translate }}</option>
-                  <option *ngFor="let month of months" [value]="month.value">{{ month.name }}</option>
-                </select>
-            </div>
-        
-            <div class="control-group">
-                <label>{{ 'SELECT_YEAR' | translate }}</label>
-                <select [(ngModel)]="selectedYear" (ngModelChange)="onMonthYearChange()">
-                  <option value="">{{ 'SELECT_YEAR' | translate }}</option>
-                  <option *ngFor="let year of years" [value]="year">{{ year }}</option>
-                </select>
-            </div>
+            <!-- 日期選擇區域 -->
+            <div class="date-selection-group">
+                <div class="control-group">
+                    <label>{{ 'SELECT_YEAR' | translate }}</label>
+                    <select [(ngModel)]="selectedYear" (ngModelChange)="onMonthYearChange()">
+                      <option value="">{{ 'SELECT_YEAR' | translate }}</option>
+                      <option *ngFor="let year of years" [value]="year">{{ year }}</option>
+                    </select>
+                </div>
 
-            <div class="control-group">
-                <label>{{ 'SELECT_DAY' | translate }}</label>
-                <select [(ngModel)]="selectedDay">
-                  <option value="">{{ 'SELECT_DAY' | translate }}</option>
-                  <option *ngFor="let day of days" [value]="day">{{ day }}</option>
-                </select>
-            </div>
-        
-            <div class="control-group">
-                <label>&nbsp;</label>
-                <button (click)="loadMonthlyData()">{{ 'SHOW_DATA' | translate }}</button>
+                <div class="control-group">
+                    <label>{{ 'SELECT_MONTH' | translate }}</label>
+                    <select [(ngModel)]="selectedMonth" (ngModelChange)="onMonthYearChange()">
+                      <option value="">{{ 'SELECT_MONTH' | translate }}</option>
+                      <option *ngFor="let month of months" [value]="month.value">{{ month.name }}</option>
+                    </select>
+                </div>
+
+                <div class="control-group">
+                    <label>{{ 'SELECT_DAY' | translate }}</label>
+                    <select [(ngModel)]="selectedDay">
+                      <option value="">{{ 'SELECT_DAY' | translate }}</option>
+                      <option *ngFor="let day of days" [value]="day">{{ day }}</option>
+                    </select>
+                </div>
+
+                <div class="control-group">
+                    <label>&nbsp;</label>
+                    <button class="show-data-button" (click)="loadMonthlyData()">{{ 'SHOW_DATA' | translate }}</button>
+                </div>
             </div>
             
             <!-- Export Section -->
             <div class="export-section">
-                <div class="control-group">
-                    <label>{{ 'EXPORT_REPORT' | translate }}</label>
-                    <select [(ngModel)]="selectedReportType">
-                      <option value="daily">{{ 'DAILY_REPORT' | translate }}</option>
-                      <option value="monthly">{{ 'MONTHLY_REPORT' | translate }}</option>
-                      <option value="quarterly">{{ 'QUARTERLY_REPORT' | translate }}</option>
-                      <option value="yearly">{{ 'YEARLY_REPORT' | translate }}</option>
-                    </select>
-                </div>
-                <div class="control-group">
-                    <label>&nbsp;</label>
-                    <div style="display: flex; gap: 10px;">
-                      <button class="preview-button" (click)="previewReport()">
-                        {{ 'PREVIEW_REPORT' | translate }}
-                      </button>
-                      <button class="export-button" (click)="exportToExcel()" [disabled]="isExporting">
-                        <span *ngIf="isExporting">⌛</span>
-                        {{ isExporting ? ('EXPORTING' | translate) : ('EXPORT_EXCEL' | translate) }}
-                      </button>
+                <div class="export-controls-group">
+                    <div class="control-group">
+                        <label>{{ 'EXPORT_REPORT' | translate }}</label>
+                        <select [(ngModel)]="selectedReportType">
+                          <option value="daily">{{ 'DAILY_REPORT' | translate }}</option>
+                          <option value="monthly">{{ 'MONTHLY_REPORT' | translate }}</option>
+                          <option value="quarterly">{{ 'QUARTERLY_REPORT' | translate }}</option>
+                          <option value="yearly">{{ 'YEARLY_REPORT' | translate }}</option>
+                        </select>
+                    </div>
+                    <div class="export-buttons-group">
+                        <button class="preview-button" (click)="previewReport()">
+                          {{ 'PREVIEW_REPORT' | translate }}
+                        </button>
+                        <button class="export-button" (click)="exportToExcel()" [disabled]="isExporting">
+                          <span *ngIf="isExporting">⌛</span>
+                          {{ isExporting ? ('EXPORTING' | translate) : ('EXPORT_EXCEL' | translate) }}
+                        </button>
                     </div>
                 </div>
             </div>

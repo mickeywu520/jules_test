@@ -23,18 +23,18 @@
 
     <!-- 導航連結容器 -->
     <ul class="nav-links" #navLinks (mouseleave)="onMouseLeave()">
-      <li *ngIf="isAuth()"><a routerLink="/dashboard">{{ 'DASHBOARD' | translate }}</a></li>
-      <li *ngIf="isAuth()"><a routerLink="/transaction">{{ 'TRANSACTIONS' | translate }}</a></li>
-      <li *ngIf="isAdmin()"><a routerLink="/category">{{ 'CATEGORY' | translate }}</a></li>
-      <li *ngIf="isAdmin()"><a routerLink="/product">{{ 'PRODUCT' | translate }}</a></li>
-      <li *ngIf="isAdmin()"><a routerLink="/supplier">{{ 'SUPPLIER' | translate }}</a></li>
-      <li *ngIf="isAdmin()"><a routerLink="/customer">{{ 'CUSTOMER' | translate }}</a></li>
-      <li *ngIf="isAuth()"><a routerLink="/purchase">{{ 'PURCHASE' | translate }}</a></li>
-      <li *ngIf="isAuth()"><a routerLink="/goods-receipt">{{ 'GOODS_RECEIPT' | translate }}</a></li>
-      <li *ngIf="isAuth()"><a routerLink="/sell">{{ 'SELL' | translate }}</a></li>
-      <li *ngIf="isAuth()"><a routerLink="/profile">{{ 'PROFILE' | translate }}</a></li>
-      <li *ngIf="!isAuth()"><a routerLink="/login">{{ 'LOGIN' | translate }}</a></li>
-      <li *ngIf="!isAuth()"><a routerLink="/register">{{ 'REGISTER' | translate }}</a></li>
+      <li *ngIf="isAuth()"><a routerLink="/dashboard" (click)="onNavItemClick()">{{ 'DASHBOARD' | translate }}</a></li>
+      <li *ngIf="isAuth()"><a routerLink="/transaction" (click)="onNavItemClick()">{{ 'TRANSACTIONS' | translate }}</a></li>
+      <li *ngIf="isAdmin()"><a routerLink="/category" (click)="onNavItemClick()">{{ 'CATEGORY' | translate }}</a></li>
+      <li *ngIf="isAdmin()"><a routerLink="/product" (click)="onNavItemClick()">{{ 'PRODUCT' | translate }}</a></li>
+      <li *ngIf="isAdmin()"><a routerLink="/supplier" (click)="onNavItemClick()">{{ 'SUPPLIER' | translate }}</a></li>
+      <li *ngIf="isAdmin()"><a routerLink="/customer" (click)="onNavItemClick()">{{ 'CUSTOMER' | translate }}</a></li>
+      <li *ngIf="isAuth()"><a routerLink="/purchase" (click)="onNavItemClick()">{{ 'PURCHASE' | translate }}</a></li>
+      <li *ngIf="isAuth()"><a routerLink="/goods-receipt" (click)="onNavItemClick()">{{ 'GOODS_RECEIPT' | translate }}</a></li>
+      <li *ngIf="isAuth()"><a routerLink="/sell" (click)="onNavItemClick()">{{ 'SELL' | translate }}</a></li>
+      <li *ngIf="isAuth()"><a routerLink="/profile" (click)="onNavItemClick()">{{ 'PROFILE' | translate }}</a></li>
+      <li *ngIf="!isAuth()"><a routerLink="/login" (click)="onNavItemClick()">{{ 'LOGIN' | translate }}</a></li>
+      <li *ngIf="!isAuth()"><a routerLink="/register" (click)="onNavItemClick()">{{ 'REGISTER' | translate }}</a></li>
       <li *ngIf="isAuth()"><a (click)="logOut()" >{{ 'LOGOUT' | translate }}</a></li>
     </ul>
 

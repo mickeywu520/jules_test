@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectorRef, Component, OnInit, ElementRef, ViewChild, AfterViewInit } from '@angular/core';
-import { Router, RouterLink, RouterOutlet } from '@angular/router';
+import { Router, RouterLink, RouterOutlet, NavigationEnd } from '@angular/router';
+import { filter } from 'rxjs/operators';
 import { ApiService } from './service/api.service';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
@@ -49,6 +50,13 @@ logOut():void{
       next: (data) => console.log('Data from FastAPI backend:', data),
       error: (err) => console.error('Error fetching from FastAPI:', err)
     });
+
+    // 監聽路由變化，自動關閉側邊欄
+    this.router.events
+      .pipe(filter(event => event instanceof NavigationEnd))
+      .subscribe(() => {
+        this.closeSidebar();
+      });
   }
 
   ngAfterViewInit(): void {
@@ -103,6 +111,11 @@ logOut():void{
   // 關閉側邊欄
   closeSidebar(): void {
     this.sidebarOpen = false;
+  }
+
+  // 導航項目點擊處理
+  onNavItemClick(): void {
+    this.closeSidebar();
   }
 
 

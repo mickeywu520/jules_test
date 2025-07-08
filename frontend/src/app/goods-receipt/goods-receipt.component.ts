@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../service/api.service';
+import { LoadingService } from '../service/loading.service';
 import { Router, ActivatedRoute } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
 
@@ -15,9 +16,10 @@ import { TranslateModule } from '@ngx-translate/core';
 
 export class GoodsReceiptComponent implements OnInit {
   constructor(
-    private apiService: ApiService, 
+    private apiService: ApiService,
     private router: Router,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private loadingService: LoadingService
   ){}
 
   // 基本資料
@@ -74,6 +76,7 @@ export class GoodsReceiptComponent implements OnInit {
     }
 
     // 載入基本資料
+    this.loadingService.showDataLoading();
     this.fetchAvailablePurchaseOrders();
     this.fetchGoodsReceipts();
   }
@@ -97,8 +100,12 @@ export class GoodsReceiptComponent implements OnInit {
       next: (res: any) => {
         this.goodsReceipts = res;
         this.applySearchFilter(); // 套用搜尋過濾
+        this.loadingService.hideLoading();
       },
-      error: (err) => this.showToast(err?.error?.message || err?.message || 'Unable to fetch goods receipts', 'error')
+      error: (err) => {
+        this.showToast(err?.error?.message || err?.message || 'Unable to fetch goods receipts', 'error');
+        this.loadingService.hideLoading();
+      }
     });
   }
 
@@ -210,6 +217,7 @@ export class GoodsReceiptComponent implements OnInit {
 
     if (this.isEditing) {
       // 更新入庫單
+      this.loadingService.showUpdating();
       this.apiService.updateGoodsReceipt(this.goodsReceiptId!, goodsReceiptData).subscribe({
         next: (res: any) => {
           this.showToast('入庫單更新成功！', 'success');
@@ -217,13 +225,16 @@ export class GoodsReceiptComponent implements OnInit {
           this.showGoodsReceiptList = true;
           this.fetchGoodsReceipts(); // 重新載入列表
           this.fetchAvailablePurchaseOrders(); // 重新載入採購單列表
+          this.loadingService.hideLoading();
         },
         error: (error) => {
           this.showToast(error?.error?.message || error?.message || '更新入庫單失敗', 'error');
+          this.loadingService.hideLoading();
         }
       });
     } else {
       // 新增入庫單
+      this.loadingService.showSaving();
       this.apiService.createGoodsReceipt(goodsReceiptData).subscribe({
         next: (res: any) => {
           this.showToast('入庫單建立成功！', 'success');
@@ -231,9 +242,11 @@ export class GoodsReceiptComponent implements OnInit {
           this.showGoodsReceiptList = true;
           this.fetchGoodsReceipts(); // 重新載入列表
           this.fetchAvailablePurchaseOrders(); // 重新載入採購單列表
+          this.loadingService.hideLoading();
         },
         error: (error) => {
           this.showToast(error?.error?.message || error?.message || '建立入庫單失敗', 'error');
+          this.loadingService.hideLoading();
         }
       });
     }

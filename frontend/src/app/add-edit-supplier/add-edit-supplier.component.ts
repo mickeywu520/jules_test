@@ -3,6 +3,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { ApiService } from '../service/api.service';
+import { LoadingService } from '../service/loading.service';
 import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
@@ -13,7 +14,11 @@ import { TranslateModule } from '@ngx-translate/core';
   styleUrl: './add-edit-supplier.component.css',
 })
 export class AddEditSupplierComponent implements OnInit {
-  constructor(private apiService: ApiService, private router: Router) {}
+  constructor(
+    private apiService: ApiService,
+    private router: Router,
+    private loadingService: LoadingService
+  ) {}
   message: string = '';
   isEditing: boolean = false;
   supplierId: string | null = null;
@@ -64,23 +69,29 @@ export class AddEditSupplierComponent implements OnInit {
     
 
     if (this.isEditing) {
+      this.loadingService.showUpdating();
       this.apiService.updateSupplier(this.supplierId!, supplierData).subscribe({
         next:(res:any) =>{
           this.showMessage("Supplier updated successfully");
+          this.loadingService.hideLoading();
           this.router.navigate(['/supplier'])
         },
         error:(error) =>{
           this.showMessage(error?.error?.message || error?.message || "Unable to edit supplier" + error)
+          this.loadingService.hideLoading();
         }
       })
     } else {
+      this.loadingService.showSaving();
       this.apiService.addSupplier(supplierData).subscribe({
         next:(res:any) =>{
           this.showMessage("Supplier Added successfully");
+          this.loadingService.hideLoading();
           this.router.navigate(['/supplier'])
         },
         error:(error) =>{
           this.showMessage(error?.error?.message || error?.message || "Unable to Add supplier" + error)
+          this.loadingService.hideLoading();
         }
       })
     }

@@ -3,6 +3,7 @@ import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { ApiService } from '../service/api.service';
+import { LoadingService } from '../service/loading.service';
 import { firstValueFrom } from 'rxjs';
 import { TranslateModule } from '@ngx-translate/core';
 
@@ -14,7 +15,11 @@ import { TranslateModule } from '@ngx-translate/core';
   styleUrl: './login.component.css'
 })
 export class LoginComponent {
-  constructor(private apiService:ApiService, private router:Router){}
+  constructor(
+    private apiService: ApiService,
+    private router: Router,
+    private loadingService: LoadingService
+  ){}
 
   formData: any = {
     email: '',
@@ -24,13 +29,16 @@ export class LoginComponent {
   message:string | null = null;
 
   async handleSubmit(){
-    if( 
-      !this.formData.email || 
-      !this.formData.password 
+    if(
+      !this.formData.email ||
+      !this.formData.password
     ){
       this.showMessage("All fields are required");
       return;
     }
+
+    // 顯示登入loading
+    this.loadingService.showLoggingIn();
 
     try {
       const loginResponse: any = await firstValueFrom(
@@ -55,16 +63,19 @@ export class LoginComponent {
         }
 
         this.apiService.authStatuschanged.emit(); // Notify other components of auth change
+        this.loadingService.hideLoading(); // 隱藏loading
         this.router.navigate(['/dashboard']);
       } else {
         // This case should ideally not be reached if loginResponse is successful and backend sends token
+        this.loadingService.hideLoading(); // 隱藏loading
         this.showMessage('Login successful, but token not received.');
         console.error('Login successful but access_token not in response:', loginResponse);
       }
     } catch (error:any) {
+      this.loadingService.hideLoading(); // 隱藏loading
       console.log(error)
       this.showMessage(error?.error?.message || error?.message || "Unable to Login a user" + error)
-      
+
     }
   }
 

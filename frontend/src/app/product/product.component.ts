@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { PaginationComponent } from '../pagination/pagination.component';
 import { ApiService } from '../service/api.service';
+import { LoadingService } from '../service/loading.service';
 import { Router } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
@@ -14,7 +15,12 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 })
 export class ProductComponent implements OnInit {
   private fullProductList: any[] = [];
-  constructor(private apiService: ApiService, private router: Router, private translate: TranslateService) {}
+  constructor(
+    private apiService: ApiService,
+    private router: Router,
+    private translate: TranslateService,
+    private loadingService: LoadingService
+  ) {}
   products: any[] = [];
   message: string = '';
   currentPage: number = 1;
@@ -27,15 +33,18 @@ export class ProductComponent implements OnInit {
 
   // Renamed from fetchProducts to reflect new reactive approach
   setupProductSubscriptionAndLoad(): void {
+    this.loadingService.showDataLoading();
     // 直接載入包含已刪除產品的列表（用於產品管理頁面）
     this.apiService.getAllProducts(true).subscribe({
       next: (allProducts: any[]) => {
         this.fullProductList = allProducts; // Store the full list including deleted
         this.applyPagination(); // Apply pagination to the new full list
+        this.loadingService.hideLoading();
       },
       error: (error: any) => {
         const errorMessage = error?.error?.message || error?.error?.detail || error?.message || this.translate.instant('UNABLE_TO_FETCH_INITIAL_PRODUCTS');
         this.showMessage(errorMessage);
+        this.loadingService.hideLoading();
       }
     });
   }

@@ -3,6 +3,7 @@ import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { ApiService } from '../service/api.service';
+import { LoadingService } from '../service/loading.service';
 import { firstValueFrom } from 'rxjs';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
@@ -15,7 +16,12 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 })
 
 export class RegisterComponent {
-  constructor(private apiService:ApiService, private router:Router, private translate:TranslateService){}
+  constructor(
+    private apiService: ApiService,
+    private router: Router,
+    private translate: TranslateService,
+    private loadingService: LoadingService
+  ){}
 
   formData: any = {
     email: '',
@@ -36,6 +42,9 @@ export class RegisterComponent {
       this.showMessage("All fields are required", 'error');
       return;
     }
+
+    // 顯示註冊loading
+    this.loadingService.showRegistering();
 
     try {
       const payload_for_api = {
@@ -61,7 +70,8 @@ export class RegisterComponent {
 
         console.log('顯示成功訊息，2秒後跳轉到登入頁面');
 
-        // 延遲跳轉，讓用戶看到成功訊息
+        // 隱藏loading並延遲跳轉，讓用戶看到成功訊息
+        this.loadingService.hideLoading();
         setTimeout(() => {
           console.log('開始跳轉到登入頁面');
           this.router.navigate(["/login"]);
@@ -69,9 +79,11 @@ export class RegisterComponent {
       } else {
         console.log('註冊回應格式不符預期:', response);
         // 如果回應格式不符預期
+        this.loadingService.hideLoading();
         this.showMessage("註冊過程中發生未知錯誤", 'error');
       }
     } catch (error:any) {
+      this.loadingService.hideLoading();
       console.log('Registration error:', error);
 
       // 處理不同類型的錯誤

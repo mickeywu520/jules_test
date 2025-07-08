@@ -3,6 +3,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { ApiService } from '../service/api.service';
+import { LoadingService } from '../service/loading.service';
 import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
@@ -13,7 +14,11 @@ import { TranslateModule } from '@ngx-translate/core';
   styleUrl: './add-edit-customer.component.css'
 })
 export class AddEditCustomerComponent implements OnInit {
-  constructor(private apiService: ApiService, private router: Router) {}
+  constructor(
+    private apiService: ApiService,
+    private router: Router,
+    private loadingService: LoadingService
+  ) {}
   message: string = '';
   isEditing: boolean = false;
   customerId: string | null = null;
@@ -146,23 +151,29 @@ export class AddEditCustomerComponent implements OnInit {
     };
 
     if (this.isEditing) {
+      this.loadingService.showUpdating();
       this.apiService.updateCustomer(this.customerId!, customerData).subscribe({
         next: (res: any) => {
           this.showMessage("Customer updated successfully");
+          this.loadingService.hideLoading();
           this.router.navigate(['/customer'])
         },
         error: (error) => {
           this.showMessage(error?.error?.message || error?.message || "Unable to edit customer" + error)
+          this.loadingService.hideLoading();
         }
       })
     } else {
+      this.loadingService.showSaving();
       this.apiService.addCustomer(customerData).subscribe({
         next: (res: any) => {
           this.showMessage("Customer added successfully");
+          this.loadingService.hideLoading();
           this.router.navigate(['/customer'])
         },
         error: (error) => {
           this.showMessage(error?.error?.message || error?.message || "Unable to add customer" + error)
+          this.loadingService.hideLoading();
         }
       })
     }

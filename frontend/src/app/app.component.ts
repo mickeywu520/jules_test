@@ -4,11 +4,12 @@ import { Router, RouterLink, RouterOutlet, NavigationEnd } from '@angular/router
 import { filter } from 'rxjs/operators';
 import { ApiService } from './service/api.service';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { LoadingDialogComponent } from './loading-dialog/loading-dialog.component';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, RouterLink, CommonModule, TranslateModule],
+  imports: [RouterOutlet, RouterLink, CommonModule, TranslateModule, LoadingDialogComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css',
 })

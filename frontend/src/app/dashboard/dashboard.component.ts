@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Component, HostListener } from '@angular/core';
 import { NgxChartsModule } from '@swimlane/ngx-charts';  // Module for charts
 import { ApiService } from '../service/api.service'; // Service to interact with API
+import { LoadingService } from '../service/loading.service'; // Loading service for UI feedback
 import { FormsModule } from '@angular/forms'; // Forms module for two-way binding
 import { TranslateModule, TranslateService } from '@ngx-translate/core'; // Import TranslateModule and TranslateService
 import * as XLSX from 'xlsx'; // Excel export library
@@ -70,7 +71,11 @@ export class DashboardComponent {
   animations = true;  // Enable chart animations
 
   // Constructor to inject ApiService for API calls
-  constructor(private apiService: ApiService, private translate: TranslateService) {
+  constructor(
+    private apiService: ApiService,
+    private translate: TranslateService,
+    private loadingService: LoadingService
+  ) {
     // Translate month names will be done in ngOnInit after translate service is ready
     this.updateChartSize();
     this.onResize();
@@ -117,9 +122,17 @@ export class DashboardComponent {
 
   // Method to fetch all transactions from the API
   loadTransactions(): void {
-    this.apiService.getAllTransactions('').subscribe((data: any[]) => {
-      this.transactions = data; // Store transactions data
-      this.processChartData(); // Process data to generate charts
+    this.loadingService.showDataLoading();
+    this.apiService.getAllTransactions('').subscribe({
+      next: (data: any[]) => {
+        this.transactions = data; // Store transactions data
+        this.processChartData(); // Process data to generate charts
+        this.loadingService.hideLoading();
+      },
+      error: (error) => {
+        console.error('Error loading transactions:', error);
+        this.loadingService.hideLoading();
+      }
     });
   }
 
@@ -158,15 +171,23 @@ export class DashboardComponent {
   loadMonthlyData(): void {
     // If specific month and year are selected, use API call
     if (this.selectedMonth && this.selectedYear) {
+      this.loadingService.showDataLoading();
       this.apiService
         .getTransactionsByMonthAndYear(
           Number.parseInt(this.selectedMonth), // Convert month string to number
           Number.parseInt(this.selectedYear) // Convert year string to number
         )
-        .subscribe((data: any[]) => {
-          this.transactions = data; // Store transactions for the selected month
-          this.processChartData(); // Process the overall data for charts
-          this.processMonthlyData(data); // Process the data for the daily chart
+        .subscribe({
+          next: (data: any[]) => {
+            this.transactions = data; // Store transactions for the selected month
+            this.processChartData(); // Process the overall data for charts
+            this.processMonthlyData(data); // Process the data for the daily chart
+            this.loadingService.hideLoading();
+          },
+          error: (error) => {
+            console.error('Error loading monthly data:', error);
+            this.loadingService.hideLoading();
+          }
         });
     } else {
       // If no specific filters, reload all transactions and filter client-side

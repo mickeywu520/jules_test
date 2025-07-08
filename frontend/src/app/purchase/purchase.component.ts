@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../service/api.service';
+import { LoadingService } from '../service/loading.service';
 import { Router, ActivatedRoute } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
 
@@ -16,7 +17,8 @@ export class PurchaseComponent implements OnInit {
   constructor(
     private apiService: ApiService,
     private router: Router,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private loadingService: LoadingService
   ){}
 
   // 基本資料
@@ -87,6 +89,7 @@ export class PurchaseComponent implements OnInit {
     }
 
     // 載入基本資料
+    this.loadingService.showDataLoading();
     this.fetchProducts();
     this.fetchSuppliers();
     this.fetchPurchaseOrders();
@@ -124,8 +127,12 @@ export class PurchaseComponent implements OnInit {
         res.forEach((po: any) => {
           this.originalStatuses[po.id.toString()] = po.status;
         });
+        this.loadingService.hideLoading();
       },
-      error: (err) => this.showToast(err?.error?.message || err?.message || 'Unable to fetch purchase orders', 'error')
+      error: (err) => {
+        this.showToast(err?.error?.message || err?.message || 'Unable to fetch purchase orders', 'error');
+        this.loadingService.hideLoading();
+      }
     });
   }
 
@@ -241,28 +248,34 @@ export class PurchaseComponent implements OnInit {
 
     if (this.isEditing) {
       // 更新採購單
+      this.loadingService.showUpdating();
       this.apiService.updatePurchaseOrder(this.purchaseOrderId!, purchaseOrderData).subscribe({
         next: (res: any) => {
           this.showToast('採購單更新成功！', 'success');
           this.resetForm();
           this.showPurchaseOrderList = true; // 跳回採購單列表
           this.fetchPurchaseOrders(); // 刷新列表
+          this.loadingService.hideLoading();
         },
         error: (error) => {
           this.showToast(error?.error?.message || error?.message || '更新採購單失敗', 'error');
+          this.loadingService.hideLoading();
         }
       });
     } else {
       // 新增採購單
+      this.loadingService.showSaving();
       this.apiService.createPurchaseOrder(purchaseOrderData).subscribe({
         next: (res: any) => {
           this.showToast('採購單建立成功！', 'success');
           this.resetForm();
           this.showPurchaseOrderList = true; // 跳回採購單列表
           this.fetchPurchaseOrders(); // 刷新列表
+          this.loadingService.hideLoading();
         },
         error: (error) => {
           this.showToast(error?.error?.message || error?.message || '建立採購單失敗', 'error');
+          this.loadingService.hideLoading();
         }
       });
     }

@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { ApiService } from '../service/api.service';
+import { LoadingService } from '../service/loading.service';
 import { Router } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
 
@@ -12,7 +13,11 @@ import { TranslateModule } from '@ngx-translate/core';
   styleUrl: './supplier.component.css',
 })
 export class SupplierComponent implements OnInit {
-  constructor(private apiService: ApiService, private router: Router) {}
+  constructor(
+    private apiService: ApiService,
+    private router: Router,
+    private loadingService: LoadingService
+  ) {}
   suppliers: any[] = [];
   message: string = '';
 
@@ -21,12 +26,15 @@ export class SupplierComponent implements OnInit {
       this.suppliers = supps;
     });
     // Fetch initial suppliers and populate/update the BehaviorSubject
+    this.loadingService.showDataLoading();
     this.apiService.fetchAndBroadcastSuppliers().subscribe({
       next: (res: any) => {
         // console.log('Initial suppliers fetched by SupplierComponent');
+        this.loadingService.hideLoading();
       },
       error: (error: any) => {
         this.showMessage(error?.error?.message || error?.message || "Unable to fetch initial suppliers" + error);
+        this.loadingService.hideLoading();
       }
     });
   }

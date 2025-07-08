@@ -3,6 +3,7 @@ import { PaginationComponent } from '../pagination/pagination.component';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { ApiService } from '../service/api.service';
+import { LoadingService } from '../service/loading.service';
 import { Router, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs/operators';
 import { TranslateModule } from '@ngx-translate/core';
@@ -15,7 +16,11 @@ import { TranslateModule } from '@ngx-translate/core';
   styleUrl: './transaction.component.css'
 })
 export class TransactionComponent implements OnInit {
-  constructor(private apiService: ApiService, private router: Router){}
+  constructor(
+    private apiService: ApiService,
+    private router: Router,
+    private loadingService: LoadingService
+  ){}
 
   transactions: any[] = [];  
   message: string = '';
@@ -40,6 +45,7 @@ export class TransactionComponent implements OnInit {
   //FETCH Transactions
 
   loadTransactions(): void {
+    this.loadingService.showDataLoading();
     this.apiService.getAllTransactions(this.valueToSearch).subscribe({
       next: (res: any) => {
         const transactions = res || [];
@@ -50,7 +56,7 @@ export class TransactionComponent implements OnInit {
           (this.currentPage - 1) * this.itemsPerPage,
           this.currentPage * this.itemsPerPage
         );
-        
+        this.loadingService.hideLoading();
       },
       error: (error) => {
         this.showMessage(
@@ -58,6 +64,7 @@ export class TransactionComponent implements OnInit {
             error?.message ||
             'Unable to Get all Transactions ' + error
         );
+        this.loadingService.hideLoading();
       },
     });
   }
@@ -68,6 +75,7 @@ export class TransactionComponent implements OnInit {
   handleSearch():void{
     this.currentPage = 1;
     this.valueToSearch = this.searchInput;
+    this.loadingService.showSearching();
     this.loadTransactions()
   }
 

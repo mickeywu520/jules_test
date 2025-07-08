@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../service/api.service';
+import { LoadingService } from '../service/loading.service';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 interface Category {
@@ -26,20 +27,27 @@ export class CategoryComponent implements OnInit {
   isEditing:boolean = false;
   editingCategoryId:string | null = null;
 
-  constructor(private apiService: ApiService, private translate: TranslateService){}
+  constructor(
+    private apiService: ApiService,
+    private translate: TranslateService,
+    private loadingService: LoadingService
+  ){}
 
   ngOnInit(): void {
     this.apiService.categories$.subscribe((cats: Category[]) => {
       this.categories = cats;
     });
     // Fetch initial categories and populate/update the BehaviorSubject
+    this.loadingService.showDataLoading();
     this.apiService.fetchAndBroadcastCategories().subscribe({
       next: (res: any) => {
         // console.log('Initial categories fetched by CategoryComponent');
+        this.loadingService.hideLoading();
       },
       error: (error: any) => {
         const errorMessage = error?.error?.message || error?.error?.detail || error?.message || this.translate.instant("UNABLE_TO_FETCH_INITIAL_CATEGORIES");
         this.showMessage(errorMessage);
+        this.loadingService.hideLoading();
       }
     });
   }
@@ -51,21 +59,27 @@ export class CategoryComponent implements OnInit {
       this.showMessage(this.translate.instant("CATEGORY_NAME_REQUIRED"));
       return;
     }
+    this.loadingService.showSaving();
     this.apiService.createCategory({name:this.categoryName}).subscribe({
       next:(res:any) =>{
         this.showMessage(this.translate.instant("CATEGORY_ADDED_SUCCESSFULLY"))
         this.categoryName = '';
         this.apiService.fetchAndBroadcastCategories().subscribe({
-          next: () => { /* console.log('Categories refreshed after action'); */ },
+          next: () => {
+            /* console.log('Categories refreshed after action'); */
+            this.loadingService.hideLoading();
+          },
           error: (err: any) => {
             console.error('Failed to refresh categories after action:', err);
             this.showMessage(this.translate.instant('FAILED_TO_REFRESH_CATEGORIES_LIST'));
+            this.loadingService.hideLoading();
           }
         });
       },
       error:(error) =>{
         const errorMessage = error?.error?.message || error?.error?.detail || error?.message || this.translate.instant("UNABLE_TO_SAVE_CATEGORY");
         this.showMessage(errorMessage);
+        this.loadingService.hideLoading();
       }
     })
   }

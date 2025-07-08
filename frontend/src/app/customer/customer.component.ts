@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { ApiService } from '../service/api.service';
+import { LoadingService } from '../service/loading.service';
 import { Router } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
 import { FormsModule } from '@angular/forms';
@@ -13,7 +14,11 @@ import { FormsModule } from '@angular/forms';
   styleUrl: './customer.component.css'
 })
 export class CustomerComponent implements OnInit {
-  constructor(private apiService: ApiService, private router: Router) {}
+  constructor(
+    private apiService: ApiService,
+    private router: Router,
+    private loadingService: LoadingService
+  ) {}
   customers: any[] = [];
   filteredCustomers: any[] = [];
   message: string = '';
@@ -25,12 +30,15 @@ export class CustomerComponent implements OnInit {
       this.filteredCustomers = custs;
     });
     // Fetch initial customers and populate/update the BehaviorSubject
+    this.loadingService.showDataLoading();
     this.apiService.fetchAndBroadcastCustomers().subscribe({
       next: (res: any) => {
         // console.log('Initial customers fetched by CustomerComponent');
+        this.loadingService.hideLoading();
       },
       error: (error: any) => {
         this.showMessage(error?.error?.message || error?.message || "Unable to fetch initial customers" + error);
+        this.loadingService.hideLoading();
       }
     });
   }

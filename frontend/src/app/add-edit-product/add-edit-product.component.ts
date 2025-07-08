@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../service/api.service';
+import { LoadingService } from '../service/loading.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
 
@@ -16,7 +17,8 @@ export class AddEditProductComponent implements OnInit {
   constructor(
     private apiService: ApiService,
     private route: ActivatedRoute,
-    private router: Router
+    private router: Router,
+    private loadingService: LoadingService
   ){}
 
   productId: string | null = null
@@ -114,33 +116,49 @@ export class AddEditProductComponent implements OnInit {
     };
 
     if (this.isEditing) {
+      this.loadingService.showUpdating();
       this.apiService.updateProduct(this.productId!, productData).subscribe({
         next: (res: any) => {
           this.showMessage("Product updated successfully")
           // 刷新產品列表
           this.apiService.fetchAndBroadcastProducts().subscribe({
-            next: () => { /* console.log('Product list refreshed after update'); */ },
-            error: (err: any) => { console.error('Failed to refresh product list after update:', err); }
+            next: () => {
+              /* console.log('Product list refreshed after update'); */
+              this.loadingService.hideLoading();
+            },
+            error: (err: any) => {
+              console.error('Failed to refresh product list after update:', err);
+              this.loadingService.hideLoading();
+            }
           });
           this.router.navigate(['/product'])
         },
         error: (error) => {
           this.showMessage(error?.error?.message || error?.message || "Unable to update product" + error)
+          this.loadingService.hideLoading();
         }
       })
     } else {
+      this.loadingService.showSaving();
       this.apiService.addProduct(productData).subscribe({
         next: (res: any) => {
           this.showMessage("Product saved successfully")
           // 刷新產品列表
           this.apiService.fetchAndBroadcastProducts().subscribe({
-            next: () => { /* console.log('Product list refreshed after add'); */ },
-            error: (err: any) => { console.error('Failed to refresh product list after add:', err); }
+            next: () => {
+              /* console.log('Product list refreshed after add'); */
+              this.loadingService.hideLoading();
+            },
+            error: (err: any) => {
+              console.error('Failed to refresh product list after add:', err);
+              this.loadingService.hideLoading();
+            }
           });
           this.router.navigate(['/product'])
         },
         error: (error) => {
           this.showMessage(error?.error?.message || error?.message || "Unable to save product" + error)
+          this.loadingService.hideLoading();
         }
       })
     }

@@ -1,0 +1,21 @@
+<!-- Loading Dialog Overlay -->
+<div class="loading-overlay" *ngIf="isLoading" (click)="$event.stopPropagation()">
+  <div class="loading-dialog">
+    <!-- Loading Spinner -->
+    <div class="loading-spinner">
+      <div class="spinner"></div>
+    </div>
+    
+    <!-- Loading Message -->
+    <div class="loading-message">
+      {{ message }}
+    </div>
+    
+    <!-- Loading Dots Animation -->
+    <div class="loading-dots">
+      <span class="dot"></span>
+      <span class="dot"></span>
+      <span class="dot"></span>
+    </div>
+  </div>
+</div>

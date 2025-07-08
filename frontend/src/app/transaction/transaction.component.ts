@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { PaginationComponent } from '../pagination/pagination.component';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
@@ -6,6 +6,7 @@ import { ApiService } from '../service/api.service';
 import { LoadingService } from '../service/loading.service';
 import { Router, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs/operators';
+import { Subscription } from 'rxjs';
 import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
@@ -15,14 +16,14 @@ import { TranslateModule } from '@ngx-translate/core';
   templateUrl: './transaction.component.html',
   styleUrl: './transaction.component.css'
 })
-export class TransactionComponent implements OnInit {
+export class TransactionComponent implements OnInit, OnDestroy {
   constructor(
     private apiService: ApiService,
     private router: Router,
     private loadingService: LoadingService
   ){}
 
-  transactions: any[] = [];  
+  transactions: any[] = [];
   message: string = '';
   searchInput:string = '';
   valueToSearch:string = '';
@@ -30,21 +31,42 @@ export class TransactionComponent implements OnInit {
   totalPages: number = 0;
   itemsPerPage: number = 10;
 
+  // 訂閱管理
+  private routerSubscription?: Subscription;
+  private isLoading = false;
+
   ngOnInit(): void {
     this.loadTransactions();
-    
+
     // Subscribe to router events to reload transactions when navigating back to this component
-    this.router.events.pipe(
+    // 但要避免重複調用
+    this.routerSubscription = this.router.events.pipe(
       filter(event => event instanceof NavigationEnd && event.urlAfterRedirects === '/transaction')
     ).subscribe(() => {
-      this.loadTransactions();
+      // 只有在不是初始載入時才重新載入
+      if (this.transactions.length > 0) {
+        this.loadTransactions();
+      }
     });
+  }
+
+  ngOnDestroy(): void {
+    // 清理訂閱
+    if (this.routerSubscription) {
+      this.routerSubscription.unsubscribe();
+    }
   }
 
 
   //FETCH Transactions
 
   loadTransactions(): void {
+    // 避免重複loading
+    if (this.isLoading) {
+      return;
+    }
+
+    this.isLoading = true;
     this.loadingService.showDataLoading();
     this.apiService.getAllTransactions(this.valueToSearch).subscribe({
       next: (res: any) => {
@@ -56,6 +78,7 @@ export class TransactionComponent implements OnInit {
           (this.currentPage - 1) * this.itemsPerPage,
           this.currentPage * this.itemsPerPage
         );
+        this.isLoading = false;
         this.loadingService.hideLoading();
       },
       error: (error) => {
@@ -64,6 +87,7 @@ export class TransactionComponent implements OnInit {
             error?.message ||
             'Unable to Get all Transactions ' + error
         );
+        this.isLoading = false;
         this.loadingService.hideLoading();
       },
     });

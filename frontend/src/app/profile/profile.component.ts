@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { ApiService } from '../service/api.service';
+import { LoadingService } from '../service/loading.service';
 import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
@@ -11,7 +12,10 @@ import { TranslateModule } from '@ngx-translate/core';
   styleUrl: './profile.component.css'
 })
 export class ProfileComponent implements OnInit {
-  constructor(private apiService: ApiService){}
+  constructor(
+    private apiService: ApiService,
+    private loadingService: LoadingService
+  ){}
   user: any = null
   message: string = "";
 
@@ -20,9 +24,11 @@ export class ProfileComponent implements OnInit {
   }
 
   fetchUserInfo():void{
+    this.loadingService.showDataLoading();
     this.apiService.getLoggedInUserInfo().subscribe({
       next:(res)=>{
         this.user = res;
+        this.loadingService.hideLoading();
       },
       error: (error) => {
         this.showMessage(
@@ -30,6 +36,7 @@ export class ProfileComponent implements OnInit {
             error?.message ||
             'Unable to Get Profile Info' + error
         );
+        this.loadingService.hideLoading();
       }
     })
   }

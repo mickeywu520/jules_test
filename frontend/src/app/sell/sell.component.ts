@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../service/api.service';
+import { LoadingService } from '../service/loading.service';
 import { Router, ActivatedRoute } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
 
@@ -15,9 +16,10 @@ import { TranslateModule } from '@ngx-translate/core';
 export class SellComponent implements OnInit {
 
   constructor(
-    private apiService: ApiService, 
+    private apiService: ApiService,
     private router: Router,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private loadingService: LoadingService
   ){}
 
   // 基本資料
@@ -84,6 +86,7 @@ export class SellComponent implements OnInit {
     }
 
     // 載入基本資料
+    this.loadingService.showDataLoading();
     this.fetchCustomers();
     this.fetchProducts();
     this.fetchSalesOrders();
@@ -115,8 +118,12 @@ export class SellComponent implements OnInit {
       next: (res: any) => {
         this.salesOrders = res;
         this.applySearchFilter(); // 套用搜尋過濾
+        this.loadingService.hideLoading();
       },
-      error: (err) => this.showToast(err?.error?.message || err?.message || 'Unable to fetch sales orders', 'error')
+      error: (err) => {
+        this.showToast(err?.error?.message || err?.message || 'Unable to fetch sales orders', 'error');
+        this.loadingService.hideLoading();
+      }
     });
   }
 
@@ -296,28 +303,34 @@ export class SellComponent implements OnInit {
 
     if (this.isEditing) {
       // 更新銷售單
+      this.loadingService.showUpdating();
       this.apiService.updateSalesOrder(this.salesOrderId!, salesOrderData).subscribe({
         next: (res: any) => {
           this.showToast('銷售單更新成功！', 'success');
           this.resetForm();
           this.showSalesOrderList = true;
           this.fetchSalesOrders();
+          this.loadingService.hideLoading();
         },
         error: (error) => {
           this.showToast(error?.error?.message || error?.message || '更新銷售單失敗', 'error');
+          this.loadingService.hideLoading();
         }
       });
     } else {
       // 新增銷售單
+      this.loadingService.showSaving();
       this.apiService.createSalesOrder(salesOrderData).subscribe({
         next: (res: any) => {
           this.showToast('銷售單建立成功！', 'success');
           this.resetForm();
           this.showSalesOrderList = true;
           this.fetchSalesOrders();
+          this.loadingService.hideLoading();
         },
         error: (error) => {
           this.showToast(error?.error?.message || error?.message || '建立銷售單失敗', 'error');
+          this.loadingService.hideLoading();
         }
       });
     }

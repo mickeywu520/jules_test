@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TranslateModule } from '@ngx-translate/core';
 import { ApiService } from '../service/api.service';
+import { LoadingService } from '../service/loading.service';
 
 interface Customer {
   id: number;
@@ -123,9 +124,13 @@ export class ShippingComponent implements OnInit {
     { value: 'PICKUP', label: 'SHIPPING_PICKUP' }
   ];
 
-  constructor(private apiService: ApiService) {}
+  constructor(
+    private apiService: ApiService,
+    private loadingService: LoadingService
+  ) {}
 
   ngOnInit(): void {
+    this.loadingService.showDataLoading();
     this.loadShippingOrders();
     this.loadSalesOrders();
     this.loadCustomers();
@@ -176,9 +181,11 @@ export class ShippingComponent implements OnInit {
     this.apiService.getAllProducts().subscribe({
       next: (data: any) => {
         this.products = data;
+        this.loadingService.hideLoading();
       },
       error: (error: any) => {
         console.error('Error loading products:', error);
+        this.loadingService.hideLoading();
       }
     });
   }

@@ -25,22 +25,31 @@ export class CustomerComponent implements OnInit {
   searchTerm: string = '';
 
   ngOnInit(): void {
+    // 訂閱BehaviorSubject以獲取數據更新
     this.apiService.customers$.subscribe((custs: any[]) => {
       this.customers = custs;
       this.filteredCustomers = custs;
-    });
-    // Fetch initial customers and populate/update the BehaviorSubject
-    this.loadingService.showDataLoading();
-    this.apiService.fetchAndBroadcastCustomers().subscribe({
-      next: (res: any) => {
-        // console.log('Initial customers fetched by CustomerComponent');
-        this.loadingService.hideLoading();
-      },
-      error: (error: any) => {
-        this.showMessage(error?.error?.message || error?.message || "Unable to fetch initial customers" + error);
+      // 如果有數據且loading還在顯示，則隱藏loading
+      if (custs.length > 0 && this.loadingService.isLoading()) {
         this.loadingService.hideLoading();
       }
     });
+
+    // 只有在BehaviorSubject沒有數據時才顯示loading並發起請求
+    const currentCustomers = this.apiService.customersSource.value;
+    if (!currentCustomers || currentCustomers.length === 0) {
+      this.loadingService.showDataLoading();
+      this.apiService.fetchAndBroadcastCustomers().subscribe({
+        next: (res: any) => {
+          // console.log('Initial customers fetched by CustomerComponent');
+          this.loadingService.hideLoading();
+        },
+        error: (error: any) => {
+          this.showMessage(error?.error?.message || error?.message || "Unable to fetch initial customers" + error);
+          this.loadingService.hideLoading();
+        }
+      });
+    }
   }
 
   // Search customers

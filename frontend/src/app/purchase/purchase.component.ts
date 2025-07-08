@@ -100,10 +100,15 @@ export class PurchaseComponent implements OnInit {
     this.apiService.products$.subscribe((prods: any[]) => {
       this.products = prods;
     });
-    this.apiService.fetchAndBroadcastProducts().subscribe({
-      next: () => { /* console.log('Products loaded'); */ },
-      error: (err) => this.showToast(err?.error?.message || err?.message || 'Unable to fetch products', 'error')
-    });
+
+    // 只有在BehaviorSubject沒有數據時才發起請求
+    const currentProducts = this.apiService.productsSource.value;
+    if (!currentProducts || currentProducts.length === 0) {
+      this.apiService.fetchAndBroadcastProducts().subscribe({
+        next: () => { /* console.log('Products loaded'); */ },
+        error: (err) => this.showToast(err?.error?.message || err?.message || 'Unable to fetch products', 'error')
+      });
+    }
   }
 
   // 載入供應商資料
@@ -111,10 +116,15 @@ export class PurchaseComponent implements OnInit {
     this.apiService.suppliers$.subscribe((supps: any[]) => {
       this.suppliers = supps;
     });
-    this.apiService.fetchAndBroadcastSuppliers().subscribe({
-      next: () => { /* console.log('Suppliers loaded'); */ },
-      error: (err) => this.showToast(err?.error?.message || err?.message || 'Unable to fetch suppliers', 'error')
-    });
+
+    // 只有在BehaviorSubject沒有數據時才發起請求
+    const currentSuppliers = this.apiService.suppliersSource.value;
+    if (!currentSuppliers || currentSuppliers.length === 0) {
+      this.apiService.fetchAndBroadcastSuppliers().subscribe({
+        next: () => { /* console.log('Suppliers loaded'); */ },
+        error: (err) => this.showToast(err?.error?.message || err?.message || 'Unable to fetch suppliers', 'error')
+      });
+    }
   }
 
   // 載入採購單列表

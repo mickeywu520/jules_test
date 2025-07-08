@@ -34,22 +34,31 @@ export class CategoryComponent implements OnInit {
   ){}
 
   ngOnInit(): void {
+    // 訂閱BehaviorSubject以獲取數據更新
     this.apiService.categories$.subscribe((cats: Category[]) => {
       this.categories = cats;
-    });
-    // Fetch initial categories and populate/update the BehaviorSubject
-    this.loadingService.showDataLoading();
-    this.apiService.fetchAndBroadcastCategories().subscribe({
-      next: (res: any) => {
-        // console.log('Initial categories fetched by CategoryComponent');
-        this.loadingService.hideLoading();
-      },
-      error: (error: any) => {
-        const errorMessage = error?.error?.message || error?.error?.detail || error?.message || this.translate.instant("UNABLE_TO_FETCH_INITIAL_CATEGORIES");
-        this.showMessage(errorMessage);
+      // 如果有數據且loading還在顯示，則隱藏loading
+      if (cats.length > 0 && this.loadingService.isLoading()) {
         this.loadingService.hideLoading();
       }
     });
+
+    // 只有在BehaviorSubject沒有數據時才顯示loading並發起請求
+    const currentCategories = this.apiService.categoriesSource.value;
+    if (!currentCategories || currentCategories.length === 0) {
+      this.loadingService.showDataLoading();
+      this.apiService.fetchAndBroadcastCategories().subscribe({
+        next: (res: any) => {
+          // console.log('Initial categories fetched by CategoryComponent');
+          this.loadingService.hideLoading();
+        },
+        error: (error: any) => {
+          const errorMessage = error?.error?.message || error?.error?.detail || error?.message || this.translate.instant("UNABLE_TO_FETCH_INITIAL_CATEGORIES");
+          this.showMessage(errorMessage);
+          this.loadingService.hideLoading();
+        }
+      });
+    }
   }
 
 

@@ -22,21 +22,30 @@ export class SupplierComponent implements OnInit {
   message: string = '';
 
   ngOnInit(): void {
+    // 訂閱BehaviorSubject以獲取數據更新
     this.apiService.suppliers$.subscribe((supps: any[]) => {
       this.suppliers = supps;
-    });
-    // Fetch initial suppliers and populate/update the BehaviorSubject
-    this.loadingService.showDataLoading();
-    this.apiService.fetchAndBroadcastSuppliers().subscribe({
-      next: (res: any) => {
-        // console.log('Initial suppliers fetched by SupplierComponent');
-        this.loadingService.hideLoading();
-      },
-      error: (error: any) => {
-        this.showMessage(error?.error?.message || error?.message || "Unable to fetch initial suppliers" + error);
+      // 如果有數據且loading還在顯示，則隱藏loading
+      if (supps.length > 0 && this.loadingService.isLoading()) {
         this.loadingService.hideLoading();
       }
     });
+
+    // 只有在BehaviorSubject沒有數據時才顯示loading並發起請求
+    const currentSuppliers = this.apiService.suppliersSource.value;
+    if (!currentSuppliers || currentSuppliers.length === 0) {
+      this.loadingService.showDataLoading();
+      this.apiService.fetchAndBroadcastSuppliers().subscribe({
+        next: (res: any) => {
+          // console.log('Initial suppliers fetched by SupplierComponent');
+          this.loadingService.hideLoading();
+        },
+        error: (error: any) => {
+          this.showMessage(error?.error?.message || error?.message || "Unable to fetch initial suppliers" + error);
+          this.loadingService.hideLoading();
+        }
+      });
+    }
   }
 
   //Navigate to ass supplier Page

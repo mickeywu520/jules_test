@@ -14,19 +14,19 @@ import { environment } from '../../environments/environment';
 export class ApiService {
 
   // BehaviorSubject for reactive categories
-  private categoriesSource = new BehaviorSubject<any[]>([]);
+  public categoriesSource = new BehaviorSubject<any[]>([]);
   public categories$ = this.categoriesSource.asObservable();
 
   // BehaviorSubject for reactive products
-  private productsSource = new BehaviorSubject<any[]>([]);
+  public productsSource = new BehaviorSubject<any[]>([]);
   public products$ = this.productsSource.asObservable();
 
   // BehaviorSubject for reactive suppliers
-  private suppliersSource = new BehaviorSubject<any[]>([]);
+  public suppliersSource = new BehaviorSubject<any[]>([]);
   public suppliers$ = this.suppliersSource.asObservable();
 
   // BehaviorSubject for reactive customers
-  private customersSource = new BehaviorSubject<any[]>([]);
+  public customersSource = new BehaviorSubject<any[]>([]);
   public customers$ = this.customersSource.asObservable();
 
   authStatuschanged = new EventEmitter<void>();

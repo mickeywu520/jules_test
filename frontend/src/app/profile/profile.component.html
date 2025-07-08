@@ -30,4 +30,89 @@
         </div>
     </div>
 
+    <!-- ADMIN用戶管理區塊 -->
+    <div *ngIf="isAdmin && allUsers.length > 0" class="user-management-section">
+        <h2>{{ 'USER_MANAGEMENT' | translate }}</h2>
+
+        <div class="users-stats">
+            <p>{{ 'TOTAL_USERS' | translate }}: <strong>{{allUsers.length}}</strong></p>
+        </div>
+
+        <div class="users-table-container">
+            <table class="users-table">
+                <thead>
+                    <tr>
+                        <th>{{ 'ID' | translate }}</th>
+                        <th>{{ 'NAME' | translate }}</th>
+                        <th>{{ 'EMAIL' | translate }}</th>
+                        <th>{{ 'PHONE_NUMBER' | translate }}</th>
+                        <th>{{ 'ROLE' | translate }}</th>
+                        <th>{{ 'CREATED_DATE' | translate }}</th>
+                        <th>{{ 'ACTIONS' | translate }}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let user of allUsers; let i = index" class="user-row">
+                        <td>{{user.id}}</td>
+                        <td>
+                            <span *ngIf="editingUserId !== user.id">{{user.name || 'N/A'}}</span>
+                            <input *ngIf="editingUserId === user.id"
+                                   [(ngModel)]="editingUser.name"
+                                   class="edit-input"
+                                   placeholder="請輸入姓名">
+                        </td>
+                        <td>
+                            <span *ngIf="editingUserId !== user.id">{{user.email}}</span>
+                            <input *ngIf="editingUserId === user.id"
+                                   [(ngModel)]="editingUser.email"
+                                   class="edit-input"
+                                   placeholder="請輸入郵箱">
+                        </td>
+                        <td>
+                            <span *ngIf="editingUserId !== user.id">{{user.phoneNumber || 'N/A'}}</span>
+                            <input *ngIf="editingUserId === user.id"
+                                   [(ngModel)]="editingUser.phoneNumber"
+                                   class="edit-input"
+                                   placeholder="請輸入電話">
+                        </td>
+                        <td>
+                            <span *ngIf="editingUserId !== user.id" class="role-badge" [class.admin-role]="user.role === 'ADMIN'" [class.user-role]="user.role === 'USER'">
+                                {{user.role}}
+                            </span>
+                            <select *ngIf="editingUserId === user.id"
+                                    [(ngModel)]="editingUser.role"
+                                    class="edit-select">
+                                <option value="USER">USER</option>
+                                <!-- 未來可以添加其他角色，但不包含ADMIN -->
+                            </select>
+                        </td>
+                        <td>{{user.createdAt | date:'yyyy-MM-dd HH:mm'}}</td>
+                        <td>
+                            <div class="action-buttons">
+                                <button *ngIf="editingUserId !== user.id"
+                                        (click)="startEditUser(user)"
+                                        class="btn-edit"
+                                        title="編輯用戶">
+                                    ✏️
+                                </button>
+                                <button *ngIf="editingUserId === user.id"
+                                        (click)="saveUser()"
+                                        class="btn-save"
+                                        title="儲存">
+                                    ✅
+                                </button>
+                                <button *ngIf="editingUserId === user.id"
+                                        (click)="cancelEdit()"
+                                        class="btn-cancel"
+                                        title="取消">
+                                    ❌
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
 </div>

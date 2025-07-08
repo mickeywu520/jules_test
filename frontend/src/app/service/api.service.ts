@@ -184,6 +184,18 @@ export class ApiService {
     });
   }
 
+  getAllUsers(): Observable<any> {
+    return this.http.get(`${ApiService.BASE_URL}/users/all`, {
+      headers: this.getHeader(),
+    });
+  }
+
+  updateUser(userId: number, userData: any): Observable<any> {
+    return this.http.put(`${ApiService.BASE_URL}/users/${userId}`, userData, {
+      headers: this.getHeader(),
+    });
+  }
+
 
 
 

@@ -1,0 +1,84 @@
+<div class="customer-type-management-page">
+  <p *ngIf="message" class="message" [ngClass]="messageType">{{ message }}</p>
+  
+  <div class="page-header">
+    <h1>{{ 'CUSTOMER_TYPE_MANAGEMENT' | translate }}</h1>
+  </div>
+
+  <div class="add-type-form">
+    <h2>{{ isEditing ? ('EDIT_CUSTOMER_TYPE' | translate) : ('ADD_CUSTOMER_TYPE' | translate) }}</h2>
+    <form (ngSubmit)="handleSubmit()" #typeForm="ngForm">
+      <div class="form-row">
+        <div class="form-group">
+          <label for="typeName">{{ 'TYPE_NAME' | translate }} *</label>
+          <input
+            type="text"
+            id="typeName"
+            [(ngModel)]="formData.typeName"
+            name="typeName"
+            required
+            #typeNameInput="ngModel"
+          />
+          <div *ngIf="typeNameInput.invalid && typeNameInput.touched" class="error">
+            {{ 'TYPE_NAME_REQUIRED' | translate }}
+          </div>
+        </div>
+      </div>
+      
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary" [disabled]="!typeForm.form.valid">
+          {{ isEditing ? ('UPDATE' | translate) : ('ADD' | translate) }}
+        </button>
+        <button type="button" class="btn btn-secondary" (click)="resetForm()" *ngIf="isEditing">
+          {{ 'CANCEL' | translate }}
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <div class="types-list">
+    <div class="types-list-header">
+      <h2>{{ 'CUSTOMER_TYPES_LIST' | translate }}</h2>
+    </div>
+    
+    <div *ngIf="loading" class="loading">
+      {{ 'LOADING' | translate }}...
+    </div>
+    
+    <table class="types-table" *ngIf="!loading">
+      <thead>
+        <tr>
+          <th>{{ 'ID' | translate }}</th>
+          <th>{{ 'TYPE_NAME' | translate }}</th>
+          <th>{{ 'CREATED_AT' | translate }}</th>
+          <th>{{ 'ACTIONS' | translate }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let type of customerTypes" [class.editing-row]="editingTypeId === type.id">
+          <td>{{ type.id }}</td>
+          <td *ngIf="editingTypeId !== type.id">{{ type.type_name }}</td>
+          <td *ngIf="editingTypeId === type.id">
+            <input [(ngModel)]="editingTypeData.type_name" name="editingTypeName" />
+          </td>
+          <td>{{ type.created_at | date:'yyyy-MM-dd HH:mm:ss' }}</td>
+          <td class="actions-cell">
+            <button *ngIf="editingTypeId !== type.id" class="btn btn-sm btn-warning" (click)="startEditing(type)">
+              {{ 'EDIT' | translate }}
+            </button>
+            <button *ngIf="editingTypeId === type.id" class="btn btn-sm btn-primary" (click)="saveEditing(type.id)">
+              {{ 'SAVE' | translate }}
+            </button>
+            <button *ngIf="editingTypeId === type.id" class="btn btn-sm btn-secondary" (click)="cancelEditing()">
+              {{ 'CANCEL' | translate }}
+            </button>
+            <button class="btn btn-sm btn-danger" (click)="deleteCustomerType(type.id)" [disabled]="deletingTypeId === type.id">
+              <span *ngIf="deletingTypeId !== type.id">{{ 'DELETE' | translate }}</span>
+              <span *ngIf="deletingTypeId === type.id">{{ 'DELETING' | translate }}...</span>
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

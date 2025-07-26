@@ -326,6 +326,37 @@ export class ApiService {
     });
   }
 
+  /** CUSTOMER TYPE API */
+  addCustomerType(body: any): Observable<any> {
+    return this.http.post(`${ApiService.BASE_URL}/customer-types/`, body, {
+      headers: this.getHeader(),
+    });
+  }
+
+  getAllCustomerTypes(): Observable<any> {
+    return this.http.get(`${ApiService.BASE_URL}/customer-types/`, {
+      headers: this.getHeader(),
+    });
+  }
+
+  getCustomerTypeById(id: string): Observable<any> {
+    return this.http.get(`${ApiService.BASE_URL}/customer-types/${id}`, {
+      headers: this.getHeader(),
+    });
+  }
+
+  updateCustomerType(id: string, body: any): Observable<any> {
+    return this.http.put(`${ApiService.BASE_URL}/customer-types/${id}`, body, {
+      headers: this.getHeader(),
+    });
+  }
+
+  deleteCustomerType(id: string): Observable<any> {
+    return this.http.delete(`${ApiService.BASE_URL}/customer-types/${id}`, {
+      headers: this.getHeader(),
+    });
+  }
+
 
 
 

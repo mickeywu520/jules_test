@@ -16,6 +16,7 @@ import { DashboardComponent } from './dashboard/dashboard.component';
 import { CustomerComponent } from './customer/customer.component';
 import { AddEditCustomerComponent } from './add-edit-customer/add-edit-customer.component';
 import { GoodsReceiptComponent } from './goods-receipt/goods-receipt.component';
+import { CustomerTypeManagementComponent } from './customer-type-management/customer-type-management.component';
 
 export const routes: Routes = [
 
@@ -47,6 +48,7 @@ export const routes: Routes = [
 
   { path: 'profile', component: ProfileComponent, canActivate:[GuardService] },
   { path: 'dashboard', component: DashboardComponent, canActivate:[GuardService] },
+  { path: 'customer-types', component: CustomerTypeManagementComponent, canActivate:[GuardService], data: {requiresAdmin: true} },
 
 //   WIDE CARD
     {path: "", redirectTo: "/login", pathMatch: 'full'},

@@ -116,6 +116,7 @@
   "ADD_CUSTOMER": "新增客戶",
   "EDIT_CUSTOMER": "編輯客戶",
   "CUSTOMER_TYPE": "客戶類型",
+  "CUSTOMER_TYPES": "客戶類型",
   "CUSTOMER_CODE": "客戶編號",
   "CUSTOMER_NAME": "客戶名稱",
   "CONTACT_PERSON": "聯絡人",
@@ -363,5 +364,17 @@
   "DISCOUNT_RATE_PLACEHOLDER": "請輸入折扣率 (0-1)",
   "SALES_ORDER_NOTES_PLACEHOLDER": "請輸入銷售備註或說明",
   "ITEM_NOTES_PLACEHOLDER": "請輸入商品備註",
-  "SEARCH_SALES_ORDER_PLACEHOLDER": "請輸入銷售單號或客戶名稱"
+  "SEARCH_SALES_ORDER_PLACEHOLDER": "請輸入銷售單號或客戶名稱",
+  "CUSTOMER_TYPE_MANAGEMENT": "客戶類型管理",
+  "ADD_CUSTOMER_TYPE": "新增客戶類型",
+  "EDIT_CUSTOMER_TYPE": "編輯客戶類型",
+  "TYPE_NAME": "類型名稱",
+  "TYPE_NAME_REQUIRED": "請輸入類型名稱",
+  "CUSTOMER_TYPES_LIST": "客戶類型列表",
+  "LOADING": "載入中",
+  "UPDATE": "更新",
+  "ADD": "新增",
+  "SAVE": "儲存",
+  "DELETING": "刪除中",
+  "ID": "編號"
 }

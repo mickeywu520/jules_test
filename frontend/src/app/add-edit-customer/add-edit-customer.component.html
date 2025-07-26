@@ -15,7 +15,7 @@
         >
           <option value="">{{ 'SELECT_CUSTOMER_TYPE' | translate }}</option>
           <option *ngFor="let type of customerTypes" [value]="type.value">
-            {{ type.label | translate }}
+            {{ type.label }}
           </option>
         </select>
       </div>

@@ -23,14 +23,8 @@ export class AddEditCustomerComponent implements OnInit {
   isEditing: boolean = false;
   customerId: string | null = null;
 
-  // Customer type options (使用中文字串值)
-  customerTypes = [
-    { value: '區域連鎖', label: 'REGIONAL_CHAIN' },
-    { value: '零售', label: 'RETAIL' },
-    { value: '犬貓舍', label: 'PET_KENNEL' },
-    { value: '一般店家', label: 'GENERAL_STORE' },
-    { value: '大型連鎖', label: 'LARGE_CHAIN' }
-  ];
+  // Customer type options (從API獲取)
+  customerTypes: any[] = [];
 
   // Payment method options (收款方式)
   paymentMethods = [
@@ -70,6 +64,32 @@ export class AddEditCustomerComponent implements OnInit {
       this.isEditing = true;
       this.fetchCustomer();
     }
+    
+    // 從API獲取客戶類型
+    this.fetchCustomerTypes();
+  }
+  
+  fetchCustomerTypes(): void {
+    this.apiService.getAllCustomerTypes().subscribe({
+      next: (res: any) => {
+        // 將獲取到的客戶類型轉換為下拉選單所需的格式
+        this.customerTypes = res.map((type: any) => ({
+          value: type.id,
+          label: type.type_name
+        }));
+      },
+      error: (error) => {
+        console.error('Error fetching customer types:', error);
+        // 如果獲取失敗，使用硬編碼的默認值
+        this.customerTypes = [
+          { value: 1, label: '區域連鎖' },
+          { value: 2, label: '零售' },
+          { value: 3, label: '犬貓舍' },
+          { value: 4, label: '一般店家' },
+          { value: 5, label: '大型連鎖' }
+        ];
+      }
+    });
   }
 
   fetchCustomer(): void {
@@ -89,7 +109,7 @@ export class AddEditCustomerComponent implements OnInit {
         }
 
         this.formData = {
-          customerType: res.customerType,
+          customerType: res.customer_type_id || res.customer_type_obj?.id || '',
           salesPersonId: res.salesPersonId || '',
           salesPersonName: res.salesPersonName || '',
           customerCode: res.customerCode,
@@ -133,7 +153,7 @@ export class AddEditCustomerComponent implements OnInit {
 
     //prepare data for submission
     const customerData = {
-      customerType: this.formData.customerType,
+      customer_type_id: this.formData.customerType,
       salesPersonId: this.formData.salesPersonId || null,
       salesPersonName: this.formData.salesPersonName || null,
       customerCode: this.formData.customerCode,

@@ -219,5 +219,17 @@
   "SALES_REPORT_SHORT": "Sales Report",
   "SALES_ORDER_NUMBER": "Sales Order Number",
   "EXCEL_SHEET_PREVIEW": "Excel Sheet Preview",
-  "EXCEL_WILL_INCLUDE_ALL_COLUMNS": "Excel file will include all columns: Date, Customer Code, Customer Name, Sales Order Number, Salesperson ID, Salesperson Name, Product Code, Product Name, Quantity, Total Amount, Notes"
+  "EXCEL_WILL_INCLUDE_ALL_COLUMNS": "Excel file will include all columns: Date, Customer Code, Customer Name, Sales Order Number, Salesperson ID, Salesperson Name, Product Code, Product Name, Quantity, Total Amount, Notes",
+  "CUSTOMER_TYPE_MANAGEMENT": "Customer Type Management",
+  "ADD_CUSTOMER_TYPE": "Add Customer Type",
+  "EDIT_CUSTOMER_TYPE": "Edit Customer Type",
+  "TYPE_NAME": "Type Name",
+  "TYPE_NAME_REQUIRED": "Type name is required",
+  "CUSTOMER_TYPES_LIST": "Customer Types List",
+  "LOADING": "Loading",
+  "UPDATE": "Update",
+  "ADD": "Add",
+  "SAVE": "Save",
+  "DELETING": "Deleting",
+  "ID": "ID"
 }

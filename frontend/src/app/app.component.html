@@ -23,6 +23,7 @@
       <li *ngIf="isAdmin()"><a routerLink="/product" (click)="onNavItemClick()">{{ 'PRODUCT' | translate }}</a></li>
       <li *ngIf="isAdmin()"><a routerLink="/supplier" (click)="onNavItemClick()">{{ 'SUPPLIER' | translate }}</a></li>
       <li *ngIf="isAdmin()"><a routerLink="/customer" (click)="onNavItemClick()">{{ 'CUSTOMER' | translate }}</a></li>
+      <li *ngIf="isAdmin()"><a routerLink="/customer-types" (click)="onNavItemClick()">{{ 'CUSTOMER_TYPES' | translate }}</a></li>
       <li *ngIf="isAuth()"><a routerLink="/purchase" (click)="onNavItemClick()">{{ 'PURCHASE' | translate }}</a></li>
       <li *ngIf="isAuth()"><a routerLink="/goods-receipt" (click)="onNavItemClick()">{{ 'GOODS_RECEIPT' | translate }}</a></li>
       <li *ngIf="isAuth()"><a routerLink="/sell" (click)="onNavItemClick()">{{ 'SELL' | translate }}</a></li>

@@ -153,6 +153,7 @@ class UserUpdate(BaseModel): # For updating user profile
     name: Optional[str] = None
     email: Optional[EmailStr] = None
     phoneNumber: Optional[str] = None
+    role: Optional[UserRole] = None
     # Role and password updates might be handled by separate, more secure endpoints or admin functions
 
 class User(UserBase): # For Read operations (e.g., /users/current)

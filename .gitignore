@@ -59,6 +59,7 @@
 
 # Python bytecode
 /backend/__pycache__/
+*.pyc
 /backend/*.py[cod]
 /backend/*$py.class
 

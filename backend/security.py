@@ -60,3 +60,12 @@ async def get_current_active_user(current_user: models.User = Depends(get_curren
     # if not current_user.is_active:
     #     raise HTTPException(status_code=400, detail="Inactive user")
     return current_user
+
+async def get_current_admin_user(current_user: models.User = Depends(get_current_active_user)):
+    """驗證當前用戶是否為ADMIN角色"""
+    if current_user.role != models.UserRole.ADMIN:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="管理員權限不足"
+        )
+    return current_user

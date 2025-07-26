@@ -39,6 +39,20 @@ class Category(CategoryBase): # For Read operations
     class Config:
         from_attributes = True
 
+# Base and Read schemas for CustomerType
+class CustomerTypeBase(BaseModel):
+    type_name: str
+
+class CustomerTypeCreate(CustomerTypeBase):
+    pass
+
+class CustomerType(CustomerTypeBase): # For Read operations
+    id: int
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
 # Base and Read schemas for Product - 根據客戶 Excel 欄位重新設計
 class ProductBase(BaseModel):
     productCode: str = Field(..., description="貨品編號，必須唯一")
@@ -95,7 +109,7 @@ class Supplier(SupplierBase): # For Read operations
 
 # Base and Read schemas for Customer
 class CustomerBase(BaseModel):
-    customerType: str
+    customer_type_id: int
     salesPersonId: Optional[str] = None
     salesPersonName: Optional[str] = None
     customerCode: str = Field(..., description="客戶編號，必須唯一")
@@ -111,11 +125,25 @@ class CustomerBase(BaseModel):
     paymentCategory: Optional[str] = None
     creditLimit: Optional[float] = 0.0
 
-class CustomerCreate(CustomerBase):
-    pass
+class CustomerCreate(BaseModel):
+    customer_type_id: int
+    salesPersonId: Optional[str] = None
+    salesPersonName: Optional[str] = None
+    customerCode: str
+    customerName: str
+    contactPerson: Optional[str] = None
+    invoiceTitle: Optional[str] = None
+    taxId: Optional[str] = None
+    phoneNumber: Optional[str] = None
+    faxNumber: Optional[str] = None
+    deliveryAddress: Optional[str] = None
+    businessHours: Optional[str] = None
+    paymentMethod: Optional[str] = None
+    paymentCategory: Optional[str] = None
+    creditLimit: Optional[float] = 0.0
 
 class CustomerUpdate(BaseModel):
-    customerType: Optional[str] = None
+    customer_type_id: Optional[int] = None
     salesPersonId: Optional[str] = None
     salesPersonName: Optional[str] = None
     customerCode: Optional[str] = None
@@ -135,6 +163,7 @@ class Customer(CustomerBase): # For Read operations
     id: int
     createdDate: datetime
     updatedAt: Optional[datetime] = None
+    customer_type_obj: Optional[CustomerType] = None  # 包含客戶類型詳細資訊
 
     class Config:
         from_attributes = True

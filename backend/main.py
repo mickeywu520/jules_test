@@ -9,7 +9,7 @@ import traceback
 import os
 
 from .database import engine, create_db_and_tables #, SessionLocal, Base (not directly used here but good for context)
-from .routers import auth, users, categories, suppliers, products, transactions, customers, purchase_orders, goods_receipts, sales_orders
+from .routers import auth, users, categories, suppliers, products, transactions, customers, purchase_orders, goods_receipts, sales_orders, customer_types
 from .error_messages import get_friendly_message, detect_error_type
 # from . import models # models are used by create_db_and_tables via database.py
 
@@ -182,6 +182,7 @@ app.include_router(customers.router)
 app.include_router(purchase_orders.router)
 app.include_router(goods_receipts.router)
 app.include_router(sales_orders.router)
+app.include_router(customer_types.router)
 
 
 # Root endpoint (optional, good for a health check or API info)

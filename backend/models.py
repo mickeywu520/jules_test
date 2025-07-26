@@ -96,6 +96,16 @@ class Category(Base):
     # 恢復與 Product 的關聯
     products = relationship("Product", back_populates="category")
 
+# CustomerType Model
+class CustomerType(Base):
+    __tablename__ = "customer_types"
+    id = Column(Integer, primary_key=True, index=True)
+    type_name = Column(String, unique=True, index=True, nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    # 與 Customer 的關聯
+    customers = relationship("Customer", back_populates="customer_type_obj")
+
 # Supplier Model
 class Supplier(Base):
     __tablename__ = "suppliers"
@@ -110,7 +120,7 @@ class Supplier(Base):
 class Customer(Base):
     __tablename__ = "customers"
     id = Column(Integer, primary_key=True, index=True)
-    customerType = Column(String, nullable=False)  # 客戶類型 (字串類型，支援動態值)
+    customer_type_id = Column(Integer, ForeignKey("customer_types.id"), nullable=False)  # 外鍵關聯到CustomerType
     createdDate = Column(DateTime(timezone=True), server_default=func.now())  # 建檔日期
     salesPersonId = Column(String, nullable=True)  # 業務員編號
     salesPersonName = Column(String, nullable=True)  # 業務員名稱
@@ -127,6 +137,9 @@ class Customer(Base):
     paymentCategory = Column(String, nullable=True)  # 收款類別 (字串類型，支援動態值)
     creditLimit = Column(Float, nullable=True, default=0.0)  # 銷貨額度
     updatedAt = Column(DateTime(timezone=True), onupdate=func.now())
+
+    # 與 CustomerType 的關聯
+    customer_type_obj = relationship("CustomerType", back_populates="customers")
 
     # 可以添加與交易的關聯（如果需要的話）
     # transactions = relationship("Transaction", back_populates="customer")

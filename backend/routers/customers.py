@@ -18,8 +18,13 @@ def create_customer(customer: schemas.CustomerCreate, db: Session = Depends(data
     if db_customer:
         raise HTTPException(status_code=400, detail=f"Customer with code '{customer.customerCode}' already exists")
 
+    # Check if the customer type exists
+    db_customer_type = db.query(models.CustomerType).filter(models.CustomerType.id == customer.customer_type_id).first()
+    if db_customer_type is None:
+        raise HTTPException(status_code=400, detail="Customer type not found")
+
     new_customer = models.Customer(
-        customerType=customer.customerType,
+        customer_type_id=customer.customer_type_id,
         salesPersonId=customer.salesPersonId,
         salesPersonName=customer.salesPersonName,
         customerCode=customer.customerCode,
@@ -70,6 +75,12 @@ def update_customer(id: int, customer_update: schemas.CustomerUpdate, db: Sessio
         existing_customer_with_new_code = db.query(models.Customer).filter(models.Customer.customerCode == customer_update.customerCode).first()
         if existing_customer_with_new_code:
             raise HTTPException(status_code=400, detail=f"Customer with code '{customer_update.customerCode}' already exists")
+
+    # Check if the customer type exists (if customer_type_id is being updated)
+    if customer_update.customer_type_id is not None:
+        db_customer_type = db.query(models.CustomerType).filter(models.CustomerType.id == customer_update.customer_type_id).first()
+        if db_customer_type is None:
+            raise HTTPException(status_code=400, detail="Customer type not found")
 
     # Update fields if provided
     update_data = customer_update.model_dump(exclude_unset=True)

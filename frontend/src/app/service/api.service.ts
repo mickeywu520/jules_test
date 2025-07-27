@@ -157,9 +157,13 @@ export class ApiService {
 
   private getHeader(): HttpHeaders {
     const token = this.getFromStorageAndDecrypt("token");
-    return new HttpHeaders({
-      Authorization: `Bearer ${token}`,
-    });
+    if (token) {
+      return new HttpHeaders({
+        Authorization: `Bearer ${token}`,
+      });
+    } else {
+      return new HttpHeaders();
+    }
   }
 
 

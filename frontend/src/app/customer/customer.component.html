@@ -37,7 +37,7 @@
         <tr *ngFor="let customer of filteredCustomers" class="customer-row">
           <td>{{ customer.customerCode }}</td>
           <td>{{ customer.customerName }}</td>
-          <td>{{ getCustomerTypeText(customer.customerType) }}</td>
+          <td>{{ getCustomerTypeText(customer) }}</td>
           <td>{{ customer.contactPerson || '-' }}</td>
           <td>{{ customer.phoneNumber || '-' }}</td>
           <td>{{ customer.paymentMethod || '-' }}</td>

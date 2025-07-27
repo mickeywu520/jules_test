@@ -97,8 +97,17 @@ export class CustomerComponent implements OnInit {
   }
 
   // Get customer type display text (現在直接返回中文字串)
-  getCustomerTypeText(type: string): string {
-    return type || '-';
+  getCustomerTypeText(customer: any): string {
+    // 如果customer對象有customer_type_obj字段且包含type_name，則返回type_name
+    if (customer.customer_type_obj && customer.customer_type_obj.type_name) {
+      return customer.customer_type_obj.type_name;
+    }
+    // 如果customer對象有customerType字段，則直接返回
+    if (customer.customerType) {
+      return customer.customerType;
+    }
+    // 默認返回'-'
+    return '-';
   }
 
   showMessage(message: string) {

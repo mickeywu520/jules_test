@@ -88,6 +88,54 @@
       </div>
     </div>
 
+    <!-- County and District Selection -->
+    <div class="form-row">
+      <!-- 選取縣市 -->
+      <div class="form-group">
+        <label for="county">{{ 'COUNTY' | translate }}</label>
+        <select
+          id="county"
+          [(ngModel)]="formData.county"
+          name="county"
+          (change)="onCountyChange()"
+        >
+          <option value="">{{ 'SELECT_COUNTY' | translate }}</option>
+          <option *ngFor="let county of counties" [value]="county">
+            {{ county }}
+          </option>
+        </select>
+      </div>
+
+      <!-- 區域 -->
+      <div class="form-group">
+        <label for="district">{{ 'DISTRICT' | translate }}</label>
+        <select
+          id="district"
+          [(ngModel)]="formData.district"
+          name="district"
+          (change)="onDistrictChange()"
+          [disabled]="!formData.county"
+        >
+          <option value="">{{ 'SELECT_DISTRICT' | translate }}</option>
+          <option *ngFor="let district of districts" [value]="district">
+            {{ district }}
+          </option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Postal Code -->
+    <div class="form-group">
+      <label for="postalCode">{{ 'POSTAL_CODE' | translate }}</label>
+      <input
+        type="text"
+        id="postalCode"
+        [value]="postalCode"
+        name="postalCode"
+        readonly
+      />
+    </div>
+
     <!-- Delivery Address -->
     <div class="form-group full-width">
       <label for="deliveryAddress">{{ 'DELIVERY_ADDRESS' | translate }}</label>

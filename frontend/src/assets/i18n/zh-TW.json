@@ -376,5 +376,10 @@
   "ADD": "新增",
   "SAVE": "儲存",
   "DELETING": "刪除中",
-  "ID": "編號"
+  "ID": "編號",
+  "COUNTY": "縣市",
+  "DISTRICT": "區域",
+  "POSTAL_CODE": "郵遞區號",
+  "SELECT_COUNTY": "選擇縣市",
+  "SELECT_DISTRICT": "選擇區域"
 }

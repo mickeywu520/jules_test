@@ -6,6 +6,9 @@ import { ApiService } from '../service/api.service';
 import { LoadingService } from '../service/loading.service';
 import { TranslateModule } from '@ngx-translate/core';
 
+// 導入台灣郵遞區號數據
+import taiwanPostalCodes from '../../assets/data/taiwanPostalCodes.json';
+
 @Component({
   selector: 'app-add-edit-customer',
   standalone: true,
@@ -39,6 +42,15 @@ export class AddEditCustomerComponent implements OnInit {
     { value: '匯款', label: 'BANK_TRANSFER' }
   ];
 
+  // 台灣縣市列表
+  counties: string[] = Object.keys(taiwanPostalCodes);
+
+  // 區域列表（根據選擇的縣市動態更新）
+  districts: string[] = [];
+
+  // 郵遞區號（根據選擇的區域自動帶入）
+  postalCode: string = '';
+
   formData: any = {
     customerType: '',
     salesPersonId: '',
@@ -50,6 +62,8 @@ export class AddEditCustomerComponent implements OnInit {
     taxId: '',
     phoneNumber: '',
     faxNumber: '',
+    county: '',  // 新增縣市字段
+    district: '',  // 新增區域字段
     deliveryAddress: '',
     businessHours: '',
     paymentMethod: '',
@@ -245,6 +259,40 @@ export class AddEditCustomerComponent implements OnInit {
     } else {
       // 如果業務員編號為空，清空業務員名稱
       this.formData.salesPersonName = '';
+    }
+  }
+
+  // 當選擇縣市時調用
+  onCountyChange(): void {
+    // 清空區域和郵遞區號
+    this.formData.district = '';
+    this.postalCode = '';
+    this.districts = [];
+    
+    // 如果選擇了縣市，更新區域列表
+    if (this.formData.county) {
+      const county = this.formData.county as string;
+      const typedTaiwanPostalCodes = taiwanPostalCodes as any;
+      if (typedTaiwanPostalCodes[county]) {
+        this.districts = Object.keys(typedTaiwanPostalCodes[county]);
+      }
+    }
+  }
+
+  // 當選擇區域時調用
+  onDistrictChange(): void {
+    // 如果選擇了區域，自動帶入郵遞區號
+    if (this.formData.district && this.formData.county) {
+      const county = this.formData.county as string;
+      const district = this.formData.district as string;
+      const typedTaiwanPostalCodes = taiwanPostalCodes as any;
+      if (typedTaiwanPostalCodes[county] && typedTaiwanPostalCodes[county][district]) {
+        this.postalCode = typedTaiwanPostalCodes[county][district];
+      } else {
+        this.postalCode = '';
+      }
+    } else {
+      this.postalCode = '';
     }
   }
 

@@ -231,5 +231,10 @@
   "ADD": "Add",
   "SAVE": "Save",
   "DELETING": "Deleting",
-  "ID": "ID"
+  "ID": "ID",
+  "COUNTY": "County",
+  "DISTRICT": "District",
+  "POSTAL_CODE": "Postal Code",
+  "SELECT_COUNTY": "Select County",
+  "SELECT_DISTRICT": "Select District"
 }

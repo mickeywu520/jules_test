@@ -196,6 +196,12 @@ export class ApiService {
     });
   }
 
+  getUserById(userId: number): Observable<any> {
+    return this.http.get(`${ApiService.BASE_URL}/users/${userId}`, {
+      headers: this.getHeader(),
+    });
+  }
+
 
 
 

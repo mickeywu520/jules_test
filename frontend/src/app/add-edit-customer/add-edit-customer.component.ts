@@ -226,6 +226,28 @@ export class AddEditCustomerComponent implements OnInit {
     });
   }
 
+  // 當業務員編號輸入框失去焦點時調用
+  onSalesPersonIdBlur(): void {
+    // 檢查業務員編號是否已填寫
+    if (this.formData.salesPersonId) {
+      // 調用API獲取業務員信息
+      this.apiService.getUserById(parseInt(this.formData.salesPersonId)).subscribe({
+        next: (res: any) => {
+          // 將獲取到的業務員名稱填入業務員名稱輸入框
+          this.formData.salesPersonName = res.name;
+        },
+        error: (error) => {
+          console.error('Error fetching sales person name:', error);
+          // 如果獲取失敗，清空業務員名稱
+          this.formData.salesPersonName = '';
+        }
+      });
+    } else {
+      // 如果業務員編號為空，清空業務員名稱
+      this.formData.salesPersonName = '';
+    }
+  }
+
   showMessage(message: string) {
     this.message = message;
     setTimeout(() => {

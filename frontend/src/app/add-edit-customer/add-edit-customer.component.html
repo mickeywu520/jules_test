@@ -122,6 +122,7 @@
           [(ngModel)]="formData.salesPersonId"
           name="salesPersonId"
           [placeholder]="'SALES_PERSON_ID_PLACEHOLDER' | translate"
+          (blur)="onSalesPersonIdBlur()"
         />
       </div>
 

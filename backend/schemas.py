@@ -112,6 +112,8 @@ class CustomerBase(BaseModel):
     customer_type_id: int
     salesPersonId: Optional[str] = None
     salesPersonName: Optional[str] = None
+    bankAccount: Optional[str] = None
+    notes: Optional[str] = None
     customerCode: str = Field(..., description="客戶編號，必須唯一")
     customerName: str = Field(..., description="客戶名稱")
     contactPerson: Optional[str] = None
@@ -129,6 +131,8 @@ class CustomerCreate(BaseModel):
     customer_type_id: int
     salesPersonId: Optional[str] = None
     salesPersonName: Optional[str] = None
+    bankAccount: Optional[str] = None
+    notes: Optional[str] = None
     customerCode: str
     customerName: str
     contactPerson: Optional[str] = None
@@ -146,6 +150,8 @@ class CustomerUpdate(BaseModel):
     customer_type_id: Optional[int] = None
     salesPersonId: Optional[str] = None
     salesPersonName: Optional[str] = None
+    bankAccount: Optional[str] = None
+    notes: Optional[str] = None
     customerCode: Optional[str] = None
     customerName: Optional[str] = None
     contactPerson: Optional[str] = None

@@ -382,6 +382,7 @@
   "POSTAL_CODE": "郵遞區號",
   "SELECT_COUNTY": "選擇縣市",
   "SELECT_DISTRICT": "選擇區域",
+  "ALL_DISTRICTS": "全部區域",
   "SELECT_CUSTOMER_TYPE": "選擇客戶類型",
   "BANK_ACCOUNT": "銀行帳戶",
   "NOTES": "備註",

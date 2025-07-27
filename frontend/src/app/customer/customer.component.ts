@@ -34,9 +34,12 @@ export class CustomerComponent implements OnInit {
   showBatchUpdateSection: boolean = false;
   searchCriteria: string = 'customerName'; // 默認搜尋條件
   searchValue: string = '';
+  countyValue: string = ''; // 縣市搜尋值
+  districtValue: string = ''; // 區域搜尋值
   batchUpdateCustomers: any[] = [];
   selectedCustomerIds: Set<number> = new Set();
   isBatchUpdateMode: boolean = false;
+  showDistrictDropdown: boolean = false; // 控制是否顯示區域下拉選單
   
   // 客戶類型選項
   customerTypes: any[] = [];
@@ -44,6 +47,9 @@ export class CustomerComponent implements OnInit {
   // 台灣縣市和區域數據
   counties: string[] = Object.keys(taiwanPostalCodes);
   districts: string[] = [];
+  
+  // 批次修改模式下的區域數據（獨立於新增/編輯客戶）
+  batchUpdateDistricts: string[] = [];
 
   ngOnInit(): void {
     // 訂閱BehaviorSubject以獲取數據更新
@@ -161,38 +167,77 @@ export class CustomerComponent implements OnInit {
   resetBatchUpdate(): void {
     this.searchCriteria = 'customerName';
     this.searchValue = '';
+    this.countyValue = '';
+    this.districtValue = '';
     this.batchUpdateCustomers = [];
     this.selectedCustomerIds.clear();
     this.isBatchUpdateMode = false;
     this.districts = [];
+    this.batchUpdateDistricts = [];
+    this.showDistrictDropdown = false;
+  }
+  
+  // 當在批次修改模式下選擇"區域"搜尋條件時，預先加載所有縣市的區域數據
+  onBatchUpdateDistrictSearch(): void {
+    // 這個方法現在不再需要，因為區域下拉選單是在選擇縣市後直接顯示的
+    // 保留這個方法以防未來需要
   }
   
   // 當選擇縣市時更新區域列表
   onCountyChange(): void {
-    if (this.searchValue) {
+    if (this.countyValue) {
       const typedTaiwanPostalCodes = taiwanPostalCodes as any;
-      if (typedTaiwanPostalCodes[this.searchValue]) {
-        this.districts = Object.keys(typedTaiwanPostalCodes[this.searchValue]);
+      if (typedTaiwanPostalCodes[this.countyValue]) {
+        // 在批次修改模式下更新batchUpdateDistricts，否則更新districts
+        if (this.showBatchUpdateSection) {
+          this.batchUpdateDistricts = Object.keys(typedTaiwanPostalCodes[this.countyValue]);
+          // 顯示區域下拉選單
+          this.showDistrictDropdown = true;
+        } else {
+          this.districts = Object.keys(typedTaiwanPostalCodes[this.countyValue]);
+        }
+      } else {
+        if (this.showBatchUpdateSection) {
+          this.batchUpdateDistricts = [];
+          // 隱藏區域下拉選單
+          this.showDistrictDropdown = false;
+        } else {
+          this.districts = [];
+        }
+      }
+    } else {
+      if (this.showBatchUpdateSection) {
+        this.batchUpdateDistricts = [];
+        // 隱藏區域下拉選單
+        this.showDistrictDropdown = false;
       } else {
         this.districts = [];
       }
-    } else {
-      this.districts = [];
     }
   }
   
   // 執行搜尋以進行批次修改
   searchForBatchUpdate(): void {
-    if (!this.searchValue.trim()) {
+    // 根據搜尋條件使用相應的搜尋值
+    let searchValue = this.searchValue;
+    if (this.searchCriteria === 'county' && this.showDistrictDropdown) {
+      searchValue = this.districtValue;
+    } else if (this.searchCriteria === 'county') {
+      searchValue = this.countyValue;
+    }
+    
+    if (!searchValue.trim()) {
       this.showMessage('請輸入搜尋值');
       return;
     }
     
     this.loadingService.showDataLoading();
     
-    switch (this.searchCriteria) {
-      case 'customerName':
-        this.apiService.searchCustomers(this.searchValue).subscribe({
+    // 如果顯示了區域下拉選單，表示用戶是在選擇縣市後選擇了區域
+    if (this.showDistrictDropdown && this.searchCriteria === 'county') {
+      // 如果選擇了"全部區域"或沒有選擇區域，則使用縣市進行搜尋
+      if (this.districtValue === 'all' || !this.districtValue) {
+        this.apiService.searchCustomersByCounty(this.countyValue).subscribe({
           next: (res: any) => {
             this.batchUpdateCustomers = res;
             this.loadingService.hideLoading();
@@ -203,15 +248,9 @@ export class CustomerComponent implements OnInit {
             this.loadingService.hideLoading();
           }
         });
-        break;
-        
-      case 'customerType':
-        if (!this.searchValue) {
-          this.showMessage('請選擇客戶類型');
-          this.loadingService.hideLoading();
-          return;
-        }
-        this.apiService.searchCustomersByType(parseInt(this.searchValue)).subscribe({
+      } else {
+        // 使用區域進行搜尋
+        this.apiService.searchCustomersByDistrict(this.districtValue).subscribe({
           next: (res: any) => {
             this.batchUpdateCustomers = res;
             this.loadingService.hideLoading();
@@ -222,35 +261,57 @@ export class CustomerComponent implements OnInit {
             this.loadingService.hideLoading();
           }
         });
-        break;
-        
-      case 'county':
-        this.apiService.searchCustomersByCounty(this.searchValue).subscribe({
-          next: (res: any) => {
-            this.batchUpdateCustomers = res;
+      }
+    } else {
+      // 使用原始的搜尋邏輯
+      switch (this.searchCriteria) {
+        case 'customerName':
+          this.apiService.searchCustomers(this.searchValue).subscribe({
+            next: (res: any) => {
+              this.batchUpdateCustomers = res;
+              this.loadingService.hideLoading();
+              this.showMessage(`找到 ${res.length} 筆符合的客戶資料`);
+            },
+            error: (error) => {
+              this.showMessage(error?.error?.message || error?.message || "搜尋客戶時發生錯誤" + error);
+              this.loadingService.hideLoading();
+            }
+          });
+          break;
+          
+        case 'customerType':
+          if (!this.searchValue) {
+            this.showMessage('請選擇客戶類型');
             this.loadingService.hideLoading();
-            this.showMessage(`找到 ${res.length} 筆符合的客戶資料`);
-          },
-          error: (error) => {
-            this.showMessage(error?.error?.message || error?.message || "搜尋客戶時發生錯誤" + error);
-            this.loadingService.hideLoading();
+            return;
           }
-        });
-        break;
-        
-      case 'district':
-        this.apiService.searchCustomersByDistrict(this.searchValue).subscribe({
-          next: (res: any) => {
-            this.batchUpdateCustomers = res;
-            this.loadingService.hideLoading();
-            this.showMessage(`找到 ${res.length} 筆符合的客戶資料`);
-          },
-          error: (error) => {
-            this.showMessage(error?.error?.message || error?.message || "搜尋客戶時發生錯誤" + error);
-            this.loadingService.hideLoading();
-          }
-        });
-        break;
+          this.apiService.searchCustomersByType(parseInt(this.searchValue)).subscribe({
+            next: (res: any) => {
+              this.batchUpdateCustomers = res;
+              this.loadingService.hideLoading();
+              this.showMessage(`找到 ${res.length} 筆符合的客戶資料`);
+            },
+            error: (error) => {
+              this.showMessage(error?.error?.message || error?.message || "搜尋客戶時發生錯誤" + error);
+              this.loadingService.hideLoading();
+            }
+          });
+          break;
+          
+        case 'county':
+          this.apiService.searchCustomersByCounty(this.countyValue).subscribe({
+            next: (res: any) => {
+              this.batchUpdateCustomers = res;
+              this.loadingService.hideLoading();
+              this.showMessage(`找到 ${res.length} 筆符合的客戶資料`);
+            },
+            error: (error) => {
+              this.showMessage(error?.error?.message || error?.message || "搜尋客戶時發生錯誤" + error);
+              this.loadingService.hideLoading();
+            }
+          });
+          break;
+      }
     }
   }
   

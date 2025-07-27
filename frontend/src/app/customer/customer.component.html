@@ -29,7 +29,6 @@
           <option value="customerName">{{ 'CUSTOMER_NAME' | translate }}</option>
           <option value="customerType">{{ 'CUSTOMER_TYPE' | translate }}</option>
           <option value="county">{{ 'COUNTY' | translate }}</option>
-          <option value="district">{{ 'DISTRICT' | translate }}</option>
         </select>
         
         <!-- 根據搜尋條件顯示不同的輸入框或下拉選單 -->
@@ -54,23 +53,26 @@
         <!-- 縣市下拉選單 -->
         <select
           *ngIf="searchCriteria === 'county'"
-          [(ngModel)]="searchValue"
-          class="search-input"
+          [(ngModel)]="countyValue"
+          class="search-input county-select"
           (change)="onCountyChange()"
         >
           <option value="">{{ 'SELECT_COUNTY' | translate }}</option>
           <option *ngFor="let county of counties" [value]="county">{{ county }}</option>
         </select>
         
-        <!-- 區域下拉選單 -->
-        <select
-          *ngIf="searchCriteria === 'district' && districts.length > 0"
-          [(ngModel)]="searchValue"
-          class="search-input"
-        >
-          <option value="">{{ 'SELECT_DISTRICT' | translate }}</option>
-          <option *ngFor="let district of districts" [value]="district">{{ district }}</option>
-        </select>
+        <!-- 區域下拉選單（在選擇縣市後顯示） -->
+        <label *ngIf="showDistrictDropdown && searchCriteria === 'county'" class="district-label">
+          {{ 'DISTRICT' | translate }}:
+          <select
+            [(ngModel)]="districtValue"
+            class="search-input"
+          >
+            <option value="">{{ 'SELECT_DISTRICT' | translate }}</option>
+            <option value="all">{{ 'ALL_DISTRICTS' | translate }}</option>
+            <option *ngFor="let district of batchUpdateDistricts" [value]="district">{{ district }}</option>
+          </select>
+        </label>
         
         <button (click)="searchForBatchUpdate()" class="search-btn">{{ 'SEARCH' | translate }}</button>
       </div>

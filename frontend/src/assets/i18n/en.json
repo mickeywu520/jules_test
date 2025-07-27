@@ -237,6 +237,7 @@
   "POSTAL_CODE": "Postal Code",
   "SELECT_COUNTY": "Select County",
   "SELECT_DISTRICT": "Select District",
+  "ALL_DISTRICTS": "All Districts",
   "SELECT_CUSTOMER_TYPE": "Select Customer Type",
   "BANK_ACCOUNT": "Bank Account",
   "NOTES": "Notes",

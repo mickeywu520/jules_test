@@ -124,6 +124,8 @@ class Customer(Base):
     createdDate = Column(DateTime(timezone=True), server_default=func.now())  # 建檔日期
     salesPersonId = Column(String, nullable=True)  # 業務員編號
     salesPersonName = Column(String, nullable=True)  # 業務員名稱
+    bankAccount = Column(String, nullable=True)  # 銀行帳戶
+    notes = Column(Text, nullable=True)  # 備註
     customerCode = Column(String, unique=True, index=True, nullable=False)  # 客戶編號
     customerName = Column(String, index=True, nullable=False)  # 客戶名稱
     contactPerson = Column(String, nullable=True)  # 客戶聯絡人

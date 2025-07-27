@@ -144,6 +144,20 @@ export class AddEditCustomerComponent implements OnInit {
           creditLimit: res.creditLimit || 0,
           monthlyPaymentDays: monthlyPaymentDays
         };
+
+        // 解析送貨地址，提取縣市、區域和郵遞區號
+        const addressInfo = this.parseDeliveryAddress(res.deliveryAddress || '');
+        this.formData.county = addressInfo.county;
+        this.formData.district = addressInfo.district;
+        this.postalCode = addressInfo.postalCode;
+
+        // 更新區域列表
+        if (this.formData.county) {
+          const typedTaiwanPostalCodes = taiwanPostalCodes as any;
+          if (typedTaiwanPostalCodes[this.formData.county]) {
+            this.districts = Object.keys(typedTaiwanPostalCodes[this.formData.county]);
+          }
+        }
       },
       error: (error) => {
         this.showMessage(
@@ -300,6 +314,61 @@ export class AddEditCustomerComponent implements OnInit {
     } else {
       this.postalCode = '';
     }
+  }
+
+  // 當點擊送貨地址輸入框時調用
+  onDeliveryAddressFocus(): void {
+    // 如果縣市、區域和郵遞區號都已選擇，則將它們填入送貨地址欄位
+    if (this.formData.county && this.formData.district && this.postalCode) {
+      // 檢查送貨地址是否已包含縣市、區域和郵遞區號
+      const addressPattern = new RegExp(`${this.postalCode}\\s*${this.formData.county}\\s*${this.formData.district}`);
+      if (!addressPattern.test(this.formData.deliveryAddress)) {
+        // 如果送貨地址不包含縣市、區域和郵遞區號，則添加它們
+        this.formData.deliveryAddress = `${this.postalCode} ${this.formData.county}${this.formData.district} ${this.formData.deliveryAddress}`;
+      }
+    }
+  }
+
+  // 解析送貨地址，提取縣市、區域和郵遞區號
+  parseDeliveryAddress(address: string): { county: string; district: string; postalCode: string } {
+    // 創建一個對象來存儲縣市、區域和郵遞區號
+    const result = { county: '', district: '', postalCode: '' };
+    
+    // 如果地址為空，直接返回空結果
+    if (!address) {
+      return result;
+    }
+    
+    // 遍歷所有縣市
+    for (const county of this.counties) {
+      // 檢查地址是否包含縣市名稱
+      if (address.includes(county)) {
+        result.county = county;
+        
+        // 獲取該縣市的所有區域
+        const typedTaiwanPostalCodes = taiwanPostalCodes as any;
+        const districts = Object.keys(typedTaiwanPostalCodes[county]);
+        
+        // 遍歷所有區域
+        for (const district of districts) {
+          // 檢查地址是否包含區域名稱
+          if (address.includes(district)) {
+            result.district = district;
+            
+            // 獲取該區域的郵遞區號
+            result.postalCode = typedTaiwanPostalCodes[county][district];
+            
+            // 找到匹配的縣市、區域和郵遞區號後，跳出循環
+            break;
+          }
+        }
+        
+        // 找到匹配的縣市後，跳出循環
+        break;
+      }
+    }
+    
+    return result;
   }
 
   showMessage(message: string) {

@@ -40,7 +40,7 @@ export class AddEditCustomerComponent implements OnInit {
   ];
 
   formData: any = {
-    customerType: '零售',
+    customerType: '',
     salesPersonId: '',
     salesPersonName: '',
     customerCode: '',
@@ -197,6 +197,33 @@ export class AddEditCustomerComponent implements OnInit {
         }
       })
     }
+  }
+
+  // 當客戶類型改變時調用
+  onCustomerTypeChange(): void {
+    // 如果正在編輯客戶，則不自動生成客戶編號
+    if (this.isEditing) {
+      return;
+    }
+    
+    // 如果沒有選擇客戶類型，則清空客戶編號
+    if (!this.formData.customerType) {
+      this.formData.customerCode = '';
+      return;
+    }
+    
+    // 調用API獲取下一個客戶編號
+    console.log('Fetching next customer code for customer type ID:', this.formData.customerType);
+    this.apiService.getNextCustomerCode(this.formData.customerType).subscribe({
+      next: (res: any) => {
+        console.log('Received next customer code:', res);
+        this.formData.customerCode = res.next_code;
+      },
+      error: (error) => {
+        console.error('Error fetching next customer code:', error);
+        this.formData.customerCode = '';
+      }
+    });
   }
 
   showMessage(message: string) {

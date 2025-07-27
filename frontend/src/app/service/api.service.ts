@@ -326,6 +326,12 @@ export class ApiService {
     });
   }
 
+  getNextCustomerCode(customerTypeId: number): Observable<any> {
+    return this.http.get(`${ApiService.BASE_URL}/customers/next-code/${customerTypeId}`, {
+      headers: this.getHeader(),
+    });
+  }
+
   /** CUSTOMER TYPE API */
   addCustomerType(body: any): Observable<any> {
     return this.http.post(`${ApiService.BASE_URL}/customer-types/`, body, {

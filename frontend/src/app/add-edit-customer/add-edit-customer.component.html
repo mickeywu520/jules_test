@@ -11,6 +11,7 @@
           id="customerType"
           [(ngModel)]="formData.customerType"
           name="customerType"
+          (change)="onCustomerTypeChange()"
           required
         >
           <option value="">{{ 'SELECT_CUSTOMER_TYPE' | translate }}</option>

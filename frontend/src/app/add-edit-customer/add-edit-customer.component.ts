@@ -223,7 +223,17 @@ export class AddEditCustomerComponent implements OnInit {
         next: (res: any) => {
           this.showMessage("Customer added successfully");
           this.loadingService.hideLoading();
-          this.router.navigate(['/customer'])
+          // 刷新客戶列表
+          this.apiService.fetchAndBroadcastCustomers().subscribe({
+            next: () => {
+              console.log('Customers list refreshed after adding new customer');
+              this.router.navigate(['/customer']);
+            },
+            error: (error) => {
+              console.error('Error refreshing customers list:', error);
+              this.router.navigate(['/customer']);
+            }
+          });
         },
         error: (error) => {
           this.showMessage(error?.error?.message || error?.message || "Unable to add customer" + error)

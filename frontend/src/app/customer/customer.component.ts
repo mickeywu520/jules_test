@@ -6,10 +6,16 @@ import { Router } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
 import { FormsModule } from '@angular/forms';
 
+// 導入台灣郵遞區號數據
+import taiwanPostalCodes from '../../assets/data/taiwanPostalCodes.json';
+
+// 導入批次修改dialog組件
+import { BatchUpdateDialogComponent } from './batch-update-dialog.component';
+
 @Component({
   selector: 'app-customer',
   standalone: true,
-  imports: [CommonModule, TranslateModule, FormsModule],
+  imports: [CommonModule, TranslateModule, FormsModule, BatchUpdateDialogComponent],
   templateUrl: './customer.component.html',
   styleUrl: './customer.component.css'
 })
@@ -23,6 +29,21 @@ export class CustomerComponent implements OnInit {
   filteredCustomers: any[] = [];
   message: string = '';
   searchTerm: string = '';
+  
+  // 批次修改功能相關變量
+  showBatchUpdateSection: boolean = false;
+  searchCriteria: string = 'customerName'; // 默認搜尋條件
+  searchValue: string = '';
+  batchUpdateCustomers: any[] = [];
+  selectedCustomerIds: Set<number> = new Set();
+  isBatchUpdateMode: boolean = false;
+  
+  // 客戶類型選項
+  customerTypes: any[] = [];
+  
+  // 台灣縣市和區域數據
+  counties: string[] = Object.keys(taiwanPostalCodes);
+  districts: string[] = [];
 
   ngOnInit(): void {
     // 訂閱BehaviorSubject以獲取數據更新
@@ -50,6 +71,17 @@ export class CustomerComponent implements OnInit {
         }
       });
     }
+    
+    // 獲取客戶類型數據
+    this.apiService.getAllCustomerTypes().subscribe({
+      next: (res: any) => {
+        this.customerTypes = res;
+      },
+      error: (error: any) => {
+        console.error('Failed to fetch customer types:', error);
+        this.showMessage('無法獲取客戶類型數據');
+      }
+    });
   }
 
   // Search customers
@@ -115,5 +147,347 @@ export class CustomerComponent implements OnInit {
     setTimeout(() => {
       this.message = '';
     }, 4000);
+  }
+  
+  // 切換批次修改模式
+  toggleBatchUpdateMode(): void {
+    this.showBatchUpdateSection = !this.showBatchUpdateSection;
+    if (!this.showBatchUpdateSection) {
+      this.resetBatchUpdate();
+    }
+  }
+  
+  // 重置批次修改功能
+  resetBatchUpdate(): void {
+    this.searchCriteria = 'customerName';
+    this.searchValue = '';
+    this.batchUpdateCustomers = [];
+    this.selectedCustomerIds.clear();
+    this.isBatchUpdateMode = false;
+    this.districts = [];
+  }
+  
+  // 當選擇縣市時更新區域列表
+  onCountyChange(): void {
+    if (this.searchValue) {
+      const typedTaiwanPostalCodes = taiwanPostalCodes as any;
+      if (typedTaiwanPostalCodes[this.searchValue]) {
+        this.districts = Object.keys(typedTaiwanPostalCodes[this.searchValue]);
+      } else {
+        this.districts = [];
+      }
+    } else {
+      this.districts = [];
+    }
+  }
+  
+  // 執行搜尋以進行批次修改
+  searchForBatchUpdate(): void {
+    if (!this.searchValue.trim()) {
+      this.showMessage('請輸入搜尋值');
+      return;
+    }
+    
+    this.loadingService.showDataLoading();
+    
+    switch (this.searchCriteria) {
+      case 'customerName':
+        this.apiService.searchCustomers(this.searchValue).subscribe({
+          next: (res: any) => {
+            this.batchUpdateCustomers = res;
+            this.loadingService.hideLoading();
+            this.showMessage(`找到 ${res.length} 筆符合的客戶資料`);
+          },
+          error: (error) => {
+            this.showMessage(error?.error?.message || error?.message || "搜尋客戶時發生錯誤" + error);
+            this.loadingService.hideLoading();
+          }
+        });
+        break;
+        
+      case 'customerType':
+        if (!this.searchValue) {
+          this.showMessage('請選擇客戶類型');
+          this.loadingService.hideLoading();
+          return;
+        }
+        this.apiService.searchCustomersByType(parseInt(this.searchValue)).subscribe({
+          next: (res: any) => {
+            this.batchUpdateCustomers = res;
+            this.loadingService.hideLoading();
+            this.showMessage(`找到 ${res.length} 筆符合的客戶資料`);
+          },
+          error: (error) => {
+            this.showMessage(error?.error?.message || error?.message || "搜尋客戶時發生錯誤" + error);
+            this.loadingService.hideLoading();
+          }
+        });
+        break;
+        
+      case 'county':
+        this.apiService.searchCustomersByCounty(this.searchValue).subscribe({
+          next: (res: any) => {
+            this.batchUpdateCustomers = res;
+            this.loadingService.hideLoading();
+            this.showMessage(`找到 ${res.length} 筆符合的客戶資料`);
+          },
+          error: (error) => {
+            this.showMessage(error?.error?.message || error?.message || "搜尋客戶時發生錯誤" + error);
+            this.loadingService.hideLoading();
+          }
+        });
+        break;
+        
+      case 'district':
+        this.apiService.searchCustomersByDistrict(this.searchValue).subscribe({
+          next: (res: any) => {
+            this.batchUpdateCustomers = res;
+            this.loadingService.hideLoading();
+            this.showMessage(`找到 ${res.length} 筆符合的客戶資料`);
+          },
+          error: (error) => {
+            this.showMessage(error?.error?.message || error?.message || "搜尋客戶時發生錯誤" + error);
+            this.loadingService.hideLoading();
+          }
+        });
+        break;
+    }
+  }
+  
+  // 切換批次修改模式（選擇要修改的客戶）
+  toggleBatchUpdateSelectionMode(): void {
+    this.isBatchUpdateMode = !this.isBatchUpdateMode;
+    if (!this.isBatchUpdateMode) {
+      this.selectedCustomerIds.clear();
+    }
+  }
+  
+  // 選擇/取消選擇單個客戶
+  toggleCustomerSelection(customerId: number): void {
+    if (this.selectedCustomerIds.has(customerId)) {
+      this.selectedCustomerIds.delete(customerId);
+    } else {
+      this.selectedCustomerIds.add(customerId);
+    }
+  }
+  
+  // 全選/取消全選
+  toggleSelectAll(): void {
+    if (this.selectedCustomerIds.size === this.batchUpdateCustomers.length) {
+      // 如果已經全選，則取消全選
+      this.selectedCustomerIds.clear();
+    } else {
+      // 否則全選
+      this.batchUpdateCustomers.forEach(customer => {
+        this.selectedCustomerIds.add(customer.id);
+      });
+    }
+  }
+  
+  // 執行批次更新
+  executeBatchUpdate(): void {
+    if (this.selectedCustomerIds.size === 0) {
+      this.showMessage('請至少選擇一個客戶');
+      return;
+    }
+    
+    // 創建一個簡單的dialog機制
+    const dialogContainer = document.createElement('div');
+    dialogContainer.id = 'batch-update-dialog-container';
+    dialogContainer.style.position = 'fixed';
+    dialogContainer.style.top = '0';
+    dialogContainer.style.left = '0';
+    dialogContainer.style.width = '100%';
+    dialogContainer.style.height = '100%';
+    dialogContainer.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+    dialogContainer.style.display = 'flex';
+    dialogContainer.style.justifyContent = 'center';
+    dialogContainer.style.alignItems = 'center';
+    dialogContainer.style.zIndex = '1000';
+    
+    // 創建dialog內容
+    const dialogContent = document.createElement('div');
+    dialogContent.style.backgroundColor = 'white';
+    dialogContent.style.padding = '20px';
+    dialogContent.style.borderRadius = '8px';
+    dialogContent.style.maxWidth = '500px';
+    dialogContent.style.width = '90%';
+    dialogContent.style.maxHeight = '90vh';
+    dialogContent.style.overflowY = 'auto';
+    
+    // 添加標題
+    const title = document.createElement('h2');
+    title.textContent = '批次更新客戶';
+    title.style.marginTop = '0';
+    dialogContent.appendChild(title);
+    
+    // 添加確認消息
+    const message = document.createElement('p');
+    message.textContent = `您即將更新 ${this.selectedCustomerIds.size} 筆客戶資料。請選擇要更新的欄位並輸入新值。`;
+    dialogContent.appendChild(message);
+    
+    // 添加欄位選擇
+    const fieldSelection = document.createElement('div');
+    fieldSelection.innerHTML = `
+      <h3>選擇要更新的欄位</h3>
+      <div style="display: flex; flex-direction: column; gap: 10px;">
+        <label><input type="checkbox" value="contactPerson"> 聯絡人</label>
+        <label><input type="checkbox" value="phoneNumber"> 電話號碼</label>
+        <label><input type="checkbox" value="faxNumber"> 傳真號碼</label>
+        <label><input type="checkbox" value="businessHours"> 營業時間</label>
+        <label><input type="checkbox" value="paymentMethod"> 收款方式</label>
+        <label><input type="checkbox" value="paymentCategory"> 收款類別</label>
+        <label><input type="checkbox" value="creditLimit"> 信用額度</label>
+      </div>
+    `;
+    dialogContent.appendChild(fieldSelection);
+    
+    // 添加輸入框容器
+    const inputContainer = document.createElement('div');
+    inputContainer.id = 'batch-update-inputs';
+    inputContainer.style.marginTop = '20px';
+    dialogContent.appendChild(inputContainer);
+    
+    // 添加按鈕容器
+    const buttonContainer = document.createElement('div');
+    buttonContainer.style.display = 'flex';
+    buttonContainer.style.justifyContent = 'flex-end';
+    buttonContainer.style.gap = '10px';
+    buttonContainer.style.marginTop = '20px';
+    
+    // 添加取消按鈕
+    const cancelButton = document.createElement('button');
+    cancelButton.textContent = '取消';
+    cancelButton.style.padding = '8px 16px';
+    cancelButton.style.backgroundColor = '#6c757d';
+    cancelButton.style.color = 'white';
+    cancelButton.style.border = 'none';
+    cancelButton.style.borderRadius = '4px';
+    cancelButton.style.cursor = 'pointer';
+    cancelButton.addEventListener('click', () => {
+      document.body.removeChild(dialogContainer);
+    });
+    buttonContainer.appendChild(cancelButton);
+    
+    // 添加確認按鈕
+    const confirmButton = document.createElement('button');
+    confirmButton.textContent = '確認';
+    confirmButton.style.padding = '8px 16px';
+    confirmButton.style.backgroundColor = '#007bff';
+    confirmButton.style.color = 'white';
+    confirmButton.style.border = 'none';
+    confirmButton.style.borderRadius = '4px';
+    confirmButton.style.cursor = 'pointer';
+    confirmButton.addEventListener('click', () => {
+      // 獲取選中的欄位
+      const selectedFields = Array.from(fieldSelection.querySelectorAll('input[type="checkbox"]:checked'))
+        .map((checkbox: any) => checkbox.getAttribute('value'));
+      
+      if (selectedFields.length === 0) {
+        alert('請至少選擇一個欄位');
+        return;
+      }
+      
+      // 獲取輸入的新值
+      const updateData: any = {};
+      selectedFields.forEach((field: string) => {
+        const input = inputContainer.querySelector(`input[data-field="${field}"]`) as HTMLInputElement;
+        if (input) {
+          updateData[field] = input.value;
+        }
+      });
+      
+      // 執行批次更新
+      const customerIds = Array.from(this.selectedCustomerIds);
+      this.loadingService.showSaving();
+      this.apiService.batchUpdateCustomers(customerIds, updateData).subscribe({
+        next: (res: any) => {
+          this.loadingService.hideLoading();
+          this.showMessage(`成功更新 ${res.length} 筆客戶資料`);
+          document.body.removeChild(dialogContainer);
+          
+          // 重新載入客戶列表
+          this.apiService.fetchAndBroadcastCustomers().subscribe({
+            next: () => {
+              // 重置批次修改功能
+              this.resetBatchUpdate();
+              this.showBatchUpdateSection = false;
+            },
+            error: (error: any) => {
+              console.error('Failed to refresh customers after batch update:', error);
+              this.showMessage('無法刷新客戶列表');
+            }
+          });
+        },
+        error: (error) => {
+          this.loadingService.hideLoading();
+          this.showMessage(error?.error?.message || error?.message || "批次更新客戶時發生錯誤" + error);
+          document.body.removeChild(dialogContainer);
+        }
+      });
+    });
+    buttonContainer.appendChild(confirmButton);
+    
+    dialogContent.appendChild(buttonContainer);
+    
+    // 添加欄位選擇事件監聽器
+    fieldSelection.querySelectorAll('input[type="checkbox"]').forEach((checkbox: any) => {
+      checkbox.addEventListener('change', () => {
+        // 清空輸入框容器
+        inputContainer.innerHTML = '';
+        
+        // 獲取選中的欄位
+        const selectedFields = Array.from(fieldSelection.querySelectorAll('input[type="checkbox"]:checked'))
+          .map((cb: any) => cb.value);
+        
+        // 為選中的欄位創建輸入框
+        if (selectedFields.length > 0) {
+          const inputsTitle = document.createElement('h3');
+          inputsTitle.textContent = '輸入新值';
+          inputContainer.appendChild(inputsTitle);
+          
+          selectedFields.forEach((field: string) => {
+            const fieldContainer = document.createElement('div');
+            fieldContainer.style.marginBottom = '15px';
+            
+            const label = document.createElement('label');
+            label.textContent = this.getFieldLabel(field);
+            label.style.display = 'block';
+            label.style.marginBottom = '5px';
+            label.style.fontWeight = 'bold';
+            fieldContainer.appendChild(label);
+            
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.dataset['field'] = field;
+            input.style.width = '100%';
+            input.style.padding = '8px';
+            input.style.border = '1px solid #ccc';
+            input.style.borderRadius = '4px';
+            input.style.boxSizing = 'border-box';
+            fieldContainer.appendChild(input);
+            
+            inputContainer.appendChild(fieldContainer);
+          });
+        }
+      });
+    });
+    
+    dialogContainer.appendChild(dialogContent);
+    document.body.appendChild(dialogContainer);
+  }
+  
+  // 獲取欄位標籤
+  getFieldLabel(field: string): string {
+    const labels: { [key: string]: string } = {
+      'contactPerson': '聯絡人',
+      'phoneNumber': '電話號碼',
+      'faxNumber': '傳真號碼',
+      'businessHours': '營業時間',
+      'paymentMethod': '收款方式',
+      'paymentCategory': '收款類別',
+      'creditLimit': '信用額度'
+    };
+    return labels.hasOwnProperty(field) ? labels[field] : field;
   }
 }

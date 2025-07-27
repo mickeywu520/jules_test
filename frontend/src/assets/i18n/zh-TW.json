@@ -382,8 +382,22 @@
   "POSTAL_CODE": "郵遞區號",
   "SELECT_COUNTY": "選擇縣市",
   "SELECT_DISTRICT": "選擇區域",
+  "SELECT_CUSTOMER_TYPE": "選擇客戶類型",
   "BANK_ACCOUNT": "銀行帳戶",
   "NOTES": "備註",
   "BANK_ACCOUNT_PLACEHOLDER": "請輸入銀行帳戶",
-  "NOTES_PLACEHOLDER": "請輸入備註"
+  "NOTES_PLACEHOLDER": "請輸入備註",
+  "SHOW_BATCH_UPDATE": "顯示批次修改",
+  "HIDE_BATCH_UPDATE": "隱藏批次修改",
+  "SELECT_FIELDS_TO_UPDATE": "選擇要更新的欄位",
+  "ENTER_NEW_VALUES": "輸入新值",
+  "BATCH_UPDATE_CUSTOMERS": "批次更新客戶",
+  "BATCH_UPDATE_CONFIRM_MESSAGE": "您即將更新 {{count}} 筆客戶資料。請選擇要更新的欄位並輸入新值。",
+  "ENTER_SEARCH_VALUE": "請輸入搜尋值",
+  "NO_CUSTOMERS_FOUND_FOR_BATCH_UPDATE": "找不到符合批次修改條件的客戶",
+  "SELECT_CUSTOMERS": "選擇客戶",
+  "CANCEL_SELECTION": "取消選擇",
+  "SELECT_ALL": "全選",
+  "DESELECT_ALL": "取消全選",
+  "BATCH_UPDATE": "批次更新"
 }

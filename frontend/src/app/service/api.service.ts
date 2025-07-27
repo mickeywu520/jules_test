@@ -336,6 +336,34 @@ export class ApiService {
     });
   }
 
+  searchCustomersByType(customerTypeId: number): Observable<any> {
+    return this.http.get(`${ApiService.BASE_URL}/customers/search-by-type/${customerTypeId}`, {
+      headers: this.getHeader(),
+    });
+  }
+
+  searchCustomersByCounty(county: string): Observable<any> {
+    return this.http.get(`${ApiService.BASE_URL}/customers/search-by-county/${county}`, {
+      headers: this.getHeader(),
+    });
+  }
+
+  searchCustomersByDistrict(district: string): Observable<any> {
+    return this.http.get(`${ApiService.BASE_URL}/customers/search-by-district/${district}`, {
+      headers: this.getHeader(),
+    });
+  }
+
+  batchUpdateCustomers(customerIds: number[], customerData: any): Observable<any> {
+    const body = {
+      customer_ids: customerIds,
+      customer_update: customerData
+    };
+    return this.http.put(`${ApiService.BASE_URL}/customers/batch-update`, body, {
+      headers: this.getHeader()
+    });
+  }
+
   getNextCustomerCode(customerTypeId: number): Observable<any> {
     return this.http.get(`${ApiService.BASE_URL}/customers/next-code/${customerTypeId}`, {
       headers: this.getHeader(),

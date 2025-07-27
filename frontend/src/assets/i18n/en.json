@@ -237,8 +237,22 @@
   "POSTAL_CODE": "Postal Code",
   "SELECT_COUNTY": "Select County",
   "SELECT_DISTRICT": "Select District",
+  "SELECT_CUSTOMER_TYPE": "Select Customer Type",
   "BANK_ACCOUNT": "Bank Account",
   "NOTES": "Notes",
   "BANK_ACCOUNT_PLACEHOLDER": "Enter bank account",
-  "NOTES_PLACEHOLDER": "Enter notes"
+  "NOTES_PLACEHOLDER": "Enter notes",
+  "SHOW_BATCH_UPDATE": "Show Batch Update",
+  "HIDE_BATCH_UPDATE": "Hide Batch Update",
+  "SELECT_FIELDS_TO_UPDATE": "Select Fields to Update",
+  "ENTER_NEW_VALUES": "Enter New Values",
+  "BATCH_UPDATE_CUSTOMERS": "Batch Update Customers",
+  "BATCH_UPDATE_CONFIRM_MESSAGE": "You are about to update {{count}} customer records. Please select the fields to update and enter new values.",
+  "ENTER_SEARCH_VALUE": "Enter search value",
+  "NO_CUSTOMERS_FOUND_FOR_BATCH_UPDATE": "No customers found for batch update",
+  "SELECT_CUSTOMERS": "Select Customers",
+  "CANCEL_SELECTION": "Cancel Selection",
+  "SELECT_ALL": "Select All",
+  "DESELECT_ALL": "Deselect All",
+  "BATCH_UPDATE": "Batch Update"
 }

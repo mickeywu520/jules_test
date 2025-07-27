@@ -188,6 +188,32 @@
     </div>
 
     <div class="form-row">
+      <!-- Bank Account -->
+      <div class="form-group">
+        <label for="bankAccount">{{ 'BANK_ACCOUNT' | translate }}</label>
+        <input
+          type="text"
+          id="bankAccount"
+          [(ngModel)]="formData.bankAccount"
+          name="bankAccount"
+          [placeholder]="'BANK_ACCOUNT_PLACEHOLDER' | translate"
+        />
+      </div>
+
+      <!-- Notes -->
+      <div class="form-group">
+        <label for="notes">{{ 'NOTES' | translate }}</label>
+        <input
+          type="text"
+          id="notes"
+          [(ngModel)]="formData.notes"
+          name="notes"
+          [placeholder]="'NOTES_PLACEHOLDER' | translate"
+        />
+      </div>
+    </div>
+
+    <div class="form-row">
       <!-- Invoice Title -->
       <div class="form-group">
         <label for="invoiceTitle">{{ 'INVOICE_TITLE' | translate }}</label>

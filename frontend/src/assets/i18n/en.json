@@ -236,5 +236,9 @@
   "DISTRICT": "District",
   "POSTAL_CODE": "Postal Code",
   "SELECT_COUNTY": "Select County",
-  "SELECT_DISTRICT": "Select District"
+  "SELECT_DISTRICT": "Select District",
+  "BANK_ACCOUNT": "Bank Account",
+  "NOTES": "Notes",
+  "BANK_ACCOUNT_PLACEHOLDER": "Enter bank account",
+  "NOTES_PLACEHOLDER": "Enter notes"
 }

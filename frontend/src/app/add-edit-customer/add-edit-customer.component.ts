@@ -55,6 +55,8 @@ export class AddEditCustomerComponent implements OnInit {
     customerType: '',
     salesPersonId: '',
     salesPersonName: '',
+    bankAccount: '',  // 新增銀行帳戶字段
+    notes: '',  // 新增備註字段
     customerCode: '',
     customerName: '',
     contactPerson: '',
@@ -126,6 +128,8 @@ export class AddEditCustomerComponent implements OnInit {
           customerType: res.customer_type_id || res.customer_type_obj?.id || '',
           salesPersonId: res.salesPersonId || '',
           salesPersonName: res.salesPersonName || '',
+          bankAccount: res.bankAccount || '',  // 添加銀行帳戶字段
+          notes: res.notes || '',  // 添加備註字段
           customerCode: res.customerCode,
           customerName: res.customerName,
           contactPerson: res.contactPerson || '',
@@ -170,6 +174,8 @@ export class AddEditCustomerComponent implements OnInit {
       customer_type_id: this.formData.customerType,
       salesPersonId: this.formData.salesPersonId || null,
       salesPersonName: this.formData.salesPersonName || null,
+      bankAccount: this.formData.bankAccount || null,  // 添加銀行帳戶字段
+      notes: this.formData.notes || null,  // 添加備註字段
       customerCode: this.formData.customerCode,
       customerName: this.formData.customerName,
       contactPerson: this.formData.contactPerson || null,

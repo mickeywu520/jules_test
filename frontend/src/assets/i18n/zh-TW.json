@@ -381,5 +381,9 @@
   "DISTRICT": "區域",
   "POSTAL_CODE": "郵遞區號",
   "SELECT_COUNTY": "選擇縣市",
-  "SELECT_DISTRICT": "選擇區域"
+  "SELECT_DISTRICT": "選擇區域",
+  "BANK_ACCOUNT": "銀行帳戶",
+  "NOTES": "備註",
+  "BANK_ACCOUNT_PLACEHOLDER": "請輸入銀行帳戶",
+  "NOTES_PLACEHOLDER": "請輸入備註"
 }

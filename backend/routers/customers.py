@@ -115,6 +115,65 @@ def search_customers(search_term: str, db: Session = Depends(database.get_db)):
     ).all()
     return customers
 
+# Additional endpoint to search customers by customer type
+@router.get("/search-by-type/{customer_type_id}", response_model=List[schemas.Customer])
+def search_customers_by_type(customer_type_id: int, db: Session = Depends(database.get_db)):
+    customers = db.query(models.Customer).filter(
+        models.Customer.customer_type_id == customer_type_id
+    ).all()
+    return customers
+
+# Additional endpoint to search customers by county
+@router.get("/search-by-county/{county}", response_model=List[schemas.Customer])
+def search_customers_by_county(county: str, db: Session = Depends(database.get_db)):
+    customers = db.query(models.Customer).filter(
+        models.Customer.deliveryAddress.contains(county)
+    ).all()
+    return customers
+
+# Additional endpoint to search customers by district
+@router.get("/search-by-district/{district}", response_model=List[schemas.Customer])
+def search_customers_by_district(district: str, db: Session = Depends(database.get_db)):
+    customers = db.query(models.Customer).filter(
+        models.Customer.deliveryAddress.contains(district)
+    ).all()
+    return customers
+
+# Batch update customers
+@router.put("/batch-update", response_model=List[schemas.Customer])
+def batch_update_customers(
+    customer_ids: List[int], 
+    customer_update: schemas.CustomerUpdate, 
+    db: Session = Depends(database.get_db),
+    current_user: models.User = Depends(security.get_current_active_user)
+):
+    # Check if the current user has admin privileges
+    if current_user.role != models.UserRole.ADMIN:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="只有管理員可以執行批次更新操作"
+        )
+    
+    # Update customers
+    updated_customers = []
+    for customer_id in customer_ids:
+        db_customer = db.query(models.Customer).filter(models.Customer.id == customer_id).first()
+        if db_customer:
+            # Update fields if provided
+            update_data = customer_update.model_dump(exclude_unset=True)
+            for field, value in update_data.items():
+                setattr(db_customer, field, value)
+            updated_customers.append(db_customer)
+    
+    # Commit all changes
+    db.commit()
+    
+    # Refresh all updated customers
+    for customer in updated_customers:
+        db.refresh(customer)
+    
+    return updated_customers
+
 # Additional endpoint to get the next customer code for a specific customer type
 @router.get("/next-code/{customer_type_id}")
 def get_next_customer_code(customer_type_id: int, db: Session = Depends(database.get_db)):

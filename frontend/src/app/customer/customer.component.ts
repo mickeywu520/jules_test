@@ -51,7 +51,23 @@ export class CustomerComponent implements OnInit {
   // 批次修改模式下的區域數據（獨立於新增/編輯客戶）
   batchUpdateDistricts: string[] = [];
 
+  // 自定義欄位顯示相關
+  columnConfig: any[] = [
+    { key: 'customerCode', label: 'CUSTOMER_CODE', visible: true, fixed: false },
+    { key: 'customerName', label: 'CUSTOMER_NAME', visible: true, fixed: false },
+    { key: 'customerType', label: 'CUSTOMER_TYPE', visible: true, fixed: false },
+    { key: 'contactPerson', label: 'CONTACT_PERSON', visible: true, fixed: false },
+    { key: 'phoneNumber', label: 'PHONE_NUMBER', visible: true, fixed: false },
+    { key: 'paymentMethod', label: 'PAYMENT_METHOD', visible: true, fixed: false },
+    { key: 'creditLimit', label: 'CREDIT_LIMIT', visible: true, fixed: false },
+    { key: 'actions', label: 'ACTIONS', visible: true, fixed: true }
+  ];
+  showColumnConfigPanel: boolean = false;
+
   ngOnInit(): void {
+    // 初始化欄位配置
+    this.initColumnConfig();
+
     // 訂閱BehaviorSubject以獲取數據更新
     this.apiService.customers$.subscribe((custs: any[]) => {
       this.customers = custs;
@@ -550,5 +566,73 @@ export class CustomerComponent implements OnInit {
       'creditLimit': '信用額度'
     };
     return labels.hasOwnProperty(field) ? labels[field] : field;
+  }
+
+  // 初始化欄位配置
+  initColumnConfig(): void {
+    const savedConfig = localStorage.getItem('customerColumnConfig');
+    if (savedConfig) {
+      try {
+        const parsedConfig = JSON.parse(savedConfig);
+        // 合併保存的配置與默認配置，以防有新的欄位
+        this.columnConfig = this.columnConfig.map(defaultCol => {
+          const savedCol = parsedConfig.find((col: any) => col.key === defaultCol.key);
+          return savedCol ? { ...defaultCol, ...savedCol } : defaultCol;
+        });
+      } catch (e) {
+        console.error('Failed to parse saved column config', e);
+      }
+    }
+  }
+
+  // 切換設置面板顯示
+  toggleColumnConfigPanel(): void {
+    this.showColumnConfigPanel = !this.showColumnConfigPanel;
+  }
+
+  // 切換欄位可見性
+  toggleColumnVisibility(key: string): void {
+    const column = this.columnConfig.find(col => col.key === key);
+    if (column && !column.fixed) {
+      column.visible = !column.visible;
+      this.saveColumnConfig();
+    }
+  }
+
+  // 保存欄位配置到localStorage
+  saveColumnConfig(): void {
+    localStorage.setItem('customerColumnConfig', JSON.stringify(this.columnConfig));
+  }
+
+  // 重置為默認配置
+  resetToDefaultConfig(): void {
+    this.columnConfig = [
+      { key: 'customerCode', label: 'CUSTOMER_CODE', visible: true, fixed: false },
+      { key: 'customerName', label: 'CUSTOMER_NAME', visible: true, fixed: false },
+      { key: 'customerType', label: 'CUSTOMER_TYPE', visible: true, fixed: false },
+      { key: 'contactPerson', label: 'CONTACT_PERSON', visible: true, fixed: false },
+      { key: 'phoneNumber', label: 'PHONE_NUMBER', visible: true, fixed: false },
+      { key: 'paymentMethod', label: 'PAYMENT_METHOD', visible: true, fixed: false },
+      { key: 'creditLimit', label: 'CREDIT_LIMIT', visible: true, fixed: false },
+      { key: 'actions', label: 'ACTIONS', visible: true, fixed: true }
+    ];
+    this.saveColumnConfig();
+  }
+
+  // 獲取可見欄位
+  getVisibleColumns(): any[] {
+    return this.columnConfig.filter(col => col.visible);
+  }
+
+  // 獲取客戶屬性值
+  getCustomerValue(customer: any, columnKey: string): string {
+    switch (columnKey) {
+      case 'customerType':
+        return this.getCustomerTypeText(customer);
+      case 'creditLimit':
+        return customer[columnKey] ? customer[columnKey].toLocaleString() : '-';
+      default:
+        return customer[columnKey] || '-';
+    }
   }
 }

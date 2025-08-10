@@ -18,6 +18,32 @@
       <button (click)="toggleBatchUpdateMode()" class="batch-update-btn">
         {{ showBatchUpdateSection ? ('HIDE_BATCH_UPDATE' | translate) : ('SHOW_BATCH_UPDATE' | translate) }}
       </button>
+      <button (click)="toggleColumnConfigPanel()" class="column-config-btn" *ngIf="!showBatchUpdateSection">
+        {{ '自定義欄位' }}
+      </button>
+    </div>
+  </div>
+
+  <!-- COLUMN CONFIG PANEL -->
+  <div class="column-config-panel" *ngIf="showColumnConfigPanel && !showBatchUpdateSection">
+    <div class="panel-header">
+      <h3>自定義欄位顯示</h3>
+      <button (click)="resetToDefaultConfig()" class="reset-btn">重置為默認</button>
+    </div>
+    <div class="column-list">
+      <div *ngFor="let column of columnConfig" class="column-item">
+        <label>
+          <input 
+            type="checkbox" 
+            [checked]="column.visible" 
+            (change)="toggleColumnVisibility(column.key)"
+            [disabled]="column.fixed">
+          {{ column.label | translate }}
+        </label>
+      </div>
+    </div>
+    <div class="panel-footer">
+      <button (click)="toggleColumnConfigPanel()" class="close-btn">關閉</button>
     </div>
   </div>
   
@@ -151,32 +177,25 @@
     <table class="customer-table">
       <thead>
         <tr>
-          <th>{{ 'CUSTOMER_CODE' | translate }}</th>
-          <th>{{ 'CUSTOMER_NAME' | translate }}</th>
-          <th>{{ 'CUSTOMER_TYPE' | translate }}</th>
-          <th>{{ 'CONTACT_PERSON' | translate }}</th>
-          <th>{{ 'PHONE_NUMBER' | translate }}</th>
-          <th>{{ 'PAYMENT_METHOD' | translate }}</th>
-          <th>{{ 'CREDIT_LIMIT' | translate }}</th>
-          <th>{{ 'ACTIONS' | translate }}</th>
+          <th *ngFor="let column of getVisibleColumns()">
+            {{ column.label | translate }}
+          </th>
         </tr>
       </thead>
       <tbody>
         <tr *ngFor="let customer of filteredCustomers" class="customer-row">
-          <td>{{ customer.customerCode }}</td>
-          <td>{{ customer.customerName }}</td>
-          <td>{{ getCustomerTypeText(customer) }}</td>
-          <td>{{ customer.contactPerson || '-' }}</td>
-          <td>{{ customer.phoneNumber || '-' }}</td>
-          <td>{{ customer.paymentMethod || '-' }}</td>
-          <td>{{ customer.creditLimit | currency:'TWD':'symbol':'1.0-0' }}</td>
-          <td class="actions">
-            <button class="edit-btn" (click)="navigateToEditCustomerPage(customer.id)">
-              {{ 'EDIT' | translate }}
-            </button>
-            <button class="delete-btn" (click)="handleDeleteCustomer(customer.id)">
-              {{ 'DELETE' | translate }}
-            </button>
+          <td *ngFor="let column of getVisibleColumns()">
+            <span *ngIf="column.key !== 'actions'">
+              {{ getCustomerValue(customer, column.key) }}
+            </span>
+            <span *ngIf="column.key === 'actions'" class="actions">
+              <button class="edit-btn" (click)="navigateToEditCustomerPage(customer.id)">
+                {{ 'EDIT' | translate }}
+              </button>
+              <button class="delete-btn" (click)="handleDeleteCustomer(customer.id)">
+                {{ 'DELETE' | translate }}
+              </button>
+            </span>
           </td>
         </tr>
       </tbody>

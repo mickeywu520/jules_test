@@ -61,6 +61,90 @@
   background-color: #218838 !important;
 }
 
+.column-config-btn {
+  background-color: #6c757d !important;
+}
+
+.column-config-btn:hover {
+  background-color: #5a6268 !important;
+}
+
+/* Column Config Panel Styles */
+.column-config-panel {
+  background-color: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.panel-header h3 {
+  margin: 0;
+  color: #495057;
+}
+
+.reset-btn {
+  padding: 5px 10px;
+  background-color: #6c757d;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.reset-btn:hover {
+  background-color: #5a6268;
+}
+
+.column-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.column-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.column-item input[type="checkbox"] {
+  margin: 0;
+}
+
+.column-item label {
+  margin: 0;
+  font-weight: normal;
+  cursor: pointer;
+}
+
+.panel-footer {
+  text-align: right;
+}
+
+.close-btn {
+  padding: 8px 15px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.close-btn:hover {
+  background-color: #0056b3;
+}
+
 /* Batch Update Section Styles */
 .batch-update-section {
   background-color: #f8f9fa;

@@ -245,6 +245,7 @@
   "NOTES_PLACEHOLDER": "Enter notes",
   "SHOW_BATCH_UPDATE": "Show Batch Update",
   "HIDE_BATCH_UPDATE": "Hide Batch Update",
+  "SHOW_ALL": "Show All",
   "SELECT_FIELDS_TO_UPDATE": "Select Fields to Update",
   "ENTER_NEW_VALUES": "Enter New Values",
   "BATCH_UPDATE_CUSTOMERS": "Batch Update Customers",

@@ -29,17 +29,17 @@ export class CustomerComponent implements OnInit {
   filteredCustomers: any[] = [];
   message: string = '';
   searchTerm: string = '';
+  searchCriteria: string = 'all'; // 默認搜尋條件
+  countyValue: string = ''; // 縣市搜尋值
+  districtValue: string = ''; // 區域搜尋值
+  showDistrictDropdown: boolean = false; // 控制是否顯示區域下拉選單
   
   // 批次修改功能相關變量
   showBatchUpdateSection: boolean = false;
-  searchCriteria: string = 'customerName'; // 默認搜尋條件
   searchValue: string = '';
-  countyValue: string = ''; // 縣市搜尋值
-  districtValue: string = ''; // 區域搜尋值
   batchUpdateCustomers: any[] = [];
   selectedCustomerIds: Set<number> = new Set();
   isBatchUpdateMode: boolean = false;
-  showDistrictDropdown: boolean = false; // 控制是否顯示區域下拉選單
   
   // 客戶類型選項
   customerTypes: any[] = [];
@@ -108,21 +108,159 @@ export class CustomerComponent implements OnInit {
 
   // Search customers
   onSearch(): void {
-    if (this.searchTerm.trim() === '') {
-      this.filteredCustomers = this.customers;
-    } else {
+    // 如果選擇了"顯示全部"，則顯示所有客戶
+    if (this.searchCriteria === 'all') {
       this.loadingService.showDataLoading();
-      this.apiService.searchCustomers(this.searchTerm).subscribe({
+      this.apiService.getAllCustomers().subscribe({
         next: (res: any) => {
           this.filteredCustomers = res;
           this.loadingService.hideLoading();
-          this.showMessage(`找到 ${res.length} 筆符合的客戶資料`);
+          this.showMessage(`顯示全部 ${res.length} 筆客戶資料`);
         },
-        error: (error) => {
-          this.showMessage(error?.error?.message || error?.message || "搜尋客戶時發生錯誤" + error);
+        error: (error: any) => {
+          this.showMessage(error?.error?.message || error?.message || "獲取客戶資料時發生錯誤" + error);
           this.loadingService.hideLoading();
         }
       });
+      return;
+    }
+    
+    // 根據搜尋條件使用相應的搜尋值
+    let searchValue = this.searchTerm;
+    if (this.searchCriteria === 'county' && this.showDistrictDropdown) {
+      searchValue = this.districtValue;
+    } else if (this.searchCriteria === 'county') {
+      searchValue = this.countyValue;
+    }
+    
+    if (!searchValue.trim()) {
+      this.showMessage('請輸入搜尋值');
+      return;
+    }
+    
+    this.loadingService.showDataLoading();
+    
+    // 如果顯示了區域下拉選單，表示用戶是在選擇縣市後選擇了區域
+    if (this.showDistrictDropdown && this.searchCriteria === 'county') {
+      // 如果選擇了"全部區域"或沒有選擇區域，則使用縣市進行搜尋
+      if (this.districtValue === 'all' || !this.districtValue) {
+        this.apiService.searchCustomersByCounty(this.countyValue).subscribe({
+          next: (res: any) => {
+            this.filteredCustomers = res;
+            this.loadingService.hideLoading();
+            this.showMessage(`找到 ${res.length} 筆符合的客戶資料`);
+          },
+          error: (error: any) => {
+            this.showMessage(error?.error?.message || error?.message || "搜尋客戶時發生錯誤" + error);
+            this.loadingService.hideLoading();
+          }
+        });
+      } else {
+        // 使用區域進行搜尋
+        this.apiService.searchCustomersByDistrict(this.districtValue).subscribe({
+          next: (res: any) => {
+            this.filteredCustomers = res;
+            this.loadingService.hideLoading();
+            this.showMessage(`找到 ${res.length} 筆符合的客戶資料`);
+          },
+          error: (error: any) => {
+            this.showMessage(error?.error?.message || error?.message || "搜尋客戶時發生錯誤" + error);
+            this.loadingService.hideLoading();
+          }
+        });
+      }
+    } else {
+      // 使用原始的搜尋邏輯
+      switch (this.searchCriteria) {
+        case 'customerName':
+          this.apiService.searchCustomers(this.searchTerm).subscribe({
+            next: (res: any) => {
+              this.filteredCustomers = res;
+              this.loadingService.hideLoading();
+              this.showMessage(`找到 ${res.length} 筆符合的客戶資料`);
+            },
+            error: (error: any) => {
+              this.showMessage(error?.error?.message || error?.message || "搜尋客戶時發生錯誤" + error);
+              this.loadingService.hideLoading();
+            }
+          });
+          break;
+          
+        case 'customerCode':
+          this.apiService.searchCustomersByCode(this.searchTerm).subscribe({
+            next: (res: any) => {
+              this.filteredCustomers = res;
+              this.loadingService.hideLoading();
+              this.showMessage(`找到 ${res.length} 筆符合的客戶資料`);
+            },
+            error: (error: any) => {
+              this.showMessage(error?.error?.message || error?.message || "搜尋客戶時發生錯誤" + error);
+              this.loadingService.hideLoading();
+            }
+          });
+          break;
+          
+        case 'contactPerson':
+          this.apiService.searchCustomersByContactPerson(this.searchTerm).subscribe({
+            next: (res: any) => {
+              this.filteredCustomers = res;
+              this.loadingService.hideLoading();
+              this.showMessage(`找到 ${res.length} 筆符合的客戶資料`);
+            },
+            error: (error: any) => {
+              this.showMessage(error?.error?.message || error?.message || "搜尋客戶時發生錯誤" + error);
+              this.loadingService.hideLoading();
+            }
+          });
+          break;
+          
+        case 'phoneNumber':
+          this.apiService.searchCustomersByPhoneNumber(this.searchTerm).subscribe({
+            next: (res: any) => {
+              this.filteredCustomers = res;
+              this.loadingService.hideLoading();
+              this.showMessage(`找到 ${res.length} 筆符合的客戶資料`);
+            },
+            error: (error: any) => {
+              this.showMessage(error?.error?.message || error?.message || "搜尋客戶時發生錯誤" + error);
+              this.loadingService.hideLoading();
+            }
+          });
+          break;
+          
+        case 'customerType':
+          if (!this.searchTerm) {
+            this.showMessage('請選擇客戶類型');
+            this.loadingService.hideLoading();
+            return;
+          }
+          this.apiService.searchCustomersByType(parseInt(this.searchTerm)).subscribe({
+            next: (res: any) => {
+              this.filteredCustomers = res;
+              this.loadingService.hideLoading();
+              this.showMessage(`找到 ${res.length} 筆符合的客戶資料`);
+            },
+            error: (error: any) => {
+              this.showMessage(error?.error?.message || error?.message || "搜尋客戶時發生錯誤" + error);
+              this.loadingService.hideLoading();
+            }
+          });
+          break;
+          
+        case 'county':
+          this.apiService.searchCustomersByCounty(this.countyValue).subscribe({
+            next: (res: any) => {
+              this.filteredCustomers = res;
+              this.loadingService.hideLoading();
+              this.showMessage(`找到 ${res.length} 筆符合的客戶資料`);
+            },
+            error: (error: any) => {
+              this.showMessage(error?.error?.message || error?.message || "搜尋客戶時發生錯誤" + error);
+              this.loadingService.hideLoading();
+            }
+          });
+          break;
+      }
     }
   }
 

@@ -33,9 +33,19 @@
 
 .search-section {
   flex: 1;
-  max-width: 400px;
+  max-width: 600px;
   display: flex;
   align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.search-criteria {
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  min-width: 120px;
 }
 
 .search-input {
@@ -44,6 +54,15 @@
   border: 1px solid #ddd;
   border-radius: 4px;
   font-size: 14px;
+  min-width: 100px;
+}
+
+.county-select {
+  min-width: 100px;
+}
+
+.district-select {
+  min-width: 120px;
 }
 
 .search-btn {
@@ -54,7 +73,6 @@
   border-radius: 4px;
   cursor: pointer;
   font-size: 14px;
-  margin-left: 10px;
   white-space: nowrap;
 }
 

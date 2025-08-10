@@ -354,6 +354,24 @@ export class ApiService {
     });
   }
 
+  searchCustomersByCode(customerCode: string): Observable<any> {
+    return this.http.get(`${ApiService.BASE_URL}/customers/search-by-code/${customerCode}`, {
+      headers: this.getHeader(),
+    });
+  }
+
+  searchCustomersByContactPerson(contactPerson: string): Observable<any> {
+    return this.http.get(`${ApiService.BASE_URL}/customers/search-by-contact-person/${contactPerson}`, {
+      headers: this.getHeader(),
+    });
+  }
+
+  searchCustomersByPhoneNumber(phoneNumber: string): Observable<any> {
+    return this.http.get(`${ApiService.BASE_URL}/customers/search-by-phone-number/${phoneNumber}`, {
+      headers: this.getHeader(),
+    });
+  }
+
   batchUpdateCustomers(customerIds: number[], customerData: any): Observable<any> {
     const body = {
       customer_ids: customerIds,

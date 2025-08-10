@@ -88,8 +88,8 @@
       </div>
     </div>
 
-    <!-- County and District Selection -->
-    <div class="form-row">
+    <!-- County, District and Postal Code Selection -->
+    <div class="form-row three-columns">
       <!-- 選取縣市 -->
       <div class="form-group">
         <label for="county">{{ 'COUNTY' | translate }}</label>
@@ -122,18 +122,18 @@
           </option>
         </select>
       </div>
-    </div>
-
-    <!-- Postal Code -->
-    <div class="form-group">
-      <label for="postalCode">{{ 'POSTAL_CODE' | translate }}</label>
-      <input
-        type="text"
-        id="postalCode"
-        [value]="postalCode"
-        name="postalCode"
-        readonly
-      />
+      
+      <!-- 郵遞區號 -->
+      <div class="form-group">
+        <label for="postalCode">{{ 'POSTAL_CODE' | translate }}</label>
+        <input
+          type="text"
+          id="postalCode"
+          [value]="postalCode"
+          name="postalCode"
+          readonly
+        />
+      </div>
     </div>
 
     <!-- Delivery Address -->

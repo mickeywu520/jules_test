@@ -35,6 +35,10 @@ h1 {
   gap: 20px;
 }
 
+.form-row.three-columns {
+  grid-template-columns: 1fr 1fr 1fr;
+}
+
 .form-group {
   display: flex;
   flex-direction: column;
@@ -164,6 +168,10 @@ h1 {
   .form-row {
     grid-template-columns: 1fr;
     gap: 15px;
+  }
+
+  .form-row.three-columns {
+    grid-template-columns: 1fr;
   }
 
   h1 {

@@ -8,10 +8,10 @@
       <input
         type="text"
         [(ngModel)]="searchTerm"
-        (input)="onSearch()"
         [placeholder]="'SEARCH_CUSTOMERS_PLACEHOLDER' | translate"
         class="search-input"
       >
+      <button (click)="onSearch()" class="search-btn">{{ 'SEARCH' | translate }}</button>
     </div>
     <div class="add-customer">
       <button (click)="navigateToAddCustomerPage()" *ngIf="!showBatchUpdateSection">{{ 'ADD_CUSTOMER' | translate }}</button>

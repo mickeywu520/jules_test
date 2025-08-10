@@ -111,11 +111,18 @@ export class CustomerComponent implements OnInit {
     if (this.searchTerm.trim() === '') {
       this.filteredCustomers = this.customers;
     } else {
-      this.filteredCustomers = this.customers.filter(customer =>
-        customer.customerName.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
-        customer.customerCode.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
-        (customer.contactPerson && customer.contactPerson.toLowerCase().includes(this.searchTerm.toLowerCase()))
-      );
+      this.loadingService.showDataLoading();
+      this.apiService.searchCustomers(this.searchTerm).subscribe({
+        next: (res: any) => {
+          this.filteredCustomers = res;
+          this.loadingService.hideLoading();
+          this.showMessage(`找到 ${res.length} 筆符合的客戶資料`);
+        },
+        error: (error) => {
+          this.showMessage(error?.error?.message || error?.message || "搜尋客戶時發生錯誤" + error);
+          this.loadingService.hideLoading();
+        }
+      });
     }
   }
 

@@ -334,7 +334,7 @@ export class AddEditCustomerComponent implements OnInit {
       const addressPattern = new RegExp(`${this.postalCode}\\s*${this.formData.county}\\s*${this.formData.district}`);
       if (!addressPattern.test(this.formData.deliveryAddress)) {
         // 如果送貨地址不包含縣市、區域和郵遞區號，則添加它們
-        this.formData.deliveryAddress = `${this.postalCode} ${this.formData.county}${this.formData.district} ${this.formData.deliveryAddress}`;
+        this.formData.deliveryAddress = `${this.postalCode}${this.formData.county}${this.formData.district} ${this.formData.deliveryAddress || ''}`.trim();
       }
     }
   }

@@ -186,15 +186,18 @@ def get_next_customer_code(customer_type_id: int, db: Session = Depends(database
     print(f"Customer type name: {customer_type.type_name}")
     
     # Define the prefix mapping according to user requirements
-    prefix_mapping = {
-        "連鎖體系": "AA",
-        "㇐般月結店家": "B",
-        "㇐般下收店家": "D",
-        "零售": "X"
-    }
-    
-    # Get the prefix for the customer type
-    prefix = prefix_mapping.get(customer_type.type_name, "CUS")
+    # 使用包含匹配而非精確匹配，解決編碼問題
+    customer_type_name = customer_type.type_name
+    if "月結店家" in customer_type_name:
+        prefix = "B"
+    elif "下收店家" in customer_type_name:
+        prefix = "D"
+    elif "連鎖體系" in customer_type_name or "連鎖" in customer_type_name:
+        prefix = "AA"
+    elif "零售" in customer_type_name:
+        prefix = "X"
+    else:
+        prefix = "CUS"  # 默認前綴
     print(f"Prefix for customer type: {prefix}")
     
     # Find the maximum customer code for this prefix

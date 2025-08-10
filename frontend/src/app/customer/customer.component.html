@@ -5,96 +5,77 @@
   <div class="customer-header">
     <h1>{{ 'CUSTOMER_LIST' | translate }}</h1>
     <div class="search-section" *ngIf="!showBatchUpdateSection">
-      <select [(ngModel)]="searchCriteria" class="search-criteria">
-        <option value="all">{{ 'SHOW_ALL' | translate }}</option>
-        <option value="customerName">{{ 'CUSTOMER_NAME' | translate }}</option>
-        <option value="customerCode">{{ 'CUSTOMER_CODE' | translate }}</option>
-        <option value="contactPerson">{{ 'CONTACT_PERSON' | translate }}</option>
-        <option value="phoneNumber">{{ 'PHONE_NUMBER' | translate }}</option>
-        <option value="customerType">{{ 'CUSTOMER_TYPE' | translate }}</option>
-        <option value="county">{{ 'COUNTY' | translate }}</option>
-      </select>
+      <div class="search-controls">
+        <select [(ngModel)]="searchCriteria" class="search-criteria">
+          <option value="all">{{ 'SHOW_ALL' | translate }}</option>
+          <option value="customerName">{{ 'CUSTOMER_NAME' | translate }}</option>
+          <option value="customerCode">{{ 'CUSTOMER_CODE' | translate }}</option>
+          <option value="contactPerson">{{ 'CONTACT_PERSON' | translate }}</option>
+          <option value="phoneNumber">{{ 'PHONE_NUMBER' | translate }}</option>
+          <option value="customerType">{{ 'CUSTOMER_TYPE' | translate }}</option>
+          <option value="county">{{ 'COUNTY' | translate }}</option>
+        </select>
+        
+        <!-- 根據搜尋條件顯示不同的輸入框或下拉選單 -->
+        <input
+          *ngIf="searchCriteria === 'customerName' || searchCriteria === 'customerCode' || searchCriteria === 'contactPerson' || searchCriteria === 'phoneNumber'"
+          type="text"
+          [(ngModel)]="searchTerm"
+          [placeholder]="'ENTER_SEARCH_VALUE' | translate"
+          class="search-input"
+        >
+        
+        <!-- 客戶類型下拉選單 -->
+        <select
+          *ngIf="searchCriteria === 'customerType'"
+          [(ngModel)]="searchTerm"
+          class="search-input"
+        >
+          <option value="">{{ 'SELECT_CUSTOMER_TYPE' | translate }}</option>
+          <option *ngFor="let type of customerTypes" [value]="type.id">{{ type.type_name }}</option>
+        </select>
+        
+        <!-- 縣市下拉選單 -->
+        <select
+          *ngIf="searchCriteria === 'county'"
+          [(ngModel)]="countyValue"
+          class="search-input county-select"
+          (change)="onCountyChange()"
+        >
+          <option value="">{{ 'SELECT_COUNTY' | translate }}</option>
+          <option *ngFor="let county of counties" [value]="county">{{ county }}</option>
+        </select>
+        
+        <!-- 區域下拉選單（在選擇縣市後顯示） -->
+        <select
+          *ngIf="showDistrictDropdown && searchCriteria === 'county'"
+          [(ngModel)]="districtValue"
+          class="search-input district-select"
+        >
+          <option value="">{{ 'SELECT_DISTRICT' | translate }}</option>
+          <option value="all">{{ 'ALL_DISTRICTS' | translate }}</option>
+          <option *ngFor="let district of districts" [value]="district">{{ district }}</option>
+        </select>
+        
+        <button (click)="onSearch()" class="search-btn">{{ 'SEARCH' | translate }}</button>
+      </div>
       
-      <!-- 根據搜尋條件顯示不同的輸入框或下拉選單 -->
-      <input
-        *ngIf="searchCriteria === 'customerName' || searchCriteria === 'customerCode' || searchCriteria === 'contactPerson' || searchCriteria === 'phoneNumber'"
-        type="text"
-        [(ngModel)]="searchTerm"
-        [placeholder]="'ENTER_SEARCH_VALUE' | translate"
-        class="search-input"
-      >
-      
-      <!-- 客戶類型下拉選單 -->
-      <select
-        *ngIf="searchCriteria === 'customerType'"
-        [(ngModel)]="searchTerm"
-        class="search-input"
-      >
-        <option value="">{{ 'SELECT_CUSTOMER_TYPE' | translate }}</option>
-        <option *ngFor="let type of customerTypes" [value]="type.id">{{ type.type_name }}</option>
-      </select>
-      
-      <!-- 縣市下拉選單 -->
-      <select
-        *ngIf="searchCriteria === 'county'"
-        [(ngModel)]="countyValue"
-        class="search-input county-select"
-        (change)="onCountyChange()"
-      >
-        <option value="">{{ 'SELECT_COUNTY' | translate }}</option>
-        <option *ngFor="let county of counties" [value]="county">{{ county }}</option>
-      </select>
-      
-      <!-- 區域下拉選單（在選擇縣市後顯示） -->
-      <select
-        *ngIf="showDistrictDropdown && searchCriteria === 'county'"
-        [(ngModel)]="districtValue"
-        class="search-input district-select"
-      >
-        <option value="">{{ 'SELECT_DISTRICT' | translate }}</option>
-        <option value="all">{{ 'ALL_DISTRICTS' | translate }}</option>
-        <option *ngFor="let district of districts" [value]="district">{{ district }}</option>
-      </select>
-      
-      <button (click)="onSearch()" class="search-btn">{{ 'SEARCH' | translate }}</button>
-    </div>
-    <div class="add-customer">
-      <button (click)="navigateToAddCustomerPage()" *ngIf="!showBatchUpdateSection">{{ 'ADD_CUSTOMER' | translate }}</button>
-      <button (click)="toggleBatchUpdateMode()" class="batch-update-btn">
-        {{ showBatchUpdateSection ? ('HIDE_BATCH_UPDATE' | translate) : ('SHOW_BATCH_UPDATE' | translate) }}
-      </button>
-      <button (click)="toggleColumnConfigPanel()" class="column-config-btn" *ngIf="!showBatchUpdateSection">
-        {{ '自定義欄位' }}
-      </button>
-    </div>
-  </div>
-
-  <!-- COLUMN CONFIG PANEL -->
-  <div class="column-config-panel" *ngIf="showColumnConfigPanel && !showBatchUpdateSection">
-    <div class="panel-header">
-      <h3>自定義欄位顯示</h3>
-      <button (click)="resetToDefaultConfig()" class="reset-btn">重置為默認</button>
-    </div>
-    <div class="column-list">
-      <div *ngFor="let column of columnConfig" class="column-item">
-        <label>
-          <input 
-            type="checkbox" 
-            [checked]="column.visible" 
-            (change)="toggleColumnVisibility(column.key)"
-            [disabled]="column.fixed">
-          {{ column.label | translate }}
-        </label>
+      <!-- 將按鈕移到搜尋按鈕下方 -->
+      <div class="action-buttons">
+        <button (click)="navigateToAddCustomerPage()" *ngIf="!showBatchUpdateSection">{{ 'ADD_CUSTOMER' | translate }}</button>
+        <button (click)="toggleBatchUpdateMode()" class="batch-update-btn">
+          {{ showBatchUpdateSection ? ('HIDE_BATCH_UPDATE' | translate) : ('SHOW_BATCH_UPDATE' | translate) }}
+        </button>
+        <button (click)="toggleColumnConfigPanel()" class="column-config-btn" *ngIf="!showBatchUpdateSection">
+          {{ '自定義欄位' }}
+        </button>
       </div>
     </div>
-    <div class="panel-footer">
-      <button (click)="toggleColumnConfigPanel()" class="close-btn">關閉</button>
-    </div>
-  </div>
-  
-  <!-- BATCH UPDATE SECTION -->
-  <div class="batch-update-section" *ngIf="showBatchUpdateSection">
-    <div class="batch-update-controls">
+    <!-- 在批次修改模式下顯示"隱藏批次修改"按鈕和搜尋控件 -->
+    <div class="action-buttons batch-update-header" *ngIf="showBatchUpdateSection">
+      <button (click)="toggleBatchUpdateMode()" class="batch-update-btn">
+        {{ 'HIDE_BATCH_UPDATE' | translate }}
+      </button>
       <div class="search-controls">
         <select [(ngModel)]="searchCriteria" class="search-criteria">
           <option value="customerName">{{ 'CUSTOMER_NAME' | translate }}</option>
@@ -147,7 +128,35 @@
         
         <button (click)="searchForBatchUpdate()" class="search-btn">{{ 'SEARCH' | translate }}</button>
       </div>
-      
+    </div>
+  </div>
+
+  <!-- COLUMN CONFIG PANEL -->
+  <div class="column-config-panel" *ngIf="showColumnConfigPanel && !showBatchUpdateSection">
+    <div class="panel-header">
+      <h3>自定義欄位顯示</h3>
+      <button (click)="resetToDefaultConfig()" class="reset-btn">重置為默認</button>
+    </div>
+    <div class="column-list">
+      <div *ngFor="let column of columnConfig" class="column-item">
+        <label>
+          <input 
+            type="checkbox" 
+            [checked]="column.visible" 
+            (change)="toggleColumnVisibility(column.key)"
+            [disabled]="column.fixed">
+          {{ column.label | translate }}
+        </label>
+      </div>
+    </div>
+    <div class="panel-footer">
+      <button (click)="toggleColumnConfigPanel()" class="close-btn">關閉</button>
+    </div>
+  </div>
+  
+  <!-- BATCH UPDATE SECTION -->
+  <div class="batch-update-section" *ngIf="showBatchUpdateSection">
+    <div class="batch-update-controls">
       <div class="batch-actions" *ngIf="batchUpdateCustomers.length > 0">
         <button 
           (click)="toggleBatchUpdateSelectionMode()" 

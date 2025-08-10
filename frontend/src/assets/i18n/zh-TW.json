@@ -400,5 +400,6 @@
   "CANCEL_SELECTION": "取消選擇",
   "SELECT_ALL": "全選",
   "DESELECT_ALL": "取消全選",
-  "BATCH_UPDATE": "批次更新"
+  "BATCH_UPDATE": "批次更新",
+  "VERSION": "版本 {{version}}"
 }

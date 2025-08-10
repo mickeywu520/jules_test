@@ -255,5 +255,6 @@
   "CANCEL_SELECTION": "Cancel Selection",
   "SELECT_ALL": "Select All",
   "DESELECT_ALL": "Deselect All",
-  "BATCH_UPDATE": "Batch Update"
+  "BATCH_UPDATE": "Batch Update",
+  "VERSION": "Version {{version}}"
 }

@@ -32,6 +32,7 @@
       <li *ngIf="!isAuth()"><a routerLink="/register" (click)="onNavItemClick()">{{ 'REGISTER' | translate }}</a></li>
       <li *ngIf="isAuth()"><a (click)="logOut()" >{{ 'LOGOUT' | translate }}</a></li>
     </ul>
+    <div class="version-info">{{ 'VERSION' | translate:{version:version} }}</div>
   </div>
 
   <!-- MAIN CONTENT Area-->

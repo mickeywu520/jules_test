@@ -5,6 +5,7 @@ import { filter } from 'rxjs/operators';
 import { ApiService } from './service/api.service';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LoadingDialogComponent } from './loading-dialog/loading-dialog.component';
+import { environment } from '../environments/environment';
 
 @Component({
   selector: 'app-root',
@@ -17,6 +18,7 @@ import { LoadingDialogComponent } from './loading-dialog/loading-dialog.componen
 
 export class AppComponent implements OnInit, AfterViewInit {
   title = 'ims';
+  version = `${environment.version}.${environment.subversion}`;
   @ViewChild('navLinks', { static: false }) navLinks!: ElementRef;
   sidebarOpen = false;
 

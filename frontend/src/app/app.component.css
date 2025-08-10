@@ -251,4 +251,11 @@
     padding: 20px;
     transition: margin-left 0.3s ease;
     }
-    
+
+    .version-info {
+    text-align: center;
+    padding: 10px;
+    color: #aaa;
+    font-size: 0.8rem;
+    margin-top: auto;
+    }

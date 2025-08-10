@@ -139,6 +139,30 @@ def search_customers_by_district(district: str, db: Session = Depends(database.g
     ).all()
     return customers
 
+# Additional endpoint to search customers by customer code
+@router.get("/search-by-code/{customer_code}", response_model=List[schemas.Customer])
+def search_customers_by_code(customer_code: str, db: Session = Depends(database.get_db)):
+    customers = db.query(models.Customer).filter(
+        models.Customer.customerCode.ilike(f"%{customer_code}%")
+    ).all()
+    return customers
+
+# Additional endpoint to search customers by contact person
+@router.get("/search-by-contact-person/{contact_person}", response_model=List[schemas.Customer])
+def search_customers_by_contact_person(contact_person: str, db: Session = Depends(database.get_db)):
+    customers = db.query(models.Customer).filter(
+        models.Customer.contactPerson.ilike(f"%{contact_person}%")
+    ).all()
+    return customers
+
+# Additional endpoint to search customers by phone number
+@router.get("/search-by-phone-number/{phone_number}", response_model=List[schemas.Customer])
+def search_customers_by_phone_number(phone_number: str, db: Session = Depends(database.get_db)):
+    customers = db.query(models.Customer).filter(
+        models.Customer.phoneNumber.ilike(f"%{phone_number}%")
+    ).all()
+    return customers
+
 # Batch update customers
 @router.put("/batch-update", response_model=List[schemas.Customer])
 def batch_update_customers(

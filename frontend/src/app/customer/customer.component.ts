@@ -58,6 +58,7 @@ export class CustomerComponent implements OnInit {
     { key: 'customerType', label: 'CUSTOMER_TYPE', visible: true, fixed: false },
     { key: 'contactPerson', label: 'CONTACT_PERSON', visible: true, fixed: false },
     { key: 'phoneNumber', label: 'PHONE_NUMBER', visible: true, fixed: false },
+    { key: 'salesPersonId', label: 'SALES_PERSON_ID', visible: true, fixed: false },
     { key: 'paymentMethod', label: 'PAYMENT_METHOD', visible: true, fixed: false },
     { key: 'creditLimit', label: 'CREDIT_LIMIT', visible: true, fixed: false },
     { key: 'actions', label: 'ACTIONS', visible: true, fixed: true }
@@ -757,6 +758,7 @@ export class CustomerComponent implements OnInit {
       { key: 'customerType', label: 'CUSTOMER_TYPE', visible: true, fixed: false },
       { key: 'contactPerson', label: 'CONTACT_PERSON', visible: true, fixed: false },
       { key: 'phoneNumber', label: 'PHONE_NUMBER', visible: true, fixed: false },
+      { key: 'salesPersonId', label: 'SALES_PERSON_ID', visible: true, fixed: false },
       { key: 'paymentMethod', label: 'PAYMENT_METHOD', visible: true, fixed: false },
       { key: 'creditLimit', label: 'CREDIT_LIMIT', visible: true, fixed: false },
       { key: 'actions', label: 'ACTIONS', visible: true, fixed: true }

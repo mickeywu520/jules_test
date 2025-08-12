@@ -263,5 +263,6 @@
   "ADMIN_MANAGER": "Admin Manager",
   "SALES_STAFF": "Sales Staff",
   "ADMIN_STAFF": "Admin Staff",
-  "ASSISTANT": "Assistant"
+  "ASSISTANT": "Assistant",
+  "SALES_PERSON_ID": "Sales Person ID"
 }

@@ -403,5 +403,11 @@
   "SELECT_ALL": "全選",
   "DESELECT_ALL": "取消全選",
   "BATCH_UPDATE": "批次更新",
-  "VERSION": "版本 {{version}}"
+  "VERSION": "版本 {{version}}",
+  "MIS": "資訊管理",
+  "SALES_MANAGER": "業務主管",
+  "ADMIN_MANAGER": "行政主管",
+  "SALES_STAFF": "業務人員",
+  "ADMIN_STAFF": "行政人員",
+  "ASSISTANT": "助理"
 }

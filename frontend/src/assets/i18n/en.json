@@ -257,5 +257,11 @@
   "SELECT_ALL": "Select All",
   "DESELECT_ALL": "Deselect All",
   "BATCH_UPDATE": "Batch Update",
-  "VERSION": "Version {{version}}"
+  "VERSION": "Version {{version}}",
+  "MIS": "MIS",
+  "SALES_MANAGER": "Sales Manager",
+  "ADMIN_MANAGER": "Admin Manager",
+  "SALES_STAFF": "Sales Staff",
+  "ADMIN_STAFF": "Admin Staff",
+  "ASSISTANT": "Assistant"
 }

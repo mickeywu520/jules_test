@@ -85,18 +85,18 @@
                                   [class.sales-staff-role]="user.role === 'SALES_STAFF'"
                                   [class.admin-staff-role]="user.role === 'ADMIN_STAFF'"
                                   [class.assistant-role]="user.role === 'ASSISTANT'">
-                                {{user.role}}
+                                {{user.role | translate}}
                             </span>
                             <select *ngIf="editingUserId === user.id"
                                     [(ngModel)]="editingUser.role"
                                     class="edit-select">
-                                <option value="USER">USER</option>
-                                <option value="MIS">MIS</option>
-                                <option value="SALES_MANAGER">SALES_MANAGER</option>
-                                <option value="ADMIN_MANAGER">ADMIN_MANAGER</option>
-                                <option value="SALES_STAFF">SALES_STAFF</option>
-                                <option value="ADMIN_STAFF">ADMIN_STAFF</option>
-                                <option value="ASSISTANT">ASSISTANT</option>
+                                <option value="USER">{{ 'USER' | translate }}</option>
+                                <option value="MIS">{{ 'MIS' | translate }}</option>
+                                <option value="SALES_MANAGER">{{ 'SALES_MANAGER' | translate }}</option>
+                                <option value="ADMIN_MANAGER">{{ 'ADMIN_MANAGER' | translate }}</option>
+                                <option value="SALES_STAFF">{{ 'SALES_STAFF' | translate }}</option>
+                                <option value="ADMIN_STAFF">{{ 'ADMIN_STAFF' | translate }}</option>
+                                <option value="ASSISTANT">{{ 'ASSISTANT' | translate }}</option>
                                 <!-- 不包含ADMIN -->
                             </select>
                         </td>

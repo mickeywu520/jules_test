@@ -224,6 +224,7 @@
           [(ngModel)]="formData.invoiceTitle"
           name="invoiceTitle"
           [placeholder]="'INVOICE_TITLE_PLACEHOLDER' | translate"
+          (focus)="onInvoiceTitleFocus()"
         />
       </div>
 

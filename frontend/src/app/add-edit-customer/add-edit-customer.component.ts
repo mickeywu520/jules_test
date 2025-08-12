@@ -339,6 +339,14 @@ export class AddEditCustomerComponent implements OnInit {
     }
   }
 
+  // 當發票抬頭輸入框獲得焦點時調用
+  onInvoiceTitleFocus(): void {
+    // 如果發票抬頭為空，則自動填入客戶名稱加連字符
+    if (!this.formData.invoiceTitle && this.formData.customerName) {
+      this.formData.invoiceTitle = this.formData.customerName + '-';
+    }
+  }
+
   // 解析送貨地址，提取縣市、區域和郵遞區號
   parseDeliveryAddress(address: string): { county: string; district: string; postalCode: string } {
     // 創建一個對象來存儲縣市、區域和郵遞區號

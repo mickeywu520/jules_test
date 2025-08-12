@@ -10,11 +10,11 @@ class UserRole(str, enum.Enum):
     ADMIN = "ADMIN"
     USER = "USER" # Assuming a general user role
     MIS = "MIS"
-    SALES_MANAGER = "業務主管"
-    ADMIN_MANAGER = "行政主管"
-    SALES_STAFF = "業務人員"
-    ADMIN_STAFF = "行政人員"
-    ASSISTANT = "助理"
+    SALES_MANAGER = "SALES_MANAGER"
+    ADMIN_MANAGER = "ADMIN_MANAGER"
+    SALES_STAFF = "SALES_STAFF"
+    ADMIN_STAFF = "ADMIN_STAFF"
+    ASSISTANT = "ASSISTANT"
 
 class TransactionType(str, enum.Enum):
     PURCHASE = "PURCHASE"

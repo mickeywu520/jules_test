@@ -248,6 +248,37 @@
     color: white;
 }
 
+/* Styles for other roles */
+.mis-role {
+    background: linear-gradient(135deg, #6f42c1, #5a32a3);
+    color: white;
+}
+
+.sales-manager-role {
+    background: linear-gradient(135deg, #fd7e14, #e96a00);
+    color: white;
+}
+
+.admin-manager-role {
+    background: linear-gradient(135deg, #e83e8c, #d92d78);
+    color: white;
+}
+
+.sales-staff-role {
+    background: linear-gradient(135deg, #20c997, #1baa80);
+    color: white;
+}
+
+.admin-staff-role {
+    background: linear-gradient(135deg, #6610f2, #520dc2);
+    color: white;
+}
+
+.assistant-role {
+    background: linear-gradient(135deg, #ffc107, #e0a800);
+    color: white;
+}
+
 /* 編輯功能樣式 */
 .edit-input, .edit-select {
     width: 100%;

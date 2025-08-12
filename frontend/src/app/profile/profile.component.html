@@ -76,14 +76,28 @@
                                    placeholder="請輸入電話">
                         </td>
                         <td>
-                            <span *ngIf="editingUserId !== user.id" class="role-badge" [class.admin-role]="user.role === 'ADMIN'" [class.user-role]="user.role === 'USER'">
+                            <span *ngIf="editingUserId !== user.id" class="role-badge" 
+                                  [class.admin-role]="user.role === 'ADMIN'" 
+                                  [class.user-role]="user.role === 'USER'"
+                                  [class.mis-role]="user.role === 'MIS'"
+                                  [class.sales-manager-role]="user.role === 'SALES_MANAGER'"
+                                  [class.admin-manager-role]="user.role === 'ADMIN_MANAGER'"
+                                  [class.sales-staff-role]="user.role === 'SALES_STAFF'"
+                                  [class.admin-staff-role]="user.role === 'ADMIN_STAFF'"
+                                  [class.assistant-role]="user.role === 'ASSISTANT'">
                                 {{user.role}}
                             </span>
                             <select *ngIf="editingUserId === user.id"
                                     [(ngModel)]="editingUser.role"
                                     class="edit-select">
                                 <option value="USER">USER</option>
-                                <!-- 未來可以添加其他角色，但不包含ADMIN -->
+                                <option value="MIS">MIS</option>
+                                <option value="SALES_MANAGER">SALES_MANAGER</option>
+                                <option value="ADMIN_MANAGER">ADMIN_MANAGER</option>
+                                <option value="SALES_STAFF">SALES_STAFF</option>
+                                <option value="ADMIN_STAFF">ADMIN_STAFF</option>
+                                <option value="ASSISTANT">ASSISTANT</option>
+                                <!-- 不包含ADMIN -->
                             </select>
                         </td>
                         <td>{{user.createdAt | date:'yyyy-MM-dd HH:mm'}}</td>

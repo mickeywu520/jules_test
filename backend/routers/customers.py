@@ -1,7 +1,7 @@
-from typing import List
+from typing import List, Dict
 
 from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from .. import database, models, schemas, security # Adjusted imports
 
@@ -92,6 +92,113 @@ def update_customer(id: int, customer_update: schemas.CustomerUpdate, db: Sessio
     db.commit()
     db.refresh(db_customer)
     return db_customer
+
+@router.get("/{customer_id}/business-hours", response_model=schemas.CustomerBusinessHoursResponse)
+def get_customer_business_hours(customer_id: int, db: Session = Depends(database.get_db)):
+    customer = db.query(models.Customer).filter(models.Customer.id == customer_id).first()
+    if not customer:
+        raise HTTPException(status_code=404, detail="Customer not found")
+
+    weekly: List[schemas.WeeklyDay] = []
+    # 預設 0..6 每日都回傳（即使沒有資料也有 is_open=false）
+    existing = {bh.weekday: bh for bh in db.query(models.CustomerBusinessHour)
+                .filter(models.CustomerBusinessHour.customer_id == customer_id)
+                .options(joinedload(models.CustomerBusinessHour.intervals)).all()}
+
+    for weekday in range(7):
+        if weekday in existing:
+            bh = existing[weekday]
+            weekly.append(schemas.WeeklyDay(
+                weekday=weekday,
+                is_open=bh.is_open,
+                ranges=[schemas.TimeRange(start=iv.start_time.strftime('%H:%M'), end=iv.end_time.strftime('%H:%M')) for iv in bh.intervals]
+            ))
+        else:
+            weekly.append(schemas.WeeklyDay(weekday=weekday, is_open=False, ranges=[]))
+
+    exceptions_q = db.query(models.CustomerBusinessHourException).filter(
+        models.CustomerBusinessHourException.customer_id == customer_id
+    ).all()
+    exceptions = []
+    for ex in exceptions_q:
+        ranges = None
+        if ex.start_time and ex.end_time:
+            ranges = [schemas.TimeRange(start=ex.start_time.strftime('%H:%M'), end=ex.end_time.strftime('%H:%M'))]
+        exceptions.append(schemas.BusinessHourException(
+            date=ex.date,
+            is_open=ex.is_open,
+            ranges=ranges,
+            reason=ex.reason
+        ))
+
+    return schemas.CustomerBusinessHoursResponse(weekly=weekly, exceptions=exceptions or None)
+
+@router.put("/{customer_id}/business-hours", response_model=schemas.CustomerBusinessHoursResponse)
+def put_customer_business_hours(customer_id: int, payload: schemas.CustomerBusinessHoursUpdate, db: Session = Depends(database.get_db)):
+    customer = db.query(models.Customer).filter(models.Customer.id == customer_id).first()
+    if not customer:
+        raise HTTPException(status_code=404, detail="Customer not found")
+
+    # 清空舊的 weekly 設定
+    db.query(models.CustomerBusinessHourInterval).filter(
+        models.CustomerBusinessHourInterval.business_hour_id.in_(
+            db.query(models.CustomerBusinessHour.id).filter(models.CustomerBusinessHour.customer_id == customer_id)
+        )
+    ).delete(synchronize_session=False)
+    db.query(models.CustomerBusinessHour).filter(
+        models.CustomerBusinessHour.customer_id == customer_id
+    ).delete(synchronize_session=False)
+
+    # 建立新的 weekly 設定
+    for day in payload.weekly:
+        bh = models.CustomerBusinessHour(
+            customer_id=customer_id,
+            weekday=day.weekday,
+            is_open=day.is_open
+        )
+        db.add(bh)
+        db.flush()  # 取 id
+        if day.is_open:
+            for r in (day.ranges or []):
+                iv = models.CustomerBusinessHourInterval(
+                    business_hour_id=bh.id,
+                    start_time=_parse_time(r.start),
+                    end_time=_parse_time(r.end),
+                )
+                db.add(iv)
+
+    # 清空舊的 exceptions
+    db.query(models.CustomerBusinessHourException).filter(
+        models.CustomerBusinessHourException.customer_id == customer_id
+    ).delete(synchronize_session=False)
+
+    # 新增例外日
+    for ex in (payload.exceptions or []):
+        start_time = _parse_time(ex.ranges[0].start) if ex.ranges and len(ex.ranges) > 0 else None
+        end_time = _parse_time(ex.ranges[0].end) if ex.ranges and len(ex.ranges) > 0 else None
+        ex_row = models.CustomerBusinessHourException(
+            customer_id=customer_id,
+            date=ex.date,
+            is_open=ex.is_open,
+            start_time=start_time,
+            end_time=end_time,
+            reason=ex.reason
+        )
+        db.add(ex_row)
+
+    db.commit()
+
+    return get_customer_business_hours(customer_id, db)
+
+# helpers
+from datetime import datetime as _dt
+
+def _parse_time(hhmm: str):
+    try:
+        t = _dt.strptime(hhmm, '%H:%M').time()
+        return t
+    except Exception:
+        raise HTTPException(status_code=400, detail=f"Invalid time format: {hhmm}")
 
 @router.delete("/delete/{id}", response_model=schemas.Customer)
 def delete_customer(id: int, db: Session = Depends(database.get_db)):

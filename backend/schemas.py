@@ -113,6 +113,29 @@ class Supplier(SupplierBase): # For Read operations
     class Config:
         from_attributes = True
 
+# Business hours (normalized) schemas
+class TimeRange(BaseModel):
+    start: str  # 'HH:MM'
+    end: str    # 'HH:MM'
+
+class WeeklyDay(BaseModel):
+    weekday: int  # 0=Mon .. 6=Sun
+    is_open: bool
+    ranges: List[TimeRange] = []
+
+class BusinessHourException(BaseModel):
+    date: date
+    is_open: bool
+    ranges: Optional[List[TimeRange]] = None
+    reason: Optional[str] = None
+
+class CustomerBusinessHoursUpdate(BaseModel):
+    weekly: List[WeeklyDay]
+    exceptions: Optional[List[BusinessHourException]] = None
+
+class CustomerBusinessHoursResponse(CustomerBusinessHoursUpdate):
+    pass
+
 # Base and Read schemas for Customer
 class CustomerBase(BaseModel):
     customer_type_id: int

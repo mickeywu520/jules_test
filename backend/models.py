@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Float, DateTime, Date, ForeignKey, Enum as SQLAlchemyEnum, Text, Boolean
+from sqlalchemy import Column, Integer, String, Float, DateTime, Date, Time, ForeignKey, Enum as SQLAlchemyEnum, Text, Boolean
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func # For default DateTime values
 import enum
@@ -140,7 +140,7 @@ class Customer(Base):
     phoneNumber = Column(String, nullable=True)  # 電話號碼
     faxNumber = Column(String, nullable=True)  # 傳真號碼
     deliveryAddress = Column(Text, nullable=True)  # 送貨地址
-    businessHours = Column(Text, nullable=True)  # 營業時間/公休日
+    businessHours = Column(Text, nullable=True)  # 營業時間/公休日（舊欄位：保留相容）
     paymentMethod = Column(String, nullable=True)  # 收款方式 (支援動態月結天數，如 "月結30天")
     paymentCategory = Column(String, nullable=True)  # 收款類別 (字串類型，支援動態值)
     creditLimit = Column(Float, nullable=True, default=0.0)  # 銷貨額度
@@ -149,8 +149,9 @@ class Customer(Base):
     # 與 CustomerType 的關聯
     customer_type_obj = relationship("CustomerType", back_populates="customers")
 
-    # 可以添加與交易的關聯（如果需要的話）
-    # transactions = relationship("Transaction", back_populates="customer")
+    # 新增營業時間關聯（正規化）
+    business_hours = relationship("CustomerBusinessHour", back_populates="customer", cascade="all, delete-orphan")
+    business_hour_exceptions = relationship("CustomerBusinessHourException", back_populates="customer", cascade="all, delete-orphan")
 
 # Product Model - 根據客戶 Excel 欄位重新設計
 class Product(Base):
@@ -391,6 +392,47 @@ class SalesOrder(Base):
 
 
 # 銷售明細模型 (Sales Order Line Items)
+class CustomerBusinessHour(Base):
+    __tablename__ = "customer_business_hours"
+
+    id = Column(Integer, primary_key=True, index=True)
+    customer_id = Column(Integer, ForeignKey("customers.id"), nullable=False)
+    weekday = Column(Integer, nullable=False)  # 0=Mon .. 6=Sun
+    is_open = Column(Boolean, default=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+    customer = relationship("Customer", back_populates="business_hours")
+    intervals = relationship("CustomerBusinessHourInterval", back_populates="business_hour", cascade="all, delete-orphan")
+
+
+class CustomerBusinessHourInterval(Base):
+    __tablename__ = "customer_business_hour_intervals"
+
+    id = Column(Integer, primary_key=True, index=True)
+    business_hour_id = Column(Integer, ForeignKey("customer_business_hours.id"), nullable=False)
+    start_time = Column(Time, nullable=False)
+    end_time = Column(Time, nullable=False)
+
+    business_hour = relationship("CustomerBusinessHour", back_populates="intervals")
+
+
+class CustomerBusinessHourException(Base):
+    __tablename__ = "customer_business_hour_exceptions"
+
+    id = Column(Integer, primary_key=True, index=True)
+    customer_id = Column(Integer, ForeignKey("customers.id"), nullable=False)
+    date = Column(Date, nullable=False)
+    is_open = Column(Boolean, default=False)
+    start_time = Column(Time, nullable=True)
+    end_time = Column(Time, nullable=True)
+    reason = Column(Text, nullable=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+    customer = relationship("Customer", back_populates="business_hour_exceptions")
+
+
 class SalesOrderItem(Base):
     __tablename__ = "sales_order_items"
 

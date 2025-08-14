@@ -343,7 +343,7 @@ export class AddEditCustomerComponent implements OnInit {
   onInvoiceTitleFocus(): void {
     // 如果發票抬頭為空，則自動填入客戶名稱加連字符
     if (!this.formData.invoiceTitle && this.formData.customerName) {
-      this.formData.invoiceTitle = this.formData.customerName + '-';
+      this.formData.invoiceTitle = this.formData.customerName;
     }
   }
 

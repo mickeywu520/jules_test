@@ -290,6 +290,18 @@ export class ApiService {
   }
 
   /** CUSTOMER API */
+  getCustomerBusinessHours(customerId: string): Observable<any> {
+    return this.http.get(`${ApiService.BASE_URL}/customers/${customerId}/business-hours`, {
+      headers: this.getHeader(),
+    });
+  }
+
+  updateCustomerBusinessHours(customerId: string, body: any): Observable<any> {
+    return this.http.put(`${ApiService.BASE_URL}/customers/${customerId}/business-hours`, body, {
+      headers: this.getHeader(),
+    });
+  }
+
   addCustomer(body: any): Observable<any> {
     return this.http.post(`${ApiService.BASE_URL}/customers/add`, body, {
       headers: this.getHeader(),

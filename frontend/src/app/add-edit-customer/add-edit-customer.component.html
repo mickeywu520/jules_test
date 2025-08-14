@@ -149,16 +149,51 @@
       ></textarea>
     </div>
 
-    <!-- Business Hours -->
+    <!-- Business Hours (Structured) -->
     <div class="form-group full-width">
-      <label for="businessHours">{{ 'BUSINESS_HOURS' | translate }}</label>
-      <textarea
-        id="businessHours"
-        [(ngModel)]="formData.businessHours"
-        name="businessHours"
-        [placeholder]="'BUSINESS_HOURS_PLACEHOLDER' | translate"
-        rows="3"
-      ></textarea>
+      <label>{{ 'BUSINESS_HOURS' | translate }}</label>
+
+      <div class="business-hours-grid">
+        <div class="day-row" *ngFor="let day of businessHoursModel.weekly; let i = index">
+          <div class="day-label">{{ dayNames[i] }}</div>
+          <div class="day-open-toggle">
+            <label>
+              <input type="checkbox" [(ngModel)]="day.is_open" name="bh_open_{{i}}" />
+              <span>{{ day.is_open ? ('OPEN' | translate) : ('CLOSED' | translate) }}</span>
+            </label>
+          </div>
+          <div class="day-ranges" [class.disabled]="!day.is_open">
+            <div class="range-row" *ngFor="let r of day.ranges; let ri = index">
+              <input type="time" [(ngModel)]="r.start" name="bh_start_{{i}}_{{ri}}" [disabled]="!day.is_open" />
+              <span>~</span>
+              <input type="time" [(ngModel)]="r.end" name="bh_end_{{i}}_{{ri}}" [disabled]="!day.is_open" />
+              <button type="button" class="btn-small" (click)="removeRange(i, ri)" [disabled]="!day.is_open">-</button>
+            </div>
+            <button type="button" class="btn-small" (click)="addRange(i)" [disabled]="!day.is_open">+</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Exceptions (optional, minimal UI) -->
+      <div class="exceptions">
+        <h4>{{ 'EXCEPTIONS' | translate }}</h4>
+        <div class="exception-row" *ngFor="let ex of businessHoursModel.exceptions; let ei = index">
+          <input type="date" [(ngModel)]="ex.date" name="bh_ex_date_{{ei}}" />
+          <label>
+            <input type="checkbox" [(ngModel)]="ex.is_open" name="bh_ex_open_{{ei}}" />
+            <span>{{ ex.is_open ? ('OPEN' | translate) : ('CLOSED' | translate) }}</span>
+          </label>
+          <ng-container *ngIf="ex.is_open">
+            <input type="time" [(ngModel)]="ex.ranges[0].start" name="bh_ex_start_{{ei}}" />
+            <span>~</span>
+            <input type="time" [(ngModel)]="ex.ranges[0].end" name="bh_ex_end_{{ei}}" />
+          </ng-container>
+          <input type="text" [(ngModel)]="ex.reason" name="bh_ex_reason_{{ei}}" [placeholder]="'NOTES' | translate" />
+          <button type="button" class="btn-small" (click)="removeException(ei)">-</button>
+        </div>
+        <button type="button" class="btn-small" (click)="addException()">{{ 'ADD' | translate }}</button>
+      </div>
+
     </div>
 
     <div class="form-row">

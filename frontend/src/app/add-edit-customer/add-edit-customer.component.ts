@@ -51,6 +51,21 @@ export class AddEditCustomerComponent implements OnInit {
   // 郵遞區號（根據選擇的區域自動帶入）
   postalCode: string = '';
 
+  dayNames = ['週一','週二','週三','週四','週五','週六','週日'];
+
+  businessHoursModel: any = {
+    weekly: [
+      { weekday: 0, is_open: false, ranges: [] },
+      { weekday: 1, is_open: false, ranges: [] },
+      { weekday: 2, is_open: false, ranges: [] },
+      { weekday: 3, is_open: false, ranges: [] },
+      { weekday: 4, is_open: false, ranges: [] },
+      { weekday: 5, is_open: false, ranges: [] },
+      { weekday: 6, is_open: false, ranges: [] },
+    ],
+    exceptions: []
+  };
+
   formData: any = {
     customerType: '',
     salesPersonId: '',
@@ -75,6 +90,8 @@ export class AddEditCustomerComponent implements OnInit {
   };
 
   ngOnInit(): void {
+    // 若為編輯模式，載入營業時間
+
     this.customerId = this.router.url.split('/')[2]; //extracting customer id from url
     if (this.customerId) {
       this.isEditing = true;
@@ -124,6 +141,9 @@ export class AddEditCustomerComponent implements OnInit {
           }
         }
 
+        // 同步營業時間（若後端已有資料）
+        this.loadBusinessHours();
+
         this.formData = {
           customerType: res.customer_type_id || res.customer_type_obj?.id || '',
           salesPersonId: res.salesPersonId || '',
@@ -166,6 +186,87 @@ export class AddEditCustomerComponent implements OnInit {
             'Unable to get customer by id' + error
         );
       },
+    });
+  }
+
+  loadBusinessHours(): void {
+    if (!this.customerId) return;
+    this.apiService.getCustomerBusinessHours(this.customerId).subscribe({
+      next: (res: any) => {
+        // 資料格式：{ weekly: [{weekday,is_open,ranges:[{start,end}]}...], exceptions: [...] }
+        // 確保例外日 ranges 至少有一個元素供 UI 綁定
+        const ex = (res.exceptions || []).map((e: any) => ({
+          ...e,
+          ranges: e.is_open ? (e.ranges && e.ranges.length ? e.ranges : [{ start: '09:00', end: '18:00' }]) : []
+        }));
+        this.businessHoursModel = {
+          weekly: res.weekly || this.businessHoursModel.weekly,
+          exceptions: ex
+        };
+      },
+      error: (err) => {
+        console.warn('No business hours found or failed to load', err);
+      }
+    });
+  }
+
+  addRange(dayIndex: number): void {
+    const day = this.businessHoursModel.weekly[dayIndex];
+    if (!day.ranges) day.ranges = [];
+    day.ranges.push({ start: '09:00', end: '18:00' });
+  }
+
+  removeRange(dayIndex: number, rangeIndex: number): void {
+    const day = this.businessHoursModel.weekly[dayIndex];
+    if (day && day.ranges) {
+      day.ranges.splice(rangeIndex, 1);
+    }
+  }
+
+  addException(): void {
+    if (!this.businessHoursModel.exceptions) this.businessHoursModel.exceptions = [];
+    this.businessHoursModel.exceptions.push({
+      date: '',
+      is_open: false,
+      ranges: [],
+      reason: ''
+    });
+  }
+
+  removeException(index: number): void {
+    if (!this.businessHoursModel.exceptions) return;
+    this.businessHoursModel.exceptions.splice(index, 1);
+  }
+
+  private buildBusinessHoursPayload() {
+    const weekly = (this.businessHoursModel.weekly || []).map((d: any) => ({
+      weekday: d.weekday,
+      is_open: !!d.is_open,
+      ranges: d.is_open ? (d.ranges || []).filter((r: any) => r.start && r.end).map((r: any) => ({ start: r.start, end: r.end })) : []
+    }));
+
+    const exceptions = (this.businessHoursModel.exceptions || []).map((e: any) => ({
+      date: e.date,
+      is_open: !!e.is_open,
+      ranges: e.is_open && e.ranges && e.ranges.length && e.ranges[0].start && e.ranges[0].end ? [{ start: e.ranges[0].start, end: e.ranges[0].end }] : null,
+      reason: e.reason || null
+    }));
+
+    return { weekly, exceptions };
+  }
+
+  private saveBusinessHoursAndNavigate(customerId: string | number): void {
+    const payload = this.buildBusinessHoursPayload();
+    this.apiService.updateCustomerBusinessHours(String(customerId), payload).subscribe({
+      next: () => {
+        this.loadingService.hideLoading();
+        this.router.navigate(['/customer']);
+      },
+      error: (err) => {
+        console.warn('Failed to save business hours:', err);
+        this.loadingService.hideLoading();
+        this.router.navigate(['/customer']);
+      }
     });
   }
 

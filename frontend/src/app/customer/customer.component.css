@@ -518,13 +518,9 @@
   }
 }
 
-/* 修改歷史顯示區域樣式 - 顯示在欄位上方 */
-.field-history-popup {
-  position: absolute;
-  bottom: 100%; /* 顯示在欄位上方 */
-  left: 50%;
-  transform: translateX(-50%); /* 水平置中 */
-  margin-bottom: 8px; /* 與欄位保持距離 */
+/* 全域修改歷史氣泡樣式 - 永不截斷 */
+.global-history-popup {
+  position: fixed;
   z-index: 1000;
   pointer-events: none; /* 讓滑鼠事件穿透，避免干擾 */
 }
@@ -583,17 +579,7 @@
   color: #2f855a;
 }
 
-/* 添加指向欄位的小箭頭 */
-.field-history-popup::after {
-  content: '';
-  position: absolute;
-  top: 100%;
-  left: 50%;
-  transform: translateX(-50%);
-  border: 6px solid transparent;
-  border-top-color: #007bff;
-  z-index: 1001;
-}
+/* 全域氣泡不需要箭頭，因為會跟隨滑鼠 */
 
 /* 修改過的欄位樣式 - 保持原本底色 */
 .modified-field {

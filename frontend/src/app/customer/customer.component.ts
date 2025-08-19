@@ -450,8 +450,46 @@ export class CustomerComponent implements OnInit {
     // 記錄當前懸停的客戶和欄位
     this.currentHoveredCustomer = customer;
     this.currentHoveredField = fieldKey;
+    // 更新滑鼠位置
+    this.updateMousePosition(event);
     // 現在只有真正修改過的欄位才會觸發
     this.loadFieldHistory(customer.id, fieldKey);
+  }
+
+  // 滑鼠移動事件處理
+  onFieldMouseMove(event: MouseEvent): void {
+    if (this.showFieldHistory) {
+      this.updateMousePosition(event);
+    }
+  }
+
+  // 更新滑鼠位置 - 智慧邊界檢測
+  updateMousePosition(event: MouseEvent): void {
+    const offset = 15; // 偏移量，避免遮擋滑鼠
+    let x = event.clientX + offset;
+    let y = event.clientY + offset;
+    
+    // 邊界檢測
+    const windowWidth = window.innerWidth;
+    const windowHeight = window.innerHeight;
+    const popupWidth = 350; // 氣泡寬度
+    const popupHeight = 120; // 氣泡高度
+    
+    // 右邊界檢測
+    if (x + popupWidth > windowWidth) {
+      x = event.clientX - popupWidth - offset;
+    }
+    
+    // 下邊界檢測
+    if (y + popupHeight > windowHeight) {
+      y = event.clientY - popupHeight - offset;
+    }
+    
+    // 確保不會超出左上邊界
+    x = Math.max(10, x);
+    y = Math.max(10, y);
+    
+    this.mousePosition = { x, y };
   }
 
   // 滑鼠離開事件處理

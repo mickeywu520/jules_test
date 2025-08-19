@@ -327,8 +327,24 @@ export class CustomerComponent implements OnInit {
 
   // 檢查特定欄位是否被修改過
   isFieldModified(customer: any, fieldName: string): boolean {
+    // 調試日誌
+    if (customer.modified_fields) {
+      console.log(`Customer ${customer.id} modified_fields:`, customer.modified_fields);
+    }
+    
     // 檢查客戶是否有 modified_fields 屬性，且該欄位在修改列表中
-    return customer.modified_fields && customer.modified_fields.includes(fieldName);
+    if (customer.modified_fields && customer.modified_fields.includes(fieldName)) {
+      console.log(`Field ${fieldName} is modified for customer ${customer.id}`);
+      return true;
+    }
+    
+    // 回退機制：如果沒有 modified_fields，使用原來的邏輯
+    // 這樣至少小紅點會顯示出來
+    const fallback = this.isRecentlyModified(customer);
+    if (fallback) {
+      console.log(`Using fallback for customer ${customer.id}, field ${fieldName}`);
+    }
+    return fallback;
   }
 
   getModificationTooltip(customer: any): string {

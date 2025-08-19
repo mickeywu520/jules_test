@@ -410,5 +410,21 @@
   "SALES_STAFF": "業務人員",
   "ADMIN_STAFF": "行政人員",
   "ASSISTANT": "助理",
-  "SALES_PERSON_ID": "業務員編號"
+  "SALES_PERSON_ID": "業務員編號",
+  "BUSINESS_HOURS_SETTINGS": "營業時間設定",
+  "SET_BUSINESS_HOURS": "設定營業時間/公休日",
+  "CURRENT_BUSINESS_HOURS": "目前營業時間",
+  "QUICK_SETTINGS": "快速設定",
+  "WEEKDAYS_9_TO_6": "週一至週五 9:00-18:00",
+  "EVERYDAY_9_TO_6": "每天 9:00-18:00",
+  "RETAIL_HOURS": "零售時間 10:00-22:00",
+  "CLEAR_ALL": "清除全部",
+  "WEEKLY_HOURS": "週間營業時間",
+  "OPEN": "營業",
+  "CLOSED": "公休",
+  "ADD_TIME_RANGE": "新增時段",
+  "SPECIAL_DATES": "特殊日期",
+  "ADD_SPECIAL_DATE": "新增特殊日期",
+  "REASON_PLACEHOLDER": "請輸入原因",
+  "EXCEPTIONS": "例外日期"
 }

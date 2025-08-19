@@ -1,0 +1,169 @@
+<div class="dialog-overlay" *ngIf="isOpen" (click)="cancel()">
+  <div class="dialog-content" (click)="$event.stopPropagation()">
+    <div class="dialog-header">
+      <h2>{{ 'BUSINESS_HOURS_SETTINGS' | translate }}</h2>
+      <button class="close-btn" (click)="cancel()">&times;</button>
+    </div>
+
+    <div class="dialog-body">
+      <!-- 快速設定按鈕 -->
+      <div class="quick-settings">
+        <h3>{{ 'QUICK_SETTINGS' | translate }}</h3>
+        <div class="quick-buttons">
+          <button type="button" class="quick-btn" (click)="setCommonHours('weekdays')">
+            {{ 'WEEKDAYS_9_TO_6' | translate }}
+          </button>
+          <button type="button" class="quick-btn" (click)="setCommonHours('everyday')">
+            {{ 'EVERYDAY_9_TO_6' | translate }}
+          </button>
+          <button type="button" class="quick-btn" (click)="setCommonHours('retail')">
+            {{ 'RETAIL_HOURS' | translate }}
+          </button>
+          <button type="button" class="quick-btn clear" (click)="clearAll()">
+            {{ 'CLEAR_ALL' | translate }}
+          </button>
+        </div>
+      </div>
+
+      <!-- 週間營業時間設定 -->
+      <div class="weekly-hours">
+        <h3>{{ 'WEEKLY_HOURS' | translate }}</h3>
+        <div class="business-hours-grid">
+          <div class="day-row" *ngFor="let day of businessHoursModel.weekly; let i = index">
+            <div class="day-label">{{ dayNames[i] }}</div>
+            
+            <div class="day-toggle">
+              <label class="toggle-switch">
+                <input 
+                  type="checkbox" 
+                  [(ngModel)]="day.is_open" 
+                  name="bh_open_{{i}}" 
+                  (change)="onDayToggle(i)"
+                />
+                <span class="toggle-slider"></span>
+              </label>
+              <span class="toggle-text">
+                {{ day.is_open ? ('OPEN' | translate) : ('CLOSED' | translate) }}
+              </span>
+            </div>
+
+            <div class="day-ranges" [class.disabled]="!day.is_open">
+              <div class="range-row" *ngFor="let r of day.ranges; let ri = index">
+                <input 
+                  type="time" 
+                  [(ngModel)]="r.start" 
+                  name="bh_start_{{i}}_{{ri}}" 
+                  [disabled]="!day.is_open" 
+                  class="time-input"
+                />
+                <span class="time-separator">~</span>
+                <input 
+                  type="time" 
+                  [(ngModel)]="r.end" 
+                  name="bh_end_{{i}}_{{ri}}" 
+                  [disabled]="!day.is_open" 
+                  class="time-input"
+                />
+                <button 
+                  type="button" 
+                  class="btn-small remove" 
+                  (click)="removeRange(i, ri)" 
+                  [disabled]="!day.is_open"
+                  *ngIf="day.ranges.length > 1"
+                >
+                  <span>−</span>
+                </button>
+              </div>
+              <button 
+                type="button" 
+                class="btn-small add" 
+                (click)="addRange(i)" 
+                [disabled]="!day.is_open"
+                *ngIf="day.is_open"
+              >
+                <span>+ {{ 'ADD_TIME_RANGE' | translate }}</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 例外日期設定 -->
+      <div class="exceptions-section">
+        <h3>{{ 'SPECIAL_DATES' | translate }}</h3>
+        <div class="exceptions-list">
+          <div class="exception-row" *ngFor="let ex of businessHoursModel.exceptions; let ei = index">
+            <input 
+              type="date" 
+              [(ngModel)]="ex.date" 
+              name="bh_ex_date_{{ei}}" 
+              class="date-input"
+            />
+            
+            <label class="toggle-switch">
+              <input 
+                type="checkbox" 
+                [(ngModel)]="ex.is_open" 
+                name="bh_ex_open_{{ei}}" 
+                (change)="onExceptionToggle(ei)"
+              />
+              <span class="toggle-slider"></span>
+            </label>
+            <span class="toggle-text">
+              {{ ex.is_open ? ('OPEN' | translate) : ('CLOSED' | translate) }}
+            </span>
+
+            <div class="exception-time" *ngIf="ex.is_open && ex.ranges && ex.ranges.length > 0">
+              <input 
+                type="time" 
+                [(ngModel)]="ex.ranges[0].start" 
+                name="bh_ex_start_{{ei}}" 
+                class="time-input"
+              />
+              <span class="time-separator">~</span>
+              <input 
+                type="time" 
+                [(ngModel)]="ex.ranges[0].end" 
+                name="bh_ex_end_{{ei}}" 
+                class="time-input"
+              />
+            </div>
+
+            <input 
+              type="text" 
+              [(ngModel)]="ex.reason" 
+              name="bh_ex_reason_{{ei}}" 
+              [placeholder]="'REASON_PLACEHOLDER' | translate" 
+              class="reason-input"
+            />
+            
+            <button 
+              type="button" 
+              class="btn-small remove" 
+              (click)="removeException(ei)"
+            >
+              <span>×</span>
+            </button>
+          </div>
+        </div>
+        
+        <button 
+          type="button" 
+          class="btn-add-exception" 
+          (click)="addException()"
+        >
+          + {{ 'ADD_SPECIAL_DATE' | translate }}
+        </button>
+      </div>
+    </div>
+
+    <div class="dialog-footer">
+      <button type="button" class="btn-cancel" (click)="cancel()">
+        {{ 'CANCEL' | translate }}
+      </button>
+      <button type="button" class="btn-save" (click)="save()">
+        {{ 'SAVE' | translate }}
+      </button>
+    </div>
+  </div>
+</div>

@@ -7,13 +7,8 @@
       <!-- Customer Type -->
       <div class="form-group">
         <label for="customerType">{{ 'CUSTOMER_TYPE' | translate }} *</label>
-        <select
-          id="customerType"
-          [(ngModel)]="formData.customerType"
-          name="customerType"
-          (change)="onCustomerTypeChange()"
-          required
-        >
+        <select id="customerType" [(ngModel)]="formData.customerType" name="customerType"
+          (change)="onCustomerTypeChange()" required>
           <option value="">{{ 'SELECT_CUSTOMER_TYPE' | translate }}</option>
           <option *ngFor="let type of customerTypes" [value]="type.value">
             {{ type.label }}
@@ -24,14 +19,8 @@
       <!-- Customer Code -->
       <div class="form-group">
         <label for="customerCode">{{ 'CUSTOMER_CODE' | translate }} *</label>
-        <input
-          type="text"
-          id="customerCode"
-          [(ngModel)]="formData.customerCode"
-          name="customerCode"
-          [placeholder]="'CUSTOMER_CODE_PLACEHOLDER' | translate"
-          required
-        />
+        <input type="text" id="customerCode" [(ngModel)]="formData.customerCode" name="customerCode"
+          [placeholder]="'CUSTOMER_CODE_PLACEHOLDER' | translate" required />
       </div>
     </div>
 
@@ -39,26 +28,15 @@
       <!-- Customer Name -->
       <div class="form-group">
         <label for="customerName">{{ 'CUSTOMER_NAME' | translate }} *</label>
-        <input
-          type="text"
-          id="customerName"
-          [(ngModel)]="formData.customerName"
-          name="customerName"
-          [placeholder]="'CUSTOMER_NAME_PLACEHOLDER' | translate"
-          required
-        />
+        <input type="text" id="customerName" [(ngModel)]="formData.customerName" name="customerName"
+          [placeholder]="'CUSTOMER_NAME_PLACEHOLDER' | translate" required />
       </div>
 
       <!-- Contact Person -->
       <div class="form-group">
         <label for="contactPerson">{{ 'CONTACT_PERSON' | translate }}</label>
-        <input
-          type="text"
-          id="contactPerson"
-          [(ngModel)]="formData.contactPerson"
-          name="contactPerson"
-          [placeholder]="'CONTACT_PERSON_PLACEHOLDER' | translate"
-        />
+        <input type="text" id="contactPerson" [(ngModel)]="formData.contactPerson" name="contactPerson"
+          [placeholder]="'CONTACT_PERSON_PLACEHOLDER' | translate" />
       </div>
     </div>
 
@@ -66,25 +44,15 @@
       <!-- Phone Number -->
       <div class="form-group">
         <label for="phoneNumber">{{ 'PHONE_NUMBER' | translate }}</label>
-        <input
-          type="text"
-          id="phoneNumber"
-          [(ngModel)]="formData.phoneNumber"
-          name="phoneNumber"
-          [placeholder]="'PHONE_NUMBER_PLACEHOLDER' | translate"
-        />
+        <input type="text" id="phoneNumber" [(ngModel)]="formData.phoneNumber" name="phoneNumber"
+          [placeholder]="'PHONE_NUMBER_PLACEHOLDER' | translate" />
       </div>
 
       <!-- Fax Number -->
       <div class="form-group">
         <label for="faxNumber">{{ 'FAX_NUMBER' | translate }}</label>
-        <input
-          type="text"
-          id="faxNumber"
-          [(ngModel)]="formData.faxNumber"
-          name="faxNumber"
-          [placeholder]="'FAX_NUMBER_PLACEHOLDER' | translate"
-        />
+        <input type="text" id="faxNumber" [(ngModel)]="formData.faxNumber" name="faxNumber"
+          [placeholder]="'FAX_NUMBER_PLACEHOLDER' | translate" />
       </div>
     </div>
 
@@ -93,12 +61,7 @@
       <!-- 選取縣市 -->
       <div class="form-group">
         <label for="county">{{ 'COUNTY' | translate }}</label>
-        <select
-          id="county"
-          [(ngModel)]="formData.county"
-          name="county"
-          (change)="onCountyChange()"
-        >
+        <select id="county" [(ngModel)]="formData.county" name="county" (change)="onCountyChange()">
           <option value="">{{ 'SELECT_COUNTY' | translate }}</option>
           <option *ngFor="let county of counties" [value]="county">
             {{ county }}
@@ -109,117 +72,87 @@
       <!-- 區域 -->
       <div class="form-group">
         <label for="district">{{ 'DISTRICT' | translate }}</label>
-        <select
-          id="district"
-          [(ngModel)]="formData.district"
-          name="district"
-          (change)="onDistrictChange()"
-          [disabled]="!formData.county"
-        >
+        <select id="district" [(ngModel)]="formData.district" name="district" (change)="onDistrictChange()"
+          [disabled]="!formData.county">
           <option value="">{{ 'SELECT_DISTRICT' | translate }}</option>
           <option *ngFor="let district of districts" [value]="district">
             {{ district }}
           </option>
         </select>
       </div>
-      
+
       <!-- 郵遞區號 -->
       <div class="form-group">
         <label for="postalCode">{{ 'POSTAL_CODE' | translate }}</label>
-        <input
-          type="text"
-          id="postalCode"
-          [value]="postalCode"
-          name="postalCode"
-          readonly
-        />
+        <input type="text" id="postalCode" [value]="postalCode" name="postalCode" readonly />
       </div>
     </div>
 
     <!-- Delivery Address -->
     <div class="form-group full-width">
       <label for="deliveryAddress">{{ 'DELIVERY_ADDRESS' | translate }}</label>
-      <textarea
-        id="deliveryAddress"
-        [(ngModel)]="formData.deliveryAddress"
-        name="deliveryAddress"
-        [placeholder]="'DELIVERY_ADDRESS_PLACEHOLDER' | translate"
-        rows="3"
-        (focus)="onDeliveryAddressFocus()"
-      ></textarea>
+      <textarea id="deliveryAddress" [(ngModel)]="formData.deliveryAddress" name="deliveryAddress"
+        [placeholder]="'DELIVERY_ADDRESS_PLACEHOLDER' | translate" rows="3"
+        (focus)="onDeliveryAddressFocus()"></textarea>
     </div>
 
-    <!-- Business Hours (Structured) -->
+    <!-- Business Hours (Simplified) -->
     <div class="form-group full-width">
       <label>{{ 'BUSINESS_HOURS' | translate }}</label>
 
-      <div class="business-hours-grid">
-        <div class="day-row" *ngFor="let day of businessHoursModel.weekly; let i = index">
-          <div class="day-label">{{ dayNames[i] }}</div>
-          <div class="day-open-toggle">
-            <label>
-              <input type="checkbox" [(ngModel)]="day.is_open" name="bh_open_{{i}}" />
-              <span>{{ day.is_open ? ('OPEN' | translate) : ('CLOSED' | translate) }}</span>
-            </label>
-          </div>
-          <div class="day-ranges" [class.disabled]="!day.is_open">
-            <div class="range-row" *ngFor="let r of day.ranges; let ri = index">
-              <input type="time" [(ngModel)]="r.start" name="bh_start_{{i}}_{{ri}}" [disabled]="!day.is_open" />
-              <span>~</span>
-              <input type="time" [(ngModel)]="r.end" name="bh_end_{{i}}_{{ri}}" [disabled]="!day.is_open" />
-              <button type="button" class="btn-small" (click)="removeRange(i, ri)" [disabled]="!day.is_open">-</button>
+      <div class="business-hours-section">
+        <button type="button" class="business-hours-btn" (click)="openBusinessHoursDialog()">
+          <span class="btn-icon">🕒</span>
+          {{ 'SET_BUSINESS_HOURS' | translate }}
+        </button>
+
+        <div class="business-hours-summary" *ngIf="hasBusinessHours()">
+          <div class="summary-title">{{ 'CURRENT_BUSINESS_HOURS' | translate }}:</div>
+          <div class="summary-content">
+            <div class="weekly-summary">
+              <div class="day-summary" *ngFor="let day of businessHoursModel.weekly; let i = index"
+                [class.closed]="!day.is_open">
+                <span class="day-name">{{ dayNames[i] }}</span>
+                <span class="day-hours" *ngIf="day.is_open">
+                  <span *ngFor="let range of day.ranges; let last = last">
+                    {{ range.start }} - {{ range.end }}<span *ngIf="!last">, </span>
+                  </span>
+                </span>
+                <span class="day-hours closed-text" *ngIf="!day.is_open">
+                  {{ 'CLOSED' | translate }}
+                </span>
+              </div>
             </div>
-            <button type="button" class="btn-small" (click)="addRange(i)" [disabled]="!day.is_open">+</button>
+            <div class="exceptions-summary"
+              *ngIf="businessHoursModel.exceptions && businessHoursModel.exceptions.length > 0">
+              <div class="summary-subtitle">{{ 'SPECIAL_DATES' | translate }}:</div>
+              <div class="exception-item" *ngFor="let ex of businessHoursModel.exceptions">
+                {{ ex.date }} -
+                <span *ngIf="ex.is_open">
+                  {{ ex.ranges[0]?.start }} - {{ ex.ranges[0]?.end }}
+                </span>
+                <span *ngIf="!ex.is_open">{{ 'CLOSED' | translate }}</span>
+                <span *ngIf="ex.reason"> ({{ ex.reason }})</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
-
-      <!-- Exceptions (optional, minimal UI) -->
-      <div class="exceptions">
-        <h4>{{ 'EXCEPTIONS' | translate }}</h4>
-        <div class="exception-row" *ngFor="let ex of businessHoursModel.exceptions; let ei = index">
-          <input type="date" [(ngModel)]="ex.date" name="bh_ex_date_{{ei}}" />
-          <label>
-            <input type="checkbox" [(ngModel)]="ex.is_open" name="bh_ex_open_{{ei}}" />
-            <span>{{ ex.is_open ? ('OPEN' | translate) : ('CLOSED' | translate) }}</span>
-          </label>
-          <ng-container *ngIf="ex.is_open">
-            <input type="time" [(ngModel)]="ex.ranges[0].start" name="bh_ex_start_{{ei}}" />
-            <span>~</span>
-            <input type="time" [(ngModel)]="ex.ranges[0].end" name="bh_ex_end_{{ei}}" />
-          </ng-container>
-          <input type="text" [(ngModel)]="ex.reason" name="bh_ex_reason_{{ei}}" [placeholder]="'NOTES' | translate" />
-          <button type="button" class="btn-small" (click)="removeException(ei)">-</button>
-        </div>
-        <button type="button" class="btn-small" (click)="addException()">{{ 'ADD' | translate }}</button>
-      </div>
-
     </div>
 
     <div class="form-row">
       <!-- Sales Person ID -->
       <div class="form-group">
         <label for="salesPersonId">{{ 'SALES_PERSON_ID' | translate }}</label>
-        <input
-          type="text"
-          id="salesPersonId"
-          [(ngModel)]="formData.salesPersonId"
-          name="salesPersonId"
-          [placeholder]="'SALES_PERSON_ID_PLACEHOLDER' | translate"
-          (blur)="onSalesPersonIdBlur()"
-        />
+        <input type="text" id="salesPersonId" [(ngModel)]="formData.salesPersonId" name="salesPersonId"
+          [placeholder]="'SALES_PERSON_ID_PLACEHOLDER' | translate" (blur)="onSalesPersonIdBlur()" />
       </div>
 
       <!-- Sales Person Name -->
       <div class="form-group">
         <label for="salesPersonName">{{ 'SALES_PERSON_NAME' | translate }}</label>
-        <input
-          type="text"
-          id="salesPersonName"
-          [(ngModel)]="formData.salesPersonName"
-          name="salesPersonName"
-          [placeholder]="'SALES_PERSON_NAME_PLACEHOLDER' | translate"
-        />
+        <input type="text" id="salesPersonName" [(ngModel)]="formData.salesPersonName" name="salesPersonName"
+          [placeholder]="'SALES_PERSON_NAME_PLACEHOLDER' | translate" />
       </div>
     </div>
 
@@ -227,25 +160,15 @@
       <!-- Bank Account -->
       <div class="form-group">
         <label for="bankAccount">{{ 'BANK_ACCOUNT' | translate }}</label>
-        <input
-          type="text"
-          id="bankAccount"
-          [(ngModel)]="formData.bankAccount"
-          name="bankAccount"
-          [placeholder]="'BANK_ACCOUNT_PLACEHOLDER' | translate"
-        />
+        <input type="text" id="bankAccount" [(ngModel)]="formData.bankAccount" name="bankAccount"
+          [placeholder]="'BANK_ACCOUNT_PLACEHOLDER' | translate" />
       </div>
 
       <!-- Notes -->
       <div class="form-group">
         <label for="notes">{{ 'NOTES' | translate }}</label>
-        <input
-          type="text"
-          id="notes"
-          [(ngModel)]="formData.notes"
-          name="notes"
-          [placeholder]="'NOTES_PLACEHOLDER' | translate"
-        />
+        <input type="text" id="notes" [(ngModel)]="formData.notes" name="notes"
+          [placeholder]="'NOTES_PLACEHOLDER' | translate" />
       </div>
     </div>
 
@@ -253,26 +176,15 @@
       <!-- Invoice Title -->
       <div class="form-group">
         <label for="invoiceTitle">{{ 'INVOICE_TITLE' | translate }}</label>
-        <input
-          type="text"
-          id="invoiceTitle"
-          [(ngModel)]="formData.invoiceTitle"
-          name="invoiceTitle"
-          [placeholder]="'INVOICE_TITLE_PLACEHOLDER' | translate"
-          (focus)="onInvoiceTitleFocus()"
-        />
+        <input type="text" id="invoiceTitle" [(ngModel)]="formData.invoiceTitle" name="invoiceTitle"
+          [placeholder]="'INVOICE_TITLE_PLACEHOLDER' | translate" (focus)="onInvoiceTitleFocus()" />
       </div>
 
       <!-- Tax ID -->
       <div class="form-group">
         <label for="taxId">{{ 'TAX_ID' | translate }}</label>
-        <input
-          type="text"
-          id="taxId"
-          [(ngModel)]="formData.taxId"
-          name="taxId"
-          [placeholder]="'TAX_ID_PLACEHOLDER' | translate"
-        />
+        <input type="text" id="taxId" [(ngModel)]="formData.taxId" name="taxId"
+          [placeholder]="'TAX_ID_PLACEHOLDER' | translate" />
       </div>
     </div>
 
@@ -281,12 +193,8 @@
       <div class="form-group">
         <label for="paymentMethod">{{ 'PAYMENT_METHOD' | translate }}</label>
         <div class="payment-method-container">
-          <select
-            id="paymentMethod"
-            [(ngModel)]="formData.paymentMethod"
-            name="paymentMethod"
-            class="payment-method-select"
-          >
+          <select id="paymentMethod" [(ngModel)]="formData.paymentMethod" name="paymentMethod"
+            class="payment-method-select">
             <option value="">{{ 'SELECT_PAYMENT_METHOD' | translate }}</option>
             <option *ngFor="let method of paymentMethods" [value]="method.value">
               {{ method.label | translate }}
@@ -294,15 +202,8 @@
           </select>
           <!-- Monthly Payment Days Input -->
           <div *ngIf="formData.paymentMethod === 'MONTHLY'" class="monthly-days-input">
-            <input
-              type="number"
-              [(ngModel)]="formData.monthlyPaymentDays"
-              name="monthlyPaymentDays"
-              [placeholder]="'MONTHLY_PAYMENT_DAYS_PLACEHOLDER' | translate"
-              min="1"
-              max="365"
-              class="days-input"
-            />
+            <input type="number" [(ngModel)]="formData.monthlyPaymentDays" name="monthlyPaymentDays"
+              [placeholder]="'MONTHLY_PAYMENT_DAYS_PLACEHOLDER' | translate" min="1" max="365" class="days-input" />
             <span class="days-label">{{ 'DAYS' | translate }}</span>
           </div>
         </div>
@@ -311,11 +212,7 @@
       <!-- Payment Category -->
       <div class="form-group">
         <label for="paymentCategory">{{ 'PAYMENT_CATEGORY' | translate }}</label>
-        <select
-          id="paymentCategory"
-          [(ngModel)]="formData.paymentCategory"
-          name="paymentCategory"
-        >
+        <select id="paymentCategory" [(ngModel)]="formData.paymentCategory" name="paymentCategory">
           <option value="">{{ 'SELECT_PAYMENT_CATEGORY' | translate }}</option>
           <option *ngFor="let category of paymentCategories" [value]="category.value">
             {{ category.label | translate }}
@@ -327,15 +224,8 @@
     <!-- Credit Limit -->
     <div class="form-group">
       <label for="creditLimit">{{ 'CREDIT_LIMIT' | translate }}</label>
-      <input
-        type="number"
-        id="creditLimit"
-        [(ngModel)]="formData.creditLimit"
-        name="creditLimit"
-        [placeholder]="'CREDIT_LIMIT_PLACEHOLDER' | translate"
-        min="0"
-        step="0.01"
-      />
+      <input type="number" id="creditLimit" [(ngModel)]="formData.creditLimit" name="creditLimit"
+        [placeholder]="'CREDIT_LIMIT_PLACEHOLDER' | translate" min="0" step="0.01" />
     </div>
 
     <div class="form-actions">
@@ -347,4 +237,8 @@
       </button>
     </div>
   </form>
+
+  <!-- Business Hours Dialog -->
+  <app-business-hours-dialog [isOpen]="showBusinessHoursDialog" [businessHoursData]="businessHoursModel"
+    (onSave)="onBusinessHoursSave($event)" (onCancel)="onBusinessHoursCancel()"></app-business-hours-dialog>
 </div>

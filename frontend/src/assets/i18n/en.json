@@ -264,5 +264,21 @@
   "SALES_STAFF": "Sales Staff",
   "ADMIN_STAFF": "Admin Staff",
   "ASSISTANT": "Assistant",
-  "SALES_PERSON_ID": "Sales Person ID"
+  "SALES_PERSON_ID": "Sales Person ID",
+  "BUSINESS_HOURS_SETTINGS": "Business Hours Settings",
+  "SET_BUSINESS_HOURS": "Set Business Hours/Holidays",
+  "CURRENT_BUSINESS_HOURS": "Current Business Hours",
+  "QUICK_SETTINGS": "Quick Settings",
+  "WEEKDAYS_9_TO_6": "Weekdays 9:00-18:00",
+  "EVERYDAY_9_TO_6": "Everyday 9:00-18:00",
+  "RETAIL_HOURS": "Retail Hours 10:00-22:00",
+  "CLEAR_ALL": "Clear All",
+  "WEEKLY_HOURS": "Weekly Hours",
+  "OPEN": "Open",
+  "CLOSED": "Closed",
+  "ADD_TIME_RANGE": "Add Time Range",
+  "SPECIAL_DATES": "Special Dates",
+  "ADD_SPECIAL_DATE": "Add Special Date",
+  "REASON_PLACEHOLDER": "Enter reason",
+  "EXCEPTIONS": "Exceptions"
 }

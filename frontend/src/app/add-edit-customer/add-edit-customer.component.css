@@ -196,6 +196,121 @@ h1 {
   }
 }
 
+/* 營業時間區域樣式 */
+.business-hours-section {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.business-hours-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s;
+  width: fit-content;
+}
+
+.business-hours-btn:hover {
+  background-color: #0056b3;
+  transform: translateY(-1px);
+}
+
+.btn-icon {
+  font-size: 16px;
+}
+
+.business-hours-summary {
+  background-color: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 6px;
+  padding: 15px;
+}
+
+.summary-title {
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 10px;
+  font-size: 14px;
+}
+
+.summary-subtitle {
+  font-weight: 600;
+  color: #666;
+  margin: 15px 0 8px 0;
+  font-size: 13px;
+}
+
+.weekly-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 8px;
+}
+
+.day-summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 10px;
+  background-color: white;
+  border-radius: 4px;
+  border: 1px solid #e9ecef;
+  font-size: 13px;
+}
+
+.day-summary.closed {
+  background-color: #f8f9fa;
+  color: #666;
+}
+
+.day-name {
+  font-weight: 500;
+  min-width: 40px;
+}
+
+.day-hours {
+  font-size: 12px;
+  color: #007bff;
+}
+
+.day-hours.closed-text {
+  color: #666;
+  font-style: italic;
+}
+
+.exceptions-summary {
+  margin-top: 10px;
+}
+
+.exception-item {
+  padding: 4px 8px;
+  background-color: white;
+  border-radius: 4px;
+  border: 1px solid #e9ecef;
+  margin-bottom: 4px;
+  font-size: 12px;
+  color: #666;
+}
+
+@media (max-width: 768px) {
+  .weekly-summary {
+    grid-template-columns: 1fr;
+  }
+  
+  .business-hours-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
 @media (max-width: 480px) {
   .customer-form-page {
     padding: 10px;

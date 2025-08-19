@@ -5,6 +5,7 @@ import { Router, RouterLink } from '@angular/router';
 import { ApiService } from '../service/api.service';
 import { LoadingService } from '../service/loading.service';
 import { TranslateModule } from '@ngx-translate/core';
+import { BusinessHoursDialogComponent } from '../business-hours-dialog/business-hours-dialog.component';
 
 // 導入台灣郵遞區號數據
 import taiwanPostalCodes from '../../assets/data/taiwanPostalCodes.json';
@@ -12,7 +13,7 @@ import taiwanPostalCodes from '../../assets/data/taiwanPostalCodes.json';
 @Component({
   selector: 'app-add-edit-customer',
   standalone: true,
-  imports: [FormsModule, CommonModule, RouterLink, TranslateModule],
+  imports: [FormsModule, CommonModule, RouterLink, TranslateModule, BusinessHoursDialogComponent],
   templateUrl: './add-edit-customer.component.html',
   styleUrl: './add-edit-customer.component.css'
 })
@@ -52,6 +53,7 @@ export class AddEditCustomerComponent implements OnInit {
   postalCode: string = '';
 
   dayNames = ['週一','週二','週三','週四','週五','週六','週日'];
+  showBusinessHoursDialog = false;
 
   businessHoursModel: any = {
     weekly: [
@@ -210,32 +212,23 @@ export class AddEditCustomerComponent implements OnInit {
     });
   }
 
-  addRange(dayIndex: number): void {
-    const day = this.businessHoursModel.weekly[dayIndex];
-    if (!day.ranges) day.ranges = [];
-    day.ranges.push({ start: '09:00', end: '18:00' });
+  // 營業時間對話框相關方法
+  openBusinessHoursDialog(): void {
+    this.showBusinessHoursDialog = true;
   }
 
-  removeRange(dayIndex: number, rangeIndex: number): void {
-    const day = this.businessHoursModel.weekly[dayIndex];
-    if (day && day.ranges) {
-      day.ranges.splice(rangeIndex, 1);
-    }
+  onBusinessHoursSave(businessHoursData: any): void {
+    this.businessHoursModel = businessHoursData;
+    this.showBusinessHoursDialog = false;
   }
 
-  addException(): void {
-    if (!this.businessHoursModel.exceptions) this.businessHoursModel.exceptions = [];
-    this.businessHoursModel.exceptions.push({
-      date: '',
-      is_open: false,
-      ranges: [],
-      reason: ''
-    });
+  onBusinessHoursCancel(): void {
+    this.showBusinessHoursDialog = false;
   }
 
-  removeException(index: number): void {
-    if (!this.businessHoursModel.exceptions) return;
-    this.businessHoursModel.exceptions.splice(index, 1);
+  hasBusinessHours(): boolean {
+    return this.businessHoursModel.weekly.some((day: any) => day.is_open) || 
+           (this.businessHoursModel.exceptions && this.businessHoursModel.exceptions.length > 0);
   }
 
   private buildBusinessHoursPayload() {
@@ -309,9 +302,8 @@ export class AddEditCustomerComponent implements OnInit {
       this.loadingService.showUpdating();
       this.apiService.updateCustomer(this.customerId!, customerData).subscribe({
         next: (res: any) => {
-          this.showMessage("Customer updated successfully");
-          this.loadingService.hideLoading();
-          this.router.navigate(['/customer'])
+          // 更新客戶成功後，保存營業時間
+          this.saveBusinessHoursAndNavigate(this.customerId!);
         },
         error: (error) => {
           this.showMessage(error?.error?.message || error?.message || "Unable to edit customer" + error)
@@ -322,19 +314,8 @@ export class AddEditCustomerComponent implements OnInit {
       this.loadingService.showSaving();
       this.apiService.addCustomer(customerData).subscribe({
         next: (res: any) => {
-          this.showMessage("Customer added successfully");
-          this.loadingService.hideLoading();
-          // 刷新客戶列表
-          this.apiService.fetchAndBroadcastCustomers().subscribe({
-            next: () => {
-              console.log('Customers list refreshed after adding new customer');
-              this.router.navigate(['/customer']);
-            },
-            error: (error) => {
-              console.error('Error refreshing customers list:', error);
-              this.router.navigate(['/customer']);
-            }
-          });
+          // 新增客戶成功後，保存營業時間
+          this.saveBusinessHoursAndNavigate(res.id);
         },
         error: (error) => {
           this.showMessage(error?.error?.message || error?.message || "Unable to add customer" + error)

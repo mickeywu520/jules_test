@@ -3,7 +3,10 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func # For default DateTime values
 import enum
 
-from .database import Base # Import Base from database.py
+try:
+    from .database import Base # Import Base from database.py (when used as module)
+except ImportError:
+    from database import Base # Import Base from database.py (when run directly)
 
 # Define Enum types if needed by the schema (e.g., for TransactionType, TransactionStatus, UserRole)
 class UserRole(str, enum.Enum):

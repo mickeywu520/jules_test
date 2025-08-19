@@ -199,6 +199,7 @@ class Customer(CustomerBase): # For Read operations
     createdDate: datetime
     updatedAt: Optional[datetime] = None
     customer_type_obj: Optional[CustomerType] = None  # 包含客戶類型詳細資訊
+    modified_fields: Optional[List[str]] = []  # 修改過的欄位列表
 
     class Config:
         from_attributes = True

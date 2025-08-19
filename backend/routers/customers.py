@@ -69,6 +69,10 @@ def read_customers(skip: int = 0, limit: int = 100, db: Session = Depends(databa
         
         # 將修改過的欄位資訊附加到客戶物件
         customer.modified_fields = list(modified_fields)
+        
+        # 調試日誌
+        if modified_fields:
+            print(f"Customer {customer.id} has modified fields: {list(modified_fields)}")
     
     return customers
 

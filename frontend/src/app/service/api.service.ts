@@ -400,6 +400,20 @@ export class ApiService {
     });
   }
 
+  // 獲取客戶審計日誌
+  getCustomerAuditLogs(customerId: string): Observable<any> {
+    return this.http.get(`${ApiService.BASE_URL}/customers/${customerId}/audit-logs`, {
+      headers: this.getHeader(),
+    });
+  }
+
+  // 獲取特定欄位的修改歷史
+  getFieldHistory(customerId: string, fieldName: string): Observable<any> {
+    return this.http.get(`${ApiService.BASE_URL}/customers/${customerId}/field-history/${fieldName}`, {
+      headers: this.getHeader(),
+    });
+  }
+
   /** CUSTOMER TYPE API */
   addCustomerType(body: any): Observable<any> {
     return this.http.post(`${ApiService.BASE_URL}/customer-types/`, body, {

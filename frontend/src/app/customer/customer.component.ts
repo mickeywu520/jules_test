@@ -310,6 +310,189 @@ export class CustomerComponent implements OnInit {
     return '-';
   }
 
+  // 修改追蹤相關方法
+  isRecentlyModified(customer: any): boolean {
+    if (!customer.updatedAt) return false;
+    
+    const updatedDate = new Date(customer.updatedAt);
+    const createdDate = new Date(customer.createdDate);
+    const now = new Date();
+    
+    // 如果更新時間比建立時間晚，且在最近7天內修改過，則顯示指示器
+    const daysDiff = (now.getTime() - updatedDate.getTime()) / (1000 * 3600 * 24);
+    const isModified = updatedDate.getTime() > createdDate.getTime();
+    
+    return isModified && daysDiff <= 7;
+  }
+
+  // 檢查特定欄位是否被修改過
+  isFieldModified(customer: any, fieldName: string): boolean {
+    // 檢查客戶是否有 modified_fields 屬性，且該欄位在修改列表中
+    return customer.modified_fields && customer.modified_fields.includes(fieldName);
+  }
+
+  getModificationTooltip(customer: any): string {
+    if (!customer.updatedAt) return '';
+    
+    const updatedDate = new Date(customer.updatedAt);
+    const formattedDate = updatedDate.toLocaleString('zh-TW', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+    
+    return `最後修改時間：${formattedDate}`;
+  }
+
+  // 獲取欄位的修改歷史並顯示在 tooltip 中
+  getFieldModificationTooltip(customer: any, fieldKey: string): string {
+    // 這個方法會被 HTML 中的 tooltip 調用
+    // 我們需要異步獲取數據，所以先返回基本信息
+    if (!this.isRecentlyModified(customer)) {
+      return '';
+    }
+    
+    // 觸發異步獲取詳細歷史
+    this.loadFieldHistory(customer.id, fieldKey);
+    
+    // 先返回基本的修改時間信息
+    return this.getModificationTooltip(customer);
+  }
+
+  // 異步載入欄位修改歷史
+  private fieldHistoryCache: { [key: string]: any } = {};
+  
+  // 當前顯示的修改歷史資訊
+  currentFieldHistory: any = null;
+  showFieldHistory: boolean = false;
+  
+  // 滑鼠位置追蹤
+  mousePosition = { x: 0, y: 0 };
+  
+  loadFieldHistory(customerId: number, fieldName: string): void {
+    const cacheKey = `${customerId}_${fieldName}`;
+    
+    // 如果已經有緩存，直接顯示
+    if (this.fieldHistoryCache[cacheKey]) {
+      this.displayFieldHistory(this.fieldHistoryCache[cacheKey], fieldName);
+      return;
+    }
+    
+    this.apiService.getFieldHistory(customerId.toString(), fieldName).subscribe({
+      next: (response: any) => {
+        this.fieldHistoryCache[cacheKey] = response;
+        this.displayFieldHistory(response, fieldName);
+      },
+      error: (error) => {
+        console.warn('Failed to load field history:', error);
+        this.hideFieldHistory();
+      }
+    });
+  }
+
+  // 顯示欄位修改歷史
+  displayFieldHistory(history: any, fieldName: string): void {
+    if (history && history.has_history) {
+      this.currentFieldHistory = {
+        fieldName: fieldName,
+        oldValue: history.old_value,
+        newValue: history.new_value,
+        changedAt: new Date(history.changed_at).toLocaleString('zh-TW', {
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit',
+          hour: '2-digit',
+          minute: '2-digit'
+        })
+      };
+      this.showFieldHistory = true;
+    } else {
+      this.hideFieldHistory();
+    }
+  }
+
+  // 隱藏欄位修改歷史
+  hideFieldHistory(): void {
+    this.showFieldHistory = false;
+    this.currentFieldHistory = null;
+  }
+
+  // 滑鼠懸停事件處理
+  onFieldHover(customer: any, fieldKey: string, event: MouseEvent): void {
+    // 現在只有真正修改過的欄位才會觸發
+    this.updateMousePosition(event);
+    this.loadFieldHistory(customer.id, fieldKey);
+  }
+
+  // 滑鼠移動事件處理
+  onFieldMouseMove(event: MouseEvent): void {
+    if (this.showFieldHistory) {
+      this.updateMousePosition(event);
+    }
+  }
+
+  // 更新滑鼠位置
+  updateMousePosition(event: MouseEvent): void {
+    const offset = 15; // 偏移量，避免遮擋滑鼠
+    let x = event.clientX + offset;
+    let y = event.clientY + offset;
+    
+    // 邊界檢測
+    const windowWidth = window.innerWidth;
+    const windowHeight = window.innerHeight;
+    const popupWidth = 400; // 預估浮動框寬度
+    const popupHeight = 120; // 預估浮動框高度
+    
+    // 右邊界檢測
+    if (x + popupWidth > windowWidth) {
+      x = event.clientX - popupWidth - offset;
+    }
+    
+    // 下邊界檢測
+    if (y + popupHeight > windowHeight) {
+      y = event.clientY - popupHeight - offset;
+    }
+    
+    // 確保不會超出左上邊界
+    x = Math.max(10, x);
+    y = Math.max(10, y);
+    
+    this.mousePosition = { x, y };
+  }
+
+  // 滑鼠離開事件處理
+  private hideTimeout: any;
+  
+  onFieldLeave(): void {
+    // 延遲隱藏，避免滑鼠快速移動時閃爍
+    this.hideTimeout = setTimeout(() => {
+      this.hideFieldHistory();
+    }, 200);
+  }
+
+  // 獲取欄位的詳細修改信息
+  getFieldHistoryTooltip(customer: any, fieldKey: string): string {
+    const cacheKey = `${customer.id}_${fieldKey}`;
+    const history = this.fieldHistoryCache[cacheKey];
+    
+    if (!history || !history.has_history) {
+      return this.getModificationTooltip(customer);
+    }
+    
+    const changedDate = new Date(history.changed_at);
+    const formattedDate = changedDate.toLocaleString('zh-TW', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+    
+    return `修改前：${history.old_value || '(空值)'}\n修改後：${history.new_value || '(空值)'}\n修改時間：${formattedDate}`;
+  }
+
   showMessage(message: string) {
     this.message = message;
     setTimeout(() => {

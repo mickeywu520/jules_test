@@ -469,6 +469,157 @@
   margin: 0;
 }
 
+/* 修改指示器樣式 */
+.table-cell {
+  position: relative;
+}
+
+.cell-content {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+}
+
+.cell-value {
+  display: inline-block;
+  width: 100%;
+}
+
+.modification-indicator {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  z-index: 10;
+}
+
+.indicator-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  background-color: #ff4444;
+  border-radius: 50%;
+  border: 1px solid white;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 0.7;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* 修改歷史浮動顯示區域樣式 - 跟隨滑鼠 */
+.field-history-popup {
+  position: fixed;
+  z-index: 1000;
+  pointer-events: none; /* 讓滑鼠事件穿透，避免干擾 */
+}
+
+.history-card {
+  background-color: #ffffff;
+  border: 2px solid #007bff;
+  border-radius: 8px;
+  padding: 12px;
+  box-shadow: 0 4px 16px rgba(0, 123, 255, 0.3);
+  width: auto;
+  min-width: 280px;
+  max-width: 400px;
+}
+
+.history-details {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.history-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.history-row .label {
+  font-weight: 600;
+  color: #495057;
+  min-width: 60px;
+  font-size: 12px;
+  flex-shrink: 0;
+}
+
+.history-row .value {
+  color: #212529;
+  font-size: 12px;
+  padding: 3px 6px;
+  border-radius: 3px;
+  background-color: #f8f9fa;
+  border: 1px solid #dee2e6;
+  flex: 1;
+  word-break: break-all;
+}
+
+.history-row .old-value {
+  background-color: #fff5f5;
+  border-color: #fed7d7;
+  color: #c53030;
+}
+
+.history-row .new-value {
+  background-color: #f0fff4;
+  border-color: #9ae6b4;
+  color: #2f855a;
+}
+
+/* 修改過的欄位樣式 - 保持原本底色 */
+.modified-field {
+  position: relative;
+  cursor: help;
+  transition: all 0.2s ease;
+}
+
+.modified-field:hover {
+  /* 滑鼠懸停時也不改變背景色 */
+}
+
+/* 修改過的欄位右上角小標記 */
+.modified-field::after {
+  content: '●';
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  color: #ff6b35;
+  font-size: 8px;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(1.1);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.modified-field:hover::after {
+  animation-play-state: paused;
+}
+
 /* Responsive Styles */
 @media (max-width: 768px) {
   .customer-header {

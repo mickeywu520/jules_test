@@ -427,5 +427,10 @@
   "ADD_SPECIAL_DATE": "新增特殊日期",
   "REASON_PLACEHOLDER": "請輸入原因",
   "EXCEPTIONS": "例外日期",
-  "CURRENT_TIMES": "目前時間"
+  "CURRENT_TIMES": "目前時間",
+  "FIELD_MODIFICATION_HISTORY": "欄位修改歷史",
+  "FIELD_NAME": "欄位名稱",
+  "BEFORE_CHANGE": "修改前",
+  "AFTER_CHANGE": "修改後",
+  "CHANGE_TIME": "修改時間"
 }

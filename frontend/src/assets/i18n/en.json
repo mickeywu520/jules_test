@@ -281,5 +281,10 @@
   "ADD_SPECIAL_DATE": "Add Special Date",
   "REASON_PLACEHOLDER": "Enter reason",
   "EXCEPTIONS": "Exceptions",
-  "CURRENT_TIMES": "Current Times"
+  "CURRENT_TIMES": "Current Times",
+  "FIELD_MODIFICATION_HISTORY": "Field Modification History",
+  "FIELD_NAME": "Field Name",
+  "BEFORE_CHANGE": "Before Change",
+  "AFTER_CHANGE": "After Change",
+  "CHANGE_TIME": "Change Time"
 }

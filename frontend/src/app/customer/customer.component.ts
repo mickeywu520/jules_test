@@ -332,19 +332,23 @@ export class CustomerComponent implements OnInit {
       console.log(`Customer ${customer.id} modified_fields:`, customer.modified_fields);
     }
     
-    // 檢查客戶是否有 modified_fields 屬性，且該欄位在修改列表中
+    // 只有當客戶有 modified_fields 且該欄位在列表中時才返回 true
     if (customer.modified_fields && customer.modified_fields.includes(fieldName)) {
       console.log(`Field ${fieldName} is modified for customer ${customer.id}`);
       return true;
     }
     
-    // 回退機制：如果沒有 modified_fields，使用原來的邏輯
-    // 這樣至少小紅點會顯示出來
-    const fallback = this.isRecentlyModified(customer);
-    if (fallback) {
-      console.log(`Using fallback for customer ${customer.id}, field ${fieldName}`);
-    }
-    return fallback;
+    // 不使用回退機制，只有真正修改過的欄位才顯示小紅點
+    return false;
+  }
+
+  // 檢查是否應該顯示氣泡（只有當前懸停的欄位才顯示）
+  shouldShowHistoryPopup(customer: any, fieldName: string): boolean {
+    return this.showFieldHistory && 
+           this.currentFieldHistory && 
+           this.currentHoveredCustomer && 
+           this.currentHoveredCustomer.id === customer.id && 
+           this.currentHoveredField === fieldName;
   }
 
   getModificationTooltip(customer: any): string {
@@ -384,6 +388,10 @@ export class CustomerComponent implements OnInit {
   currentFieldHistory: any = null;
   showFieldHistory: boolean = false;
   
+  // 當前懸停的客戶和欄位
+  currentHoveredCustomer: any = null;
+  currentHoveredField: string = '';
+  
   // 滑鼠位置追蹤
   mousePosition = { x: 0, y: 0 };
   
@@ -412,7 +420,7 @@ export class CustomerComponent implements OnInit {
   displayFieldHistory(history: any, fieldName: string): void {
     if (history && history.has_history) {
       this.currentFieldHistory = {
-        fieldName: fieldName,
+        fieldName: fieldName, // 記錄欄位名稱，用於 HTML 中的條件判斷
         oldValue: history.old_value,
         newValue: history.new_value,
         changedAt: new Date(history.changed_at).toLocaleString('zh-TW', {
@@ -433,49 +441,17 @@ export class CustomerComponent implements OnInit {
   hideFieldHistory(): void {
     this.showFieldHistory = false;
     this.currentFieldHistory = null;
+    this.currentHoveredCustomer = null;
+    this.currentHoveredField = '';
   }
 
   // 滑鼠懸停事件處理
   onFieldHover(customer: any, fieldKey: string, event: MouseEvent): void {
+    // 記錄當前懸停的客戶和欄位
+    this.currentHoveredCustomer = customer;
+    this.currentHoveredField = fieldKey;
     // 現在只有真正修改過的欄位才會觸發
-    this.updateMousePosition(event);
     this.loadFieldHistory(customer.id, fieldKey);
-  }
-
-  // 滑鼠移動事件處理
-  onFieldMouseMove(event: MouseEvent): void {
-    if (this.showFieldHistory) {
-      this.updateMousePosition(event);
-    }
-  }
-
-  // 更新滑鼠位置
-  updateMousePosition(event: MouseEvent): void {
-    const offset = 15; // 偏移量，避免遮擋滑鼠
-    let x = event.clientX + offset;
-    let y = event.clientY + offset;
-    
-    // 邊界檢測
-    const windowWidth = window.innerWidth;
-    const windowHeight = window.innerHeight;
-    const popupWidth = 400; // 預估浮動框寬度
-    const popupHeight = 120; // 預估浮動框高度
-    
-    // 右邊界檢測
-    if (x + popupWidth > windowWidth) {
-      x = event.clientX - popupWidth - offset;
-    }
-    
-    // 下邊界檢測
-    if (y + popupHeight > windowHeight) {
-      y = event.clientY - popupHeight - offset;
-    }
-    
-    // 確保不會超出左上邊界
-    x = Math.max(10, x);
-    y = Math.max(10, y);
-    
-    this.mousePosition = { x, y };
   }
 
   // 滑鼠離開事件處理

@@ -245,10 +245,32 @@
                 class="cell-value"
                 [class.modified-field]="isFieldModified(customer, column.key)"
                 (mouseenter)="isFieldModified(customer, column.key) ? onFieldHover(customer, column.key, $event) : null"
-                (mousemove)="showFieldHistory ? onFieldMouseMove($event) : null"
                 (mouseleave)="onFieldLeave()"
               >
                 {{ getCustomerValue(customer, column.key) }}
+                
+                <!-- 修改歷史浮動顯示 - 只有當前懸停的欄位才顯示 -->
+                <div 
+                  class="field-history-popup" 
+                  *ngIf="shouldShowHistoryPopup(customer, column.key)"
+                >
+                  <div class="history-card">
+                    <div class="history-details">
+                      <div class="history-row">
+                        <span class="label">{{ 'BEFORE_CHANGE' | translate }}:</span>
+                        <span class="value old-value">{{ currentFieldHistory.oldValue || '(空值)' }}</span>
+                      </div>
+                      <div class="history-row">
+                        <span class="label">{{ 'AFTER_CHANGE' | translate }}:</span>
+                        <span class="value new-value">{{ currentFieldHistory.newValue || '(空值)' }}</span>
+                      </div>
+                      <div class="history-row">
+                        <span class="label">{{ 'CHANGE_TIME' | translate }}:</span>
+                        <span class="value">{{ currentFieldHistory.changedAt }}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </span>
             </div>
             <span *ngIf="column.key === 'actions'" class="actions">
@@ -265,30 +287,7 @@
     </table>
   </div>
 
-  <!-- 修改歷史浮動顯示區域 - 跟隨滑鼠 -->
-  <div 
-    class="field-history-popup" 
-    *ngIf="showFieldHistory && currentFieldHistory"
-    [style.left.px]="mousePosition.x"
-    [style.top.px]="mousePosition.y"
-  >
-    <div class="history-card">
-      <div class="history-details">
-        <div class="history-row">
-          <span class="label">{{ 'BEFORE_CHANGE' | translate }}:</span>
-          <span class="value old-value">{{ currentFieldHistory.oldValue || '(空值)' }}</span>
-        </div>
-        <div class="history-row">
-          <span class="label">{{ 'AFTER_CHANGE' | translate }}:</span>
-          <span class="value new-value">{{ currentFieldHistory.newValue || '(空值)' }}</span>
-        </div>
-        <div class="history-row">
-          <span class="label">{{ 'CHANGE_TIME' | translate }}:</span>
-          <span class="value">{{ currentFieldHistory.changedAt }}</span>
-        </div>
-      </div>
-    </div>
-  </div>
+
 
   <!-- NO CUSTOMERS MESSAGE -->
   <div *ngIf="filteredCustomers.length === 0 && !showBatchUpdateSection" class="no-customers">

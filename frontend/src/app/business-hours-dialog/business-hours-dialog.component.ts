@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, OnInit, OnChanges } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { TranslateModule } from '@ngx-translate/core';
 
@@ -10,7 +10,7 @@ import { TranslateModule } from '@ngx-translate/core';
   templateUrl: './business-hours-dialog.component.html',
   styleUrl: './business-hours-dialog.component.css'
 })
-export class BusinessHoursDialogComponent {
+export class BusinessHoursDialogComponent implements OnInit, OnChanges {
   @Input() isOpen: boolean = false;
   @Input() businessHoursData: any = null;
   @Output() onSave = new EventEmitter<any>();
@@ -32,6 +32,18 @@ export class BusinessHoursDialogComponent {
   };
 
   ngOnInit() {
+    // 每次打開對話框時重新初始化數據
+    this.initializeBusinessHours();
+  }
+
+  ngOnChanges() {
+    // 當輸入數據變化時重新初始化
+    if (this.isOpen) {
+      this.initializeBusinessHours();
+    }
+  }
+
+  private initializeBusinessHours() {
     if (this.businessHoursData) {
       this.businessHoursModel = JSON.parse(JSON.stringify(this.businessHoursData));
     }

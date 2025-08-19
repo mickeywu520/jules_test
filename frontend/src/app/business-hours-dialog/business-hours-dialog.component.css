@@ -214,6 +214,27 @@ input:checked + .toggle-slider:before {
   opacity: 0.5;
 }
 
+/* 時間摘要顯示 */
+.time-summary {
+  background-color: #e3f2fd;
+  border: 1px solid #bbdefb;
+  border-radius: 4px;
+  padding: 6px 10px;
+  margin-bottom: 8px;
+  font-size: 12px;
+}
+
+.summary-label {
+  font-weight: 600;
+  color: #1976d2;
+  margin-right: 8px;
+}
+
+.time-display {
+  color: #1976d2;
+  font-weight: 500;
+}
+
 .range-row {
   display: flex;
   align-items: center;

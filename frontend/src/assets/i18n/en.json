@@ -280,5 +280,6 @@
   "SPECIAL_DATES": "Special Dates",
   "ADD_SPECIAL_DATE": "Add Special Date",
   "REASON_PLACEHOLDER": "Enter reason",
-  "EXCEPTIONS": "Exceptions"
+  "EXCEPTIONS": "Exceptions",
+  "CURRENT_TIMES": "Current Times"
 }

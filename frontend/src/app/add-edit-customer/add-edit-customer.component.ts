@@ -214,6 +214,10 @@ export class AddEditCustomerComponent implements OnInit {
 
   // 營業時間對話框相關方法
   openBusinessHoursDialog(): void {
+    // 如果是編輯模式，先載入最新的營業時間數據
+    if (this.isEditing && this.customerId) {
+      this.loadBusinessHours();
+    }
     this.showBusinessHoursDialog = true;
   }
 

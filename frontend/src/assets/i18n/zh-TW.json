@@ -426,5 +426,6 @@
   "SPECIAL_DATES": "特殊日期",
   "ADD_SPECIAL_DATE": "新增特殊日期",
   "REASON_PLACEHOLDER": "請輸入原因",
-  "EXCEPTIONS": "例外日期"
+  "EXCEPTIONS": "例外日期",
+  "CURRENT_TIMES": "目前時間"
 }

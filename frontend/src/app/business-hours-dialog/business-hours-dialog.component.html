@@ -48,6 +48,14 @@
             </div>
 
             <div class="day-ranges" [class.disabled]="!day.is_open">
+              <!-- 時間摘要顯示 -->
+              <div class="time-summary" *ngIf="day.is_open && day.ranges && day.ranges.length > 0">
+                <span class="summary-label">{{ 'CURRENT_TIMES' | translate }}:</span>
+                <span class="time-display" *ngFor="let r of day.ranges; let last = last">
+                  {{ r.start || '--:--' }} - {{ r.end || '--:--' }}<span *ngIf="!last">, </span>
+                </span>
+              </div>
+              
               <div class="range-row" *ngFor="let r of day.ranges; let ri = index">
                 <input 
                   type="time" 
@@ -55,6 +63,7 @@
                   name="bh_start_{{i}}_{{ri}}" 
                   [disabled]="!day.is_open" 
                   class="time-input"
+                  placeholder="開始時間"
                 />
                 <span class="time-separator">~</span>
                 <input 
@@ -63,6 +72,7 @@
                   name="bh_end_{{i}}_{{ri}}" 
                   [disabled]="!day.is_open" 
                   class="time-input"
+                  placeholder="結束時間"
                 />
                 <button 
                   type="button" 

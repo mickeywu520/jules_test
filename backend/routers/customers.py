@@ -50,6 +50,26 @@ def create_customer(customer: schemas.CustomerCreate, db: Session = Depends(data
 @router.get("/all", response_model=List[schemas.Customer])
 def read_customers(skip: int = 0, limit: int = 100, db: Session = Depends(database.get_db)):
     customers = db.query(models.Customer).offset(skip).limit(limit).all()
+    
+    # 為每個客戶添加欄位修改資訊
+    for customer in customers:
+        # 獲取最近30天的審計日誌
+        from datetime import datetime, timedelta
+        thirty_days_ago = datetime.now() - timedelta(days=30)
+        
+        audit_logs = db.query(models.CustomerAuditLog).filter(
+            models.CustomerAuditLog.customer_id == customer.id,
+            models.CustomerAuditLog.changed_at >= thirty_days_ago
+        ).all()
+        
+        # 建立欄位修改映射
+        modified_fields = set()
+        for log in audit_logs:
+            modified_fields.add(log.field_name)
+        
+        # 將修改過的欄位資訊附加到客戶物件
+        customer.modified_fields = list(modified_fields)
+    
     return customers
 
 @router.get("/{id}", response_model=schemas.Customer)
@@ -67,7 +87,12 @@ def read_customer_by_code(customer_code: str, db: Session = Depends(database.get
     return db_customer
 
 @router.put("/update/{id}", response_model=schemas.Customer)
-def update_customer(id: int, customer_update: schemas.CustomerUpdate, db: Session = Depends(database.get_db)):
+def update_customer(
+    id: int, 
+    customer_update: schemas.CustomerUpdate, 
+    db: Session = Depends(database.get_db),
+    current_user: models.User = Depends(security.get_current_active_user)
+):
     db_customer = db.query(models.Customer).filter(models.Customer.id == id).first()
     if db_customer is None:
         raise HTTPException(status_code=404, detail="Customer not found")
@@ -84,8 +109,24 @@ def update_customer(id: int, customer_update: schemas.CustomerUpdate, db: Sessio
         if db_customer_type is None:
             raise HTTPException(status_code=400, detail="Customer type not found")
 
-    # Update fields if provided
+    # 記錄審計日誌 - 在更新前記錄舊值
     update_data = customer_update.model_dump(exclude_unset=True)
+    for field, new_value in update_data.items():
+        old_value = getattr(db_customer, field, None)
+        
+        # 只有當值真的改變時才記錄
+        if str(old_value) != str(new_value):
+            audit_log = models.CustomerAuditLog(
+                customer_id=id,
+                field_name=field,
+                old_value=str(old_value) if old_value is not None else None,
+                new_value=str(new_value) if new_value is not None else None,
+                changed_by=current_user.id,
+                action_type="UPDATE"
+            )
+            db.add(audit_log)
+
+    # Update fields if provided
     for field, value in update_data.items():
         setattr(db_customer, field, value)
 
@@ -378,3 +419,57 @@ def get_next_customer_code(customer_type_id: int, db: Session = Depends(database
     print(f"Next code: {next_code}")
     
     return {"next_code": next_code}
+
+# 獲取客戶審計日誌
+@router.get("/{customer_id}/audit-logs")
+def get_customer_audit_logs(customer_id: int, db: Session = Depends(database.get_db)):
+    """獲取客戶的修改歷史記錄"""
+    customer = db.query(models.Customer).filter(models.Customer.id == customer_id).first()
+    if not customer:
+        raise HTTPException(status_code=404, detail="Customer not found")
+    
+    # 獲取最近的審計日誌（最近30天）
+    from datetime import datetime, timedelta
+    thirty_days_ago = datetime.now() - timedelta(days=30)
+    
+    audit_logs = db.query(models.CustomerAuditLog).filter(
+        models.CustomerAuditLog.customer_id == customer_id,
+        models.CustomerAuditLog.changed_at >= thirty_days_ago
+    ).order_by(models.CustomerAuditLog.changed_at.desc()).all()
+    
+    # 格式化返回數據
+    formatted_logs = []
+    for log in audit_logs:
+        formatted_logs.append({
+            "id": log.id,
+            "field_name": log.field_name,
+            "old_value": log.old_value,
+            "new_value": log.new_value,
+            "changed_at": log.changed_at.isoformat(),
+            "changed_by": log.changed_by,
+            "action_type": log.action_type
+        })
+    
+    return {"audit_logs": formatted_logs}
+
+# 獲取特定欄位的最後修改記錄
+@router.get("/{customer_id}/field-history/{field_name}")
+def get_field_history(customer_id: int, field_name: str, db: Session = Depends(database.get_db)):
+    """獲取特定欄位的最後修改記錄"""
+    # 獲取該欄位的最新修改記錄
+    latest_change = db.query(models.CustomerAuditLog).filter(
+        models.CustomerAuditLog.customer_id == customer_id,
+        models.CustomerAuditLog.field_name == field_name
+    ).order_by(models.CustomerAuditLog.changed_at.desc()).first()
+    
+    if not latest_change:
+        return {"has_history": False}
+    
+    return {
+        "has_history": True,
+        "field_name": latest_change.field_name,
+        "old_value": latest_change.old_value,
+        "new_value": latest_change.new_value,
+        "changed_at": latest_change.changed_at.isoformat(),
+        "changed_by": latest_change.changed_by
+    }

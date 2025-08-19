@@ -155,6 +155,25 @@ class Customer(Base):
     # 新增營業時間關聯（正規化）
     business_hours = relationship("CustomerBusinessHour", back_populates="customer", cascade="all, delete-orphan")
     business_hour_exceptions = relationship("CustomerBusinessHourException", back_populates="customer", cascade="all, delete-orphan")
+    
+    # 審計日誌關聯
+    audit_logs = relationship("CustomerAuditLog", back_populates="customer", cascade="all, delete-orphan")
+
+# 客戶審計日誌模型
+class CustomerAuditLog(Base):
+    __tablename__ = "customer_audit_log"
+    id = Column(Integer, primary_key=True, index=True)
+    customer_id = Column(Integer, ForeignKey("customers.id"), nullable=False)
+    field_name = Column(String(100), nullable=False)  # 修改的欄位名稱
+    old_value = Column(Text, nullable=True)  # 修改前的值
+    new_value = Column(Text, nullable=True)  # 修改後的值
+    changed_by = Column(Integer, ForeignKey("users.id"), nullable=True)  # 修改者
+    changed_at = Column(DateTime(timezone=True), server_default=func.now())  # 修改時間
+    action_type = Column(String(20), default="UPDATE")  # 操作類型
+
+    # 關聯
+    customer = relationship("Customer", back_populates="audit_logs")
+    changed_by_user = relationship("User", foreign_keys=[changed_by])
 
 # Product Model - 根據客戶 Excel 欄位重新設計
 class Product(Base):

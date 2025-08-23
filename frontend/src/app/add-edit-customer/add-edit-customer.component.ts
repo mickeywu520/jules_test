@@ -87,7 +87,7 @@ export class AddEditCustomerComponent implements OnInit {
     businessHours: '',
     paymentMethod: '',
     paymentCategory: '',
-    creditLimit: 0,
+    creditLimit: 50000,
     monthlyPaymentDays: 30  // 用於前端顯示，不會直接傳送到後端
   };
 

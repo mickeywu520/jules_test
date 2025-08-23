@@ -8,25 +8,68 @@
 
             <div class="profile-item">
                 <label for="">{{ 'NAME' | translate }}</label>
-                <span>{{user.name}}</span>
+                <span *ngIf="!isEditingProfile">{{user.name}}</span>
+                <input *ngIf="isEditingProfile" 
+                       type="text" 
+                       [(ngModel)]="editingProfileData.name" 
+                       class="profile-edit-input"
+                       placeholder="請輸入姓名">
             </div>
 
             <div class="profile-item">
                 <label for="">{{ 'EMAIL' | translate }}</label>
-                <span>{{user.email}}</span>
+                <span *ngIf="!isEditingProfile">{{user.email}}</span>
+                <input *ngIf="isEditingProfile" 
+                       type="email" 
+                       [(ngModel)]="editingProfileData.email" 
+                       class="profile-edit-input"
+                       placeholder="請輸入郵箱">
             </div>
-
 
             <div class="profile-item">
                 <label for="">{{ 'PHONE_NUMBER' | translate }}</label>
-                <span>{{user.phoneNumber}}</span>
+                <span *ngIf="!isEditingProfile">{{user.phoneNumber}}</span>
+                <input *ngIf="isEditingProfile" 
+                       type="text" 
+                       [(ngModel)]="editingProfileData.phoneNumber" 
+                       class="profile-edit-input"
+                       placeholder="請輸入電話號碼">
             </div>
 
             <div class="profile-item">
                 <label for="">{{ 'ROLE' | translate }}</label>
-                <span>{{user.role}}</span>
+                <span class="role-badge" 
+                      [class.admin-role]="user.role === 'ADMIN'" 
+                      [class.user-role]="user.role === 'USER'"
+                      [class.mis-role]="user.role === 'MIS'"
+                      [class.sales-manager-role]="user.role === 'SALES_MANAGER'"
+                      [class.admin-manager-role]="user.role === 'ADMIN_MANAGER'"
+                      [class.sales-staff-role]="user.role === 'SALES_STAFF'"
+                      [class.admin-staff-role]="user.role === 'ADMIN_STAFF'"
+                      [class.assistant-role]="user.role === 'ASSISTANT'">
+                    {{user.role | translate}}
+                </span>
             </div>
 
+        </div>
+
+        <!-- 個人資料編輯按鈕 -->
+        <div class="profile-actions">
+            <button *ngIf="!isEditingProfile && !isAdmin" 
+                    (click)="startEditProfile()" 
+                    class="btn-edit-profile">
+                {{ 'EDIT_PROFILE' | translate }}
+            </button>
+            <button *ngIf="isEditingProfile" 
+                    (click)="saveProfile()" 
+                    class="btn-save-profile">
+                {{ 'SAVE' | translate }}
+            </button>
+            <button *ngIf="isEditingProfile" 
+                    (click)="cancelEditProfile()" 
+                    class="btn-cancel-profile">
+                {{ 'CANCEL' | translate }}
+            </button>
         </div>
     </div>
 

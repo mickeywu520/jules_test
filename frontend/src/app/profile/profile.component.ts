@@ -23,6 +23,10 @@ export class ProfileComponent implements OnInit {
   isAdmin: boolean = false;
   editingUserId: number | null = null;
   editingUser: any = {};
+  
+  // 個人資料編輯相關變數
+  isEditingProfile: boolean = false;
+  editingProfileData: any = {};
 
   ngOnInit(): void {
     this.fetchUserInfo();
@@ -128,6 +132,52 @@ export class ProfileComponent implements OnInit {
           error?.error?.message ||
             error?.message ||
             '更新用戶資訊失敗'
+        );
+        this.loadingService.hideLoading();
+      }
+    });
+  }
+
+  // 個人資料編輯相關方法
+  startEditProfile(): void {
+    this.isEditingProfile = true;
+    this.editingProfileData = {
+      id: this.user.id,
+      name: this.user.name || '',
+      email: this.user.email || '',
+      phoneNumber: this.user.phoneNumber || '',
+      role: this.user.role // 保持原有角色，不允許修改
+    };
+  }
+
+  cancelEditProfile(): void {
+    this.isEditingProfile = false;
+    this.editingProfileData = {};
+  }
+
+  saveProfile(): void {
+    if (!this.editingProfileData.name || !this.editingProfileData.email) {
+      this.showMessage('姓名和郵箱不能為空');
+      return;
+    }
+
+    // 確保不修改角色
+    this.editingProfileData.role = this.user.role;
+
+    this.loadingService.showUpdating();
+    this.apiService.updateUser(this.editingProfileData.id, this.editingProfileData).subscribe({
+      next: (updatedUser) => {
+        // 更新當前用戶資訊
+        this.user = updatedUser;
+        this.showMessage('個人資料更新成功');
+        this.cancelEditProfile();
+        this.loadingService.hideLoading();
+      },
+      error: (error) => {
+        this.showMessage(
+          error?.error?.message ||
+            error?.message ||
+            '更新個人資料失敗'
         );
         this.loadingService.hideLoading();
       }

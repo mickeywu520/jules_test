@@ -42,21 +42,39 @@
      
     .profile-item {
     display: flex;
-    justify-content: space-between;
+    flex-direction: row;
+    align-items: center;
     padding: 10px 0;
     font-size: 20px;
     color: #444;
     border-bottom: 1px solid #eee;
     transition: color 0.2s;
+    margin-bottom: 15px;
     }
      
     .profile-item label {
     font-weight: bold;
     color: #17a2b8;
+    white-space: nowrap;
+    flex-shrink: 0;
+    min-width: 120px;
+    margin-right: 15px;
     }
      
     .profile-item span {
     color: #333;
+    /* 這行確保 span 佔據可用空間 */
+    flex: 1;
+    /* 這行讓內容在 span 內水平置中 */
+    text-align: left;
+    }
+    
+    .profile-item .role-badge {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    align-self: center;
+    text-align: center; /* 讓徽章置中 */
     }
      
      
@@ -230,12 +248,14 @@
 }
 
 .role-badge {
-    padding: 4px 12px;
+    padding: 6px 12px;
     border-radius: 20px;
-    font-size: 0.8rem;
+    font-size: 0.9rem;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.5px;
+    line-height: 1.2;
+    vertical-align: middle;
 }
 
 .admin-role {
@@ -347,4 +367,78 @@
     .users-table th {
         font-size: 0.85rem;
     }
+}
+
+/* 個人資料編輯樣式 */
+.profile-edit-input {
+    flex: 1;
+    padding: 8px 12px;
+    border: 2px solid #e0e0e0;
+    border-radius: 6px;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    background-color: #fff;
+    box-sizing: border-box;
+}
+
+/* 編輯模式下的額外樣式調整 */
+
+.profile-edit-input:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+}
+
+.profile-actions {
+    margin-top: 20px;
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    padding: 15px 0;
+}
+
+.btn-edit-profile,
+.btn-save-profile,
+.btn-cancel-profile {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-width: 100px;
+}
+
+.btn-edit-profile {
+    background-color: #007bff;
+    color: white;
+}
+
+.btn-edit-profile:hover {
+    background-color: #0056b3;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 123, 255, 0.3);
+}
+
+.btn-save-profile {
+    background-color: #28a745;
+    color: white;
+}
+
+.btn-save-profile:hover {
+    background-color: #1e7e34;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(40, 167, 69, 0.3);
+}
+
+.btn-cancel-profile {
+    background-color: #6c757d;
+    color: white;
+}
+
+.btn-cancel-profile:hover {
+    background-color: #545b62;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(108, 117, 125, 0.3);
 }

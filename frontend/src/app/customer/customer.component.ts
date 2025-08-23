@@ -71,8 +71,10 @@ export class CustomerComponent implements OnInit {
 
     // 訂閱BehaviorSubject以獲取數據更新
     this.apiService.customers$.subscribe((custs: any[]) => {
-      this.customers = custs;
-      this.filteredCustomers = custs;
+      // 對客戶資料按客戶編號排序
+      const sortedCustomers = this.sortCustomersByCode(custs);
+      this.customers = sortedCustomers;
+      this.filteredCustomers = sortedCustomers;
       // 如果有數據且loading還在顯示，則隱藏loading
       if (custs.length > 0 && this.loadingService.isLoading()) {
         this.loadingService.hideLoading();
@@ -114,7 +116,7 @@ export class CustomerComponent implements OnInit {
       this.loadingService.showDataLoading();
       this.apiService.getAllCustomers().subscribe({
         next: (res: any) => {
-          this.filteredCustomers = res;
+          this.filteredCustomers = this.sortCustomersByCode(res);
           this.loadingService.hideLoading();
           this.showMessage(`顯示全部 ${res.length} 筆客戶資料`);
         },
@@ -147,7 +149,7 @@ export class CustomerComponent implements OnInit {
       if (this.districtValue === 'all' || !this.districtValue) {
         this.apiService.searchCustomersByCounty(this.countyValue).subscribe({
           next: (res: any) => {
-            this.filteredCustomers = res;
+            this.filteredCustomers = this.sortCustomersByCode(res);
             this.loadingService.hideLoading();
             this.showMessage(`找到 ${res.length} 筆符合的客戶資料`);
           },
@@ -160,7 +162,7 @@ export class CustomerComponent implements OnInit {
         // 使用區域進行搜尋
         this.apiService.searchCustomersByDistrict(this.districtValue).subscribe({
           next: (res: any) => {
-            this.filteredCustomers = res;
+            this.filteredCustomers = this.sortCustomersByCode(res);
             this.loadingService.hideLoading();
             this.showMessage(`找到 ${res.length} 筆符合的客戶資料`);
           },
@@ -176,7 +178,7 @@ export class CustomerComponent implements OnInit {
         case 'customerName':
           this.apiService.searchCustomers(this.searchTerm).subscribe({
             next: (res: any) => {
-              this.filteredCustomers = res;
+              this.filteredCustomers = this.sortCustomersByCode(res);
               this.loadingService.hideLoading();
               this.showMessage(`找到 ${res.length} 筆符合的客戶資料`);
             },
@@ -190,7 +192,7 @@ export class CustomerComponent implements OnInit {
         case 'customerCode':
           this.apiService.searchCustomersByCode(this.searchTerm).subscribe({
             next: (res: any) => {
-              this.filteredCustomers = res;
+              this.filteredCustomers = this.sortCustomersByCode(res);
               this.loadingService.hideLoading();
               this.showMessage(`找到 ${res.length} 筆符合的客戶資料`);
             },
@@ -204,7 +206,7 @@ export class CustomerComponent implements OnInit {
         case 'contactPerson':
           this.apiService.searchCustomersByContactPerson(this.searchTerm).subscribe({
             next: (res: any) => {
-              this.filteredCustomers = res;
+              this.filteredCustomers = this.sortCustomersByCode(res);
               this.loadingService.hideLoading();
               this.showMessage(`找到 ${res.length} 筆符合的客戶資料`);
             },
@@ -218,7 +220,7 @@ export class CustomerComponent implements OnInit {
         case 'phoneNumber':
           this.apiService.searchCustomersByPhoneNumber(this.searchTerm).subscribe({
             next: (res: any) => {
-              this.filteredCustomers = res;
+              this.filteredCustomers = this.sortCustomersByCode(res);
               this.loadingService.hideLoading();
               this.showMessage(`找到 ${res.length} 筆符合的客戶資料`);
             },
@@ -237,7 +239,7 @@ export class CustomerComponent implements OnInit {
           }
           this.apiService.searchCustomersByType(parseInt(this.searchTerm)).subscribe({
             next: (res: any) => {
-              this.filteredCustomers = res;
+              this.filteredCustomers = this.sortCustomersByCode(res);
               this.loadingService.hideLoading();
               this.showMessage(`找到 ${res.length} 筆符合的客戶資料`);
             },
@@ -251,7 +253,7 @@ export class CustomerComponent implements OnInit {
         case 'county':
           this.apiService.searchCustomersByCounty(this.countyValue).subscribe({
             next: (res: any) => {
-              this.filteredCustomers = res;
+              this.filteredCustomers = this.sortCustomersByCode(res);
               this.loadingService.hideLoading();
               this.showMessage(`找到 ${res.length} 筆符合的客戶資料`);
             },
@@ -614,7 +616,7 @@ export class CustomerComponent implements OnInit {
       if (this.districtValue === 'all' || !this.districtValue) {
         this.apiService.searchCustomersByCounty(this.countyValue).subscribe({
           next: (res: any) => {
-            this.batchUpdateCustomers = res;
+            this.batchUpdateCustomers = this.sortCustomersByCode(res);
             this.loadingService.hideLoading();
             this.showMessage(`找到 ${res.length} 筆符合的客戶資料`);
           },
@@ -627,7 +629,7 @@ export class CustomerComponent implements OnInit {
         // 使用區域進行搜尋
         this.apiService.searchCustomersByDistrict(this.districtValue).subscribe({
           next: (res: any) => {
-            this.batchUpdateCustomers = res;
+            this.batchUpdateCustomers = this.sortCustomersByCode(res);
             this.loadingService.hideLoading();
             this.showMessage(`找到 ${res.length} 筆符合的客戶資料`);
           },
@@ -643,7 +645,7 @@ export class CustomerComponent implements OnInit {
         case 'customerName':
           this.apiService.searchCustomers(this.searchValue).subscribe({
             next: (res: any) => {
-              this.batchUpdateCustomers = res;
+              this.batchUpdateCustomers = this.sortCustomersByCode(res);
               this.loadingService.hideLoading();
               this.showMessage(`找到 ${res.length} 筆符合的客戶資料`);
             },
@@ -662,7 +664,7 @@ export class CustomerComponent implements OnInit {
           }
           this.apiService.searchCustomersByType(parseInt(this.searchValue)).subscribe({
             next: (res: any) => {
-              this.batchUpdateCustomers = res;
+              this.batchUpdateCustomers = this.sortCustomersByCode(res);
               this.loadingService.hideLoading();
               this.showMessage(`找到 ${res.length} 筆符合的客戶資料`);
             },
@@ -676,7 +678,7 @@ export class CustomerComponent implements OnInit {
         case 'county':
           this.apiService.searchCustomersByCounty(this.countyValue).subscribe({
             next: (res: any) => {
-              this.batchUpdateCustomers = res;
+              this.batchUpdateCustomers = this.sortCustomersByCode(res);
               this.loadingService.hideLoading();
               this.showMessage(`找到 ${res.length} 筆符合的客戶資料`);
             },
@@ -994,5 +996,19 @@ export class CustomerComponent implements OnInit {
       default:
         return customer[columnKey] || '-';
     }
+  }
+
+  // 依照客戶編號排序函數 - 英文字A開始數字遞增
+  sortCustomersByCode(customers: any[]): any[] {
+    return customers.sort((a, b) => {
+      const codeA = a.customerCode || '';
+      const codeB = b.customerCode || '';
+      
+      // 使用自然排序方式，讓 A1, A2, ..., A10, A11 正確排序
+      return codeA.localeCompare(codeB, undefined, { 
+        numeric: true, 
+        sensitivity: 'base' 
+      });
+    });
   }
 }

@@ -161,11 +161,15 @@ export class ProfileComponent implements OnInit {
       return;
     }
 
-    // 確保不修改角色
-    this.editingProfileData.role = this.user.role;
+    // 準備更新資料，不包含id和role（後端會自動處理當前用戶）
+    const updateData = {
+      name: this.editingProfileData.name,
+      email: this.editingProfileData.email,
+      phoneNumber: this.editingProfileData.phoneNumber
+    };
 
     this.loadingService.showUpdating();
-    this.apiService.updateUser(this.editingProfileData.id, this.editingProfileData).subscribe({
+    this.apiService.updateCurrentUser(updateData).subscribe({
       next: (updatedUser) => {
         // 更新當前用戶資訊
         this.user = updatedUser;

@@ -200,6 +200,13 @@ export class ApiService {
     });
   }
 
+  // 更新當前用戶自己的資料
+  updateCurrentUser(userData: any): Observable<any> {
+    return this.http.put(`${ApiService.BASE_URL}/users/current`, userData, {
+      headers: this.getHeader(),
+    });
+  }
+
   getUserById(userId: number): Observable<any> {
     return this.http.get(`${ApiService.BASE_URL}/users/${userId}`, {
       headers: this.getHeader(),

@@ -64,7 +64,7 @@
       </button>
       <div class="search-controls">
         <select [(ngModel)]="searchCriteria" class="search-criteria">
-          <option value="customerName">{{ 'CUSTOMER_NAME' | translate }}</option>
+          <option value="customerName" selected>{{ 'CUSTOMER_NAME' | translate }}</option>
           <option value="customerType">{{ 'CUSTOMER_TYPE' | translate }}</option>
           <option value="county">{{ 'COUNTY' | translate }}</option>
         </select>
@@ -177,7 +177,7 @@
     </div>
 
     <!-- NO BATCH CUSTOMERS MESSAGE -->
-    <div *ngIf="batchUpdateCustomers.length === 0 && showBatchUpdateSection" class="no-customers">
+    <div *ngIf="batchUpdateCustomers.length === 0 && showBatchUpdateSection && hasBatchSearched" class="no-customers">
       <p>{{ 'NO_CUSTOMERS_FOUND_FOR_BATCH_UPDATE' | translate }}</p>
     </div>
   </div>

@@ -40,6 +40,7 @@ export class CustomerComponent implements OnInit {
   batchUpdateCustomers: any[] = [];
   selectedCustomerIds: Set<number> = new Set();
   isBatchUpdateMode: boolean = false;
+  hasBatchSearched: boolean = false; // 追蹤是否已執行批次搜尋
   
   // 客戶類型選項
   customerTypes: any[] = [];
@@ -535,7 +536,10 @@ export class CustomerComponent implements OnInit {
   // 切換批次修改模式
   toggleBatchUpdateMode(): void {
     this.showBatchUpdateSection = !this.showBatchUpdateSection;
-    if (!this.showBatchUpdateSection) {
+    if (this.showBatchUpdateSection) {
+      // 切換到批次修改模式時，設置搜尋條件為'customerName'
+      this.searchCriteria = 'customerName';
+    } else {
       this.resetBatchUpdate();
     }
   }
@@ -552,6 +556,7 @@ export class CustomerComponent implements OnInit {
     this.districts = [];
     this.batchUpdateDistricts = [];
     this.showDistrictDropdown = false;
+    this.hasBatchSearched = false; // 重置批次搜尋狀態
   }
   
   // 當在批次修改模式下選擇"區域"搜尋條件時，預先加載所有縣市的區域數據
@@ -609,6 +614,7 @@ export class CustomerComponent implements OnInit {
     }
     
     this.loadingService.showDataLoading();
+    this.hasBatchSearched = true; // 設置已執行批次搜尋
     
     // 如果顯示了區域下拉選單，表示用戶是在選擇縣市後選擇了區域
     if (this.showDistrictDropdown && this.searchCriteria === 'county') {

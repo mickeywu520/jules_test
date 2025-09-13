@@ -433,5 +433,7 @@
   "FIELD_NAME": "欄位名稱",
   "BEFORE_CHANGE": "修改前",
   "AFTER_CHANGE": "修改後",
-  "CHANGE_TIME": "修改時間"
+  "CHANGE_TIME": "修改時間",
+  "BATCH_UPDATE_EMPTY_FIELDS_ERROR": "請為以下欄位輸入值：{{fields}}",
+  "CONFIRM": "確認"
 }

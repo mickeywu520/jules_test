@@ -287,5 +287,7 @@
   "FIELD_NAME": "Field Name",
   "BEFORE_CHANGE": "Before Change",
   "AFTER_CHANGE": "After Change",
-  "CHANGE_TIME": "Change Time"
+  "CHANGE_TIME": "Change Time",
+  "BATCH_UPDATE_EMPTY_FIELDS_ERROR": "Please enter values for the following fields: {{fields}}",
+  "CONFIRM": "Confirm"
 }

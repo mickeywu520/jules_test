@@ -135,7 +135,7 @@
         </button>
         <button (click)="executeBatchUpdate()" class="batch-update-btn" *ngIf="isBatchUpdateMode"
           [disabled]="selectedCustomerIds.size === 0">
-          {{ 'BATCH_UPDATE' | translate }}
+          {{ 'BATCH_UPDATE' | translate }} ({{ selectedCustomerIds.size }})
         </button>
       </div>
     </div>
@@ -249,4 +249,8 @@
       </div>
     </div>
   </div>
+
+  <!-- 批次更新對話框 -->
+  <app-batch-update-dialog *ngIf="showBatchDialog" [dialogRef]="batchDialogRef" [dialogData]="batchDialogData">
+  </app-batch-update-dialog>
 </div>

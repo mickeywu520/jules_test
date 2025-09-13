@@ -1,4 +1,5 @@
 from typing import List, Dict
+import json
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session, joinedload
@@ -332,16 +333,44 @@ def batch_update_customers(
     
     # Update customers
     updated_customers = []
+    business_hours_updates = []  # Store business hours updates for later processing
+    
     for customer_id in customer_ids:
         db_customer = db.query(models.Customer).filter(models.Customer.id == customer_id).first()
         if db_customer:
             # Update fields if provided
             update_data = customer_update.model_dump(exclude_unset=True)
+            
+            # Handle business hours specially
+            if 'businessHours' in update_data:
+                business_hours_json = update_data['businessHours']
+                # Store for later processing
+                business_hours_updates.append((customer_id, business_hours_json))
+            
+            # Update other fields
             for field, value in update_data.items():
                 setattr(db_customer, field, value)
             updated_customers.append(db_customer)
     
-    # Commit all changes
+    # Commit customer updates first
+    db.commit()
+    
+    # Process business hours updates
+    for customer_id, business_hours_json in business_hours_updates:
+        try:
+            # Parse the JSON string
+            business_hours_data = json.loads(business_hours_json)
+            print(f"Updating business hours for customer {customer_id} with data: {business_hours_data}")
+            
+            # Update business hours using the same logic as the dedicated endpoint
+            _update_customer_business_hours(customer_id, business_hours_data, db)
+            print(f"Successfully updated business hours for customer {customer_id}")
+            
+        except (json.JSONDecodeError, Exception) as e:
+            print(f"Failed to update business hours for customer {customer_id}: {e}")
+            # Continue with other customers even if one fails
+    
+    # Final commit for business hours updates
     db.commit()
     
     # Refresh all updated customers
@@ -349,6 +378,73 @@ def batch_update_customers(
         db.refresh(customer)
     
     return updated_customers
+
+# Helper function to update customer business hours
+def _update_customer_business_hours(customer_id: int, business_hours_data: dict, db: Session):
+    """
+    Helper function to update customer business hours from parsed JSON data
+    """
+    customer = db.query(models.Customer).filter(models.Customer.id == customer_id).first()
+    if not customer:
+        return
+    
+    # Clear existing business hours (same logic as the dedicated endpoint)
+    db.query(models.CustomerBusinessHourInterval).filter(
+        models.CustomerBusinessHourInterval.business_hour_id.in_(
+            db.query(models.CustomerBusinessHour.id).filter(models.CustomerBusinessHour.customer_id == customer_id)
+        )
+    ).delete(synchronize_session=False)
+    db.query(models.CustomerBusinessHour).filter(
+        models.CustomerBusinessHour.customer_id == customer_id
+    ).delete(synchronize_session=False)
+    
+    # Add weekly business hours
+    weekly_data = business_hours_data.get('weekly', [])
+    for day_data in weekly_data:
+        weekday = day_data.get('weekday', 0)
+        is_open = day_data.get('is_open', False)
+        
+        # Create business hour record
+        business_hour = models.CustomerBusinessHour(
+            customer_id=customer_id,
+            weekday=weekday,
+            is_open=is_open
+        )
+        db.add(business_hour)
+        db.flush()  # Get the ID
+        
+        # Add time intervals if open
+        if is_open:
+            ranges = day_data.get('ranges', [])
+            for range_data in ranges:
+                interval = models.CustomerBusinessHourInterval(
+                    business_hour_id=business_hour.id,  # Correct field name
+                    start_time=_parse_time(range_data.get('start', '09:00')),
+                    end_time=_parse_time(range_data.get('end', '18:00'))
+                )
+                db.add(interval)
+    
+    # Clear existing exceptions
+    db.query(models.CustomerBusinessHourException).filter(
+        models.CustomerBusinessHourException.customer_id == customer_id
+    ).delete(synchronize_session=False)
+    
+    # Add exceptions
+    exceptions_data = business_hours_data.get('exceptions', [])
+    for exception_data in exceptions_data:
+        ranges = exception_data.get('ranges', [])
+        start_time = _parse_time(ranges[0].get('start')) if ranges and len(ranges) > 0 else None
+        end_time = _parse_time(ranges[0].get('end')) if ranges and len(ranges) > 0 else None
+        
+        exception = models.CustomerBusinessHourException(
+            customer_id=customer_id,
+            date=exception_data.get('date'),
+            is_open=exception_data.get('is_open', False),
+            start_time=start_time,
+            end_time=end_time,
+            reason=exception_data.get('reason')
+        )
+        db.add(exception)
 
 # Additional endpoint to get the next customer code for a specific customer type
 @router.get("/next-code/{customer_type_id}")

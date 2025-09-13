@@ -2,6 +2,7 @@ import { Component, OnInit, Input } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { BusinessHoursDialogComponent } from '../business-hours-dialog/business-hours-dialog.component';
 
 export interface BatchUpdateDialogData {
   customerIds: number[];
@@ -16,7 +17,7 @@ export interface BatchUpdateDialogResult {
 @Component({
   selector: 'app-batch-update-dialog',
   standalone: true,
-  imports: [CommonModule, FormsModule, TranslateModule],
+  imports: [CommonModule, FormsModule, TranslateModule, BusinessHoursDialogComponent],
   template: `
     <div class="dialog-overlay" (click)="onCancel()">
       <div class="dialog-container" (click)="$event.stopPropagation()">
@@ -91,6 +92,27 @@ export interface BatchUpdateDialogResult {
                   {{ category.label | translate }}
                 </option>
               </select>
+              
+              <!-- Business Hours special handling -->
+              <div *ngIf="field.type === 'business-hours'" class="business-hours-section">
+                <div class="business-hours-container">
+                  <button type="button" class="business-hours-btn" (click)="openBusinessHoursDialog()">
+                    <span class="btn-icon">🕒</span>
+                    {{ 'SET_BUSINESS_HOURS' | translate }}
+                  </button>
+                  
+                  <div class="business-hours-summary" *ngIf="hasBusinessHours()">
+                    <div class="summary-title">{{ 'CURRENT_BUSINESS_HOURS' | translate }}:</div>
+                    <div class="summary-content">
+                      <div class="day-summary" *ngFor="let day of getBusinessHoursSummary()" 
+                           [class.closed]="day.hours === ('CLOSED' | translate)">
+                        <span class="day-name">{{ day.name }}:</span>
+                        <span class="day-hours">{{ day.hours }}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -105,6 +127,14 @@ export interface BatchUpdateDialogResult {
         </div>
       </div>
     </div>
+    
+    <!-- Business Hours Dialog -->
+    <app-business-hours-dialog 
+      [isOpen]="showBusinessHoursDialog" 
+      [businessHoursData]="businessHoursModel"
+      (onSave)="onBusinessHoursSave($event)" 
+      (onCancel)="onBusinessHoursCancel()">
+    </app-business-hours-dialog>
   `,
   styles: [`
     .dialog-overlay {
@@ -247,6 +277,80 @@ export interface BatchUpdateDialogResult {
       border-color: #dc3545 !important;
       box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
     }
+    
+    /* Business Hours Styles */
+    .business-hours-section {
+      margin-top: 10px;
+    }
+    
+    .business-hours-container {
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      padding: 10px;
+      background-color: #f9f9f9;
+    }
+    
+    .business-hours-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      width: 100%;
+      justify-content: center;
+    }
+    
+    .business-hours-btn:hover {
+      background-color: #0056b3;
+    }
+    
+    .btn-icon {
+      font-size: 16px;
+    }
+    
+    .business-hours-summary {
+      margin-top: 15px;
+      padding-top: 15px;
+      border-top: 1px solid #ddd;
+    }
+    
+    .summary-title {
+      font-weight: bold;
+      margin-bottom: 10px;
+      color: #495057;
+    }
+    
+    .summary-content {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+    
+    .day-summary {
+      display: flex;
+      justify-content: space-between;
+      padding: 3px 0;
+      font-size: 13px;
+    }
+    
+    .day-summary.closed {
+      color: #6c757d;
+    }
+    
+    .day-name {
+      font-weight: 500;
+      min-width: 40px;
+    }
+    
+    .day-hours {
+      text-align: right;
+      flex: 1;
+    }
   `]
 })
 export class BatchUpdateDialogComponent implements OnInit {
@@ -270,7 +374,7 @@ export class BatchUpdateDialogComponent implements OnInit {
     { key: 'contactPerson', label: 'CONTACT_PERSON', selected: false, newValue: '', type: 'text' },
     { key: 'phoneNumber', label: 'PHONE_NUMBER', selected: false, newValue: '', type: 'text' },
     { key: 'faxNumber', label: 'FAX_NUMBER', selected: false, newValue: '', type: 'text' },
-    { key: 'businessHours', label: 'BUSINESS_HOURS', selected: false, newValue: '', type: 'text' },
+    { key: 'businessHours', label: 'BUSINESS_HOURS', selected: false, newValue: '', type: 'business-hours' },
     { key: 'paymentMethod', label: 'PAYMENT_METHOD', selected: false, newValue: '', type: 'select' },
     { key: 'paymentCategory', label: 'PAYMENT_CATEGORY', selected: false, newValue: '', type: 'select' },
     { key: 'creditLimit', label: 'CREDIT_LIMIT', selected: false, newValue: '', type: 'number' }
@@ -278,6 +382,22 @@ export class BatchUpdateDialogComponent implements OnInit {
 
   selectedFields: any[] = [];
   errorMessage: string = '';
+
+  // Business Hours related properties
+  showBusinessHoursDialog: boolean = false;
+  dayNames = ['週一', '週二', '週三', '週四', '週五', '週六', '週日'];
+  businessHoursModel: any = {
+    weekly: [
+      { weekday: 0, is_open: false, ranges: [] },
+      { weekday: 1, is_open: false, ranges: [] },
+      { weekday: 2, is_open: false, ranges: [] },
+      { weekday: 3, is_open: false, ranges: [] },
+      { weekday: 4, is_open: false, ranges: [] },
+      { weekday: 5, is_open: false, ranges: [] },
+      { weekday: 6, is_open: false, ranges: [] },
+    ],
+    exceptions: []
+  };
 
   constructor(private translate: TranslateService) {}
 
@@ -308,6 +428,9 @@ export class BatchUpdateDialogComponent implements OnInit {
   }
 
   isFieldEmpty(field: any): boolean {
+    if (field.type === 'business-hours') {
+      return !this.hasBusinessHours();
+    }
     return !field.newValue || field.newValue.toString().trim() === '';
   }
 
@@ -315,6 +438,57 @@ export class BatchUpdateDialogComponent implements OnInit {
     // 當用戶開始輸入時，清除錯誤訊息
     if (this.errorMessage) {
       this.errorMessage = '';
+    }
+  }
+
+  // Business Hours related methods
+  openBusinessHoursDialog(): void {
+    this.showBusinessHoursDialog = true;
+  }
+
+  onBusinessHoursSave(businessHoursData: any): void {
+    this.businessHoursModel = businessHoursData;
+    
+    // 找到 businessHours 欄位並更新其值
+    const businessHoursField = this.selectedFields.find(field => field.key === 'businessHours');
+    if (businessHoursField) {
+      businessHoursField.newValue = JSON.stringify(businessHoursData);
+    }
+    
+    this.showBusinessHoursDialog = false;
+    this.onInputChange(); // 清除錯誤訊息
+  }
+
+  onBusinessHoursCancel(): void {
+    this.showBusinessHoursDialog = false;
+  }
+
+  hasBusinessHours(): boolean {
+    const businessHoursField = this.selectedFields.find(field => field.key === 'businessHours');
+    if (!businessHoursField || !businessHoursField.newValue) return false;
+    
+    try {
+      const data = JSON.parse(businessHoursField.newValue);
+      return data.weekly && data.weekly.some((day: any) => day.is_open);
+    } catch {
+      return false;
+    }
+  }
+
+  getBusinessHoursSummary(): any[] {
+    const businessHoursField = this.selectedFields.find(field => field.key === 'businessHours');
+    if (!businessHoursField || !businessHoursField.newValue) return [];
+    
+    try {
+      const data = JSON.parse(businessHoursField.newValue);
+      return data.weekly.map((day: any, index: number) => ({
+        name: this.dayNames[index],
+        hours: day.is_open 
+          ? day.ranges.map((range: any) => `${range.start}-${range.end}`).join(', ')
+          : this.translate.instant('CLOSED')
+      }));
+    } catch {
+      return [];
     }
   }
 
@@ -327,7 +501,12 @@ export class BatchUpdateDialogComponent implements OnInit {
     
     // 檢查是否有未輸入值的欄位
     const emptyFields = this.selectedFields.filter(field => {
-      const isEmpty = !field.newValue || field.newValue.toString().trim() === '';
+      let isEmpty: boolean;
+      if (field.type === 'business-hours') {
+        isEmpty = !this.hasBusinessHours();
+      } else {
+        isEmpty = !field.newValue || field.newValue.toString().trim() === '';
+      }
       console.log(`Field ${field.key}: value="${field.newValue}", isEmpty=${isEmpty}`);
       return isEmpty;
     });
@@ -351,7 +530,12 @@ export class BatchUpdateDialogComponent implements OnInit {
     const updateData: any = {};
     this.selectedFields.forEach(field => {
       // 確保值不為空才加入更新資料
-      if (field.newValue && field.newValue.toString().trim() !== '') {
+      if (field.type === 'business-hours') {
+        // 營業時間特殊處理
+        if (this.hasBusinessHours()) {
+          updateData[field.key] = field.newValue;
+        }
+      } else if (field.newValue && field.newValue.toString().trim() !== '') {
         let value = field.newValue.toString().trim();
         
         // 對於數字類型的欄位，轉換為數字

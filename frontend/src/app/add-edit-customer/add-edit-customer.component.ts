@@ -143,9 +143,6 @@ export class AddEditCustomerComponent implements OnInit {
           }
         }
 
-        // 同步營業時間（若後端已有資料）
-        this.loadBusinessHours();
-
         this.formData = {
           customerType: res.customer_type_id || res.customer_type_obj?.id || '',
           salesPersonId: res.salesPersonId || '',
@@ -166,6 +163,9 @@ export class AddEditCustomerComponent implements OnInit {
           creditLimit: res.creditLimit || 0,
           monthlyPaymentDays: monthlyPaymentDays
         };
+
+        // 同步營業時間（若後端已有資料）- 在 formData 設定後載入
+        this.loadBusinessHours();
 
         // 解析送貨地址，提取縣市、區域和郵遞區號
         const addressInfo = this.parseDeliveryAddress(res.deliveryAddress || '');
@@ -207,9 +207,34 @@ export class AddEditCustomerComponent implements OnInit {
         };
       },
       error: (err) => {
-        console.warn('No business hours found or failed to load', err);
+        console.warn('No business hours found from API, trying to load from businessHours field', err);
+        // 如果專門的營業時間 API 失敗，嘗試從 businessHours 字符串欄位讀取
+        this.loadBusinessHoursFromStringField();
       }
     });
+  }
+
+  // 從 businessHours 字符串欄位載入營業時間數據（後備方案）
+  private loadBusinessHoursFromStringField(): void {
+    if (this.formData.businessHours) {
+      try {
+        const businessHoursData = JSON.parse(this.formData.businessHours);
+        console.log('Loaded business hours from string field:', businessHoursData);
+        
+        // 確保例外日 ranges 至少有一個元素供 UI 綁定
+        const ex = (businessHoursData.exceptions || []).map((e: any) => ({
+          ...e,
+          ranges: e.is_open ? (e.ranges && e.ranges.length ? e.ranges : [{ start: '09:00', end: '18:00' }]) : []
+        }));
+        
+        this.businessHoursModel = {
+          weekly: businessHoursData.weekly || this.businessHoursModel.weekly,
+          exceptions: ex
+        };
+      } catch (error) {
+        console.error('Failed to parse businessHours string field:', error);
+      }
+    }
   }
 
   // 營業時間對話框相關方法

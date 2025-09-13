@@ -341,6 +341,22 @@ def batch_update_customers(
             # Update fields if provided
             update_data = customer_update.model_dump(exclude_unset=True)
             
+            # 記錄審計日誌 - 在更新前記錄舊值（重用個別更新的邏輯）
+            for field, new_value in update_data.items():
+                old_value = getattr(db_customer, field, None)
+                
+                # 只有當值真的改變時才記錄
+                if str(old_value) != str(new_value):
+                    audit_log = models.CustomerAuditLog(
+                        customer_id=customer_id,
+                        field_name=field,
+                        old_value=str(old_value) if old_value is not None else None,
+                        new_value=str(new_value) if new_value is not None else None,
+                        changed_by=current_user.id,
+                        action_type="BATCH_UPDATE"  # 標記為批次更新
+                    )
+                    db.add(audit_log)
+            
             # Handle business hours specially
             if 'businessHours' in update_data:
                 business_hours_json = update_data['businessHours']
@@ -376,6 +392,29 @@ def batch_update_customers(
     # Refresh all updated customers
     for customer in updated_customers:
         db.refresh(customer)
+    
+    # 為每個更新的客戶添加欄位修改資訊（與read_customers方法中相同的邏輯）
+    for customer in updated_customers:
+        # 獲取最近30天的審計日誌
+        from datetime import datetime, timedelta
+        thirty_days_ago = datetime.now() - timedelta(days=30)
+        
+        audit_logs = db.query(models.CustomerAuditLog).filter(
+            models.CustomerAuditLog.customer_id == customer.id,
+            models.CustomerAuditLog.changed_at >= thirty_days_ago
+        ).all()
+        
+        # 建立欄位修改映射
+        modified_fields = set()
+        for log in audit_logs:
+            modified_fields.add(log.field_name)
+        
+        # 將修改過的欄位資訊附加到客戶物件
+        customer.modified_fields = list(modified_fields)
+        
+        # 調試日誌
+        if modified_fields:
+            print(f"Customer {customer.id} has modified fields: {list(modified_fields)}")
     
     return updated_customers
 

@@ -592,12 +592,12 @@
   /* 滑鼠懸停時也不改變背景色 */
 }
 
-/* 修改過的欄位右上角小標記 */
+/* 修改過的欄位左上角小標記 */
 .modified-field::after {
   content: '●';
   position: absolute;
   top: -2px;
-  right: -2px;
+  left: -2px;
   color: #ff6b35;
   font-size: 8px;
   animation: pulse 2s infinite;

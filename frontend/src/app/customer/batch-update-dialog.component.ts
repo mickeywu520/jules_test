@@ -81,6 +81,20 @@ export interface BatchUpdateDialogResult {
                 </option>
               </select>
               
+              <!-- Monthly payment days input (shown when payment method is MONTHLY) -->
+              <div *ngIf="field.type === 'select' && field.key === 'paymentMethod' && field.newValue === 'MONTHLY'" 
+                   class="monthly-days-container">
+                <input 
+                  type="number" 
+                  [(ngModel)]="monthlyPaymentDays"
+                  [placeholder]="'MONTHLY_PAYMENT_DAYS_PLACEHOLDER' | translate"
+                  min="1" 
+                  max="365"
+                  class="form-control monthly-days-input"
+                  (input)="onInputChange()">
+                <span class="days-label">{{ 'DAYS' | translate }}</span>
+              </div>
+              
               <!-- Select dropdown for payment category -->
               <select 
                 *ngIf="field.type === 'select' && field.key === 'paymentCategory'"
@@ -351,6 +365,29 @@ export interface BatchUpdateDialogResult {
       text-align: right;
       flex: 1;
     }
+    
+    /* Monthly Payment Days Styles */
+    .monthly-days-container {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 8px;
+      padding: 8px;
+      background-color: #f8f9fa;
+      border-radius: 4px;
+      border: 1px solid #e9ecef;
+    }
+    
+    .monthly-days-input {
+      width: 80px;
+      padding: 6px 8px !important;
+    }
+    
+    .days-label {
+      font-size: 14px;
+      color: #666;
+      font-weight: 500;
+    }
   `]
 })
 export class BatchUpdateDialogComponent implements OnInit {
@@ -379,6 +416,9 @@ export class BatchUpdateDialogComponent implements OnInit {
     { key: 'paymentCategory', label: 'PAYMENT_CATEGORY', selected: false, newValue: '', type: 'select' },
     { key: 'creditLimit', label: 'CREDIT_LIMIT', selected: false, newValue: '', type: 'number' }
   ];
+
+  // 月結天數
+  monthlyPaymentDays: number = 30;
 
   selectedFields: any[] = [];
   errorMessage: string = '';
@@ -538,8 +578,13 @@ export class BatchUpdateDialogComponent implements OnInit {
       } else if (field.newValue && field.newValue.toString().trim() !== '') {
         let value = field.newValue.toString().trim();
         
+        // 特殊處理收款方式，如果是月結則組合天數
+        if (field.key === 'paymentMethod' && value === 'MONTHLY') {
+          const days = parseInt(this.monthlyPaymentDays.toString()) || 30;
+          updateData[field.key] = `月結${days}天`;
+        }
         // 對於數字類型的欄位，轉換為數字
-        if (field.type === 'number') {
+        else if (field.type === 'number') {
           const numValue = parseFloat(value);
           if (!isNaN(numValue)) {
             updateData[field.key] = numValue;

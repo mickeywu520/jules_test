@@ -815,8 +815,30 @@ export class CustomerComponent implements OnInit {
         return this.getCustomerTypeText(customer);
       case 'creditLimit':
         return customer[columnKey] ? customer[columnKey].toLocaleString() : '-';
+      case 'paymentMethod':
+        return this.getPaymentMethodText(customer[columnKey]);
       default:
         return customer[columnKey] || '-';
+    }
+  }
+
+  // 獲取收款方式顯示文本
+  getPaymentMethodText(paymentMethod: string): string {
+    if (!paymentMethod) return '-';
+
+    // 處理月結格式 (例如: "月結30天")
+    if (paymentMethod.startsWith('月結') && paymentMethod.endsWith('天')) {
+      return paymentMethod;
+    }
+
+    // 處理英文代碼
+    switch (paymentMethod) {
+      case 'MONTHLY':
+        return '月結';
+      case 'IMMEDIATE_PAYMENT':
+        return '下收';
+      default:
+        return paymentMethod;
     }
   }
 

@@ -169,7 +169,7 @@
             <td>{{ getCustomerTypeText(customer) }}</td>
             <td>{{ customer.contactPerson || '-' }}</td>
             <td>{{ customer.phoneNumber || '-' }}</td>
-            <td>{{ customer.paymentMethod || '-' }}</td>
+            <td>{{ getPaymentMethodText(customer.paymentMethod) }}</td>
             <td>{{ customer.creditLimit | currency:'TWD':'symbol':'1.0-0' }}</td>
           </tr>
         </tbody>

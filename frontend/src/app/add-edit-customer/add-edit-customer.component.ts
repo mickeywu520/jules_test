@@ -282,12 +282,30 @@ export class AddEditCustomerComponent implements OnInit {
     this.apiService.updateCustomerBusinessHours(String(customerId), payload).subscribe({
       next: () => {
         this.loadingService.hideLoading();
-        this.router.navigate(['/customer']);
+        // 更新客戶成功後，刷新客戶列表
+        this.apiService.fetchAndBroadcastCustomers().subscribe({
+          next: () => {
+            this.router.navigate(['/customer']);
+          },
+          error: (err) => {
+            console.error('Failed to refresh customers after update:', err);
+            this.router.navigate(['/customer']);
+          }
+        });
       },
       error: (err) => {
         console.warn('Failed to save business hours:', err);
         this.loadingService.hideLoading();
-        this.router.navigate(['/customer']);
+        // 即使營業時間保存失敗，也刷新客戶列表並導航
+        this.apiService.fetchAndBroadcastCustomers().subscribe({
+          next: () => {
+            this.router.navigate(['/customer']);
+          },
+          error: (err) => {
+            console.error('Failed to refresh customers after update:', err);
+            this.router.navigate(['/customer']);
+          }
+        });
       }
     });
   }
@@ -331,8 +349,16 @@ export class AddEditCustomerComponent implements OnInit {
       this.loadingService.showUpdating();
       this.apiService.updateCustomer(this.customerId!, customerData).subscribe({
         next: (res: any) => {
-          // 更新客戶成功後，保存營業時間
-          this.saveBusinessHoursAndNavigate(this.customerId!);
+          // 更新客戶成功後，刷新客戶列表再保存營業時間
+          this.apiService.fetchAndBroadcastCustomers().subscribe({
+            next: () => {
+              this.saveBusinessHoursAndNavigate(this.customerId!);
+            },
+            error: (err: any) => {
+              console.error('Failed to refresh customers after update:', err);
+              this.saveBusinessHoursAndNavigate(this.customerId!);
+            }
+          });
         },
         error: (error) => {
           this.showMessage(error?.error?.message || error?.message || "Unable to edit customer" + error)
@@ -343,8 +369,16 @@ export class AddEditCustomerComponent implements OnInit {
       this.loadingService.showSaving();
       this.apiService.addCustomer(customerData).subscribe({
         next: (res: any) => {
-          // 新增客戶成功後，保存營業時間
-          this.saveBusinessHoursAndNavigate(res.id);
+          // 新增客戶成功後，刷新客戶列表再保存營業時間
+          this.apiService.fetchAndBroadcastCustomers().subscribe({
+            next: () => {
+              this.saveBusinessHoursAndNavigate(res.id);
+            },
+            error: (err: any) => {
+              console.error('Failed to refresh customers after add:', err);
+              this.saveBusinessHoursAndNavigate(res.id);
+            }
+          });
         },
         error: (error) => {
           this.showMessage(error?.error?.message || error?.message || "Unable to add customer" + error)
